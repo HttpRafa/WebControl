@@ -11,13 +11,9 @@ import net.rafael.web.control.interfaces.IDatabaseCollection
 //
 //------------------------------
 
-class MongoDBDatabase : IDatabase {
+class MongoDBDatabase(override val key: String) : IDatabase {
 
-    override fun getKey(): String {
-        TODO("Not yet implemented")
-    }
-
-    override fun getCollections(): List<IDatabaseCollection> {
+    override fun getCollections(): MutableList<IDatabaseCollection> {
         TODO("Not yet implemented")
     }
 

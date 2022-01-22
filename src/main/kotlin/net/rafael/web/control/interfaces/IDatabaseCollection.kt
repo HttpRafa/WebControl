@@ -1,6 +1,6 @@
 package net.rafael.web.control.interfaces
 
-import com.google.gson.JsonObject
+import com.google.gson.JsonArray
 
 //------------------------------
 //
@@ -11,7 +11,7 @@ import com.google.gson.JsonObject
 //------------------------------
 interface IDatabaseCollection {
 
-    fun getKey(): String
-    fun asJsonObject(): JsonObject
+    val key: String
+    val data: JsonArray
 
 }

@@ -11,8 +11,8 @@ import net.rafael.web.control.interfaces.IDatabaseCollection
 //------------------------------
 interface IDatabase {
 
-    fun getKey(): String
-    fun getCollections(): List<IDatabaseCollection>
+    val key: String
+    fun getCollections(): MutableList<IDatabaseCollection>
 
     fun getCollection(key: String): IDatabaseCollection
     fun createCollection(key: String): IDatabaseCollection

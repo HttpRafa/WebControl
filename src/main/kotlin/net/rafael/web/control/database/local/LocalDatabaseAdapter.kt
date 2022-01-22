@@ -36,7 +36,7 @@ class LocalDatabaseAdapter : IDatabaseAdapter {
     override fun getDatabase(name: String): Optional<IDatabase> {
         val databaseFile = File(databaseFolder, "$name.json")
         return if (databaseFile.exists()) {
-            Optional.of(LocalDatabase(databaseFile))
+            Optional.of(LocalDatabase(name, databaseFile))
         } else {
             Optional.empty()
         }
@@ -57,7 +57,7 @@ class LocalDatabaseAdapter : IDatabaseAdapter {
             fileWriter.write(gson.toJson(jsonObject))
             fileWriter.flush()
             fileWriter.close()
-            return Optional.of(LocalDatabase(databaseFile))
+            return Optional.of(LocalDatabase(name, databaseFile))
         } catch (exception: IOException) {
             logger.handleException(exception)
         }

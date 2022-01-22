@@ -1,8 +1,14 @@
 package net.rafael.web.control.database.local.database
 
+import com.google.gson.JsonArray
+import com.google.gson.JsonObject
+import com.google.gson.JsonParser
+import net.rafael.web.control.database.local.collection.LocalDatabaseCollection
 import java.io.File
 import net.rafael.web.control.interfaces.IDatabase
 import net.rafael.web.control.interfaces.IDatabaseCollection
+import java.io.FileInputStream
+import java.io.InputStreamReader
 
 //------------------------------
 //
@@ -12,14 +18,23 @@ import net.rafael.web.control.interfaces.IDatabaseCollection
 //
 //------------------------------
 
-class LocalDatabase(val databaseFile: File) : IDatabase {
+class LocalDatabase(override val key: String, val databaseFile: File) : IDatabase {
 
-    override fun getKey(): String {
-        TODO("Not yet implemented")
-    }
+    override fun getCollections(): MutableList<IDatabaseCollection> {
+        val collectionList: MutableList<IDatabaseCollection> = mutableListOf()
 
-    override fun getCollections(): List<IDatabaseCollection> {
-        TODO("Not yet implemented")
+        val jsonObject: JsonObject = JsonParser.parseReader(InputStreamReader(FileInputStream(databaseFile))).asJsonObject
+        val collections: JsonArray = jsonObject.get("collections").asJsonArray
+
+        for (collectionObject in collections) {
+            val collection = collectionObject.asJsonObject
+            val key: String = collection.get("key").asString
+            val data: JsonArray = collection.get("data").asJsonArray
+
+            collectionList.add(LocalDatabaseCollection(data, key))
+        }
+
+        return collectionList
     }
 
     override fun getCollection(key: String): IDatabaseCollection {
