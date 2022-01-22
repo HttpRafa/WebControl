@@ -3,7 +3,9 @@ package net.rafael.web.control.database
 import net.rafael.web.control.WebControl
 import net.rafael.web.control.database.local.LocalDatabaseAdapter
 import net.rafael.web.control.database.mongodb.MongoDBDatabaseAdapter
+import net.rafael.web.control.interfaces.IDatabase
 import net.rafael.web.control.interfaces.IDatabaseAdapter
+import java.util.*
 
 //------------------------------
 //
@@ -28,10 +30,6 @@ class DatabaseManager(val databaseType: DatabaseType) {
 
     fun connect() {
         databaseAdapter.connect()
-    }
-
-    fun createDatabases() {
-        databaseAdapter.createDatabaseIfNotExists("users")
     }
 
     fun disconnect() {

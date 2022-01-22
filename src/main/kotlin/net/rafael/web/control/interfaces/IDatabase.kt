@@ -1,6 +1,7 @@
 package net.rafael.web.control.interfaces
 
 import net.rafael.web.control.interfaces.IDatabaseCollection
+import java.util.*
 
 //------------------------------
 //
@@ -11,11 +12,11 @@ import net.rafael.web.control.interfaces.IDatabaseCollection
 //------------------------------
 interface IDatabase {
 
-    val key: String
+    val name: String
     fun getCollections(): MutableList<IDatabaseCollection>
 
-    fun getCollection(key: String): IDatabaseCollection
-    fun createCollection(key: String): IDatabaseCollection
+    fun getCollection(key: String): Optional<IDatabaseCollection>
+    fun createCollection(key: String): Optional<IDatabaseCollection>
     fun deleteCollection(key: String)
 
 }

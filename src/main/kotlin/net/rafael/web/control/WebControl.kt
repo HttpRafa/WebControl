@@ -20,6 +20,7 @@ class WebControl(args: Array<String>) {
     private val databaseManager: DatabaseManager
 
     init {
+
         webControl = this
         logger = ApplicationLogger()
 
@@ -27,7 +28,7 @@ class WebControl(args: Array<String>) {
 
         databaseManager = DatabaseManager(DatabaseType.valueOf(configManager.jsonObject.get("database").asJsonObject.get("type").asString))
         databaseManager.connect()
-        databaseManager.createDatabases()
+
     }
 
     companion object {

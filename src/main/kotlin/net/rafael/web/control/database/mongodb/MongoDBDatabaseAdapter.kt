@@ -21,18 +21,4 @@ class MongoDBDatabaseAdapter : IDatabaseAdapter {
 
     }
 
-    override fun getDatabase(name: String): Optional<IDatabase> {
-        return Optional.empty()
-    }
-
-    override fun createDatabase(name: String): Optional<IDatabase> {
-        return Optional.empty()
-    }
-
-    override fun createDatabaseIfNotExists(name: String): Optional<IDatabase> {
-        return Optional.empty()
-    }
-
-    override fun deleteDatabase(name: String) {}
-
 }

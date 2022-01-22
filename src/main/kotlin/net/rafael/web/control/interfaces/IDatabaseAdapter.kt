@@ -15,9 +15,4 @@ interface IDatabaseAdapter {
     fun connect()
     fun disconnect()
 
-    fun getDatabase(name: String): Optional<IDatabase>
-    fun createDatabase(name: String): Optional<IDatabase>
-    fun createDatabaseIfNotExists(name: String): Optional<IDatabase>
-    fun deleteDatabase(name: String)
-
 }
