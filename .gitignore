@@ -1,0 +1,7 @@
+# Project exclude paths
+/client/node_modules/
+/target/
+/.idea/
+/WebControl.iml
+/dependency-reduced-pom.xml
+/client/.idea/
