@@ -1,4 +1,4 @@
-package net.rafael.web.control.user.permission.node;
+package net.rafael.web.control.user.permission.node
 
 //------------------------------
 //
@@ -8,9 +8,9 @@ package net.rafael.web.control.user.permission.node;
 //
 //------------------------------
 
-public enum UserPermissions {
+enum class UserPermissions {
 
     ALL,
-    MAX_APPLICATIONS,
+    MAX_APPLICATIONS
 
 }
