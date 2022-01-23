@@ -25,10 +25,7 @@ class ConfigManager(configFolder: File, val configFile: File) {
     init {
 
         // Set default config
-        val databaseConfig = JsonObject()
-        databaseConfig.addProperty("type", DatabaseType.LOCAL.name)
 
-        jsonObject.add("database", databaseConfig)
 
         if(!configFolder.exists()) {
             configFolder.mkdirs()
