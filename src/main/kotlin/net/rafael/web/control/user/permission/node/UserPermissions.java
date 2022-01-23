@@ -1,15 +1,16 @@
-package net.rafael.web.control.database
+package net.rafael.web.control.user.permission.node;
 
 //------------------------------
 //
 // This class was developed by Rafael K.
-// On 1/22/2022 at 2:11 PM
+// On 1/23/2022 at 9:21 PM
 // In the project WebControl
 //
 //------------------------------
-enum class DatabaseType {
 
-    LOCAL,
-    MONGODB
+public enum UserPermissions {
+
+    ALL,
+    MAX_APPLICATIONS,
 
 }

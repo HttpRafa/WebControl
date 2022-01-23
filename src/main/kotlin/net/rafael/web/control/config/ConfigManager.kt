@@ -5,7 +5,6 @@ import com.google.gson.GsonBuilder
 import com.google.gson.JsonObject
 import com.google.gson.JsonParser
 import net.rafael.web.control.WebControl
-import net.rafael.web.control.database.DatabaseType
 import java.io.File
 import java.io.FileInputStream
 import java.io.FileWriter

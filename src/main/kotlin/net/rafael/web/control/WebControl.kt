@@ -1,8 +1,6 @@
 package net.rafael.web.control
 
 import net.rafael.web.control.config.ConfigManager
-import net.rafael.web.control.database.DatabaseManager
-import net.rafael.web.control.database.DatabaseType
 import net.rafael.web.control.logging.ApplicationLogger
 import java.io.File
 
@@ -17,7 +15,6 @@ import java.io.File
 class WebControl(args: Array<String>) {
 
     private val configManager: ConfigManager
-    private val databaseManager: DatabaseManager
 
     init {
 
@@ -25,9 +22,6 @@ class WebControl(args: Array<String>) {
         logger = ApplicationLogger()
 
         configManager = ConfigManager(File("configs/"), File("configs/config.json"))
-
-        databaseManager = DatabaseManager(DatabaseType.valueOf(configManager.jsonObject.get("database").asJsonObject.get("type").asString))
-        databaseManager.connect()
 
     }
 

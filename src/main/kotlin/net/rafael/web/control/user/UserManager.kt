@@ -1,22 +1,28 @@
 package net.rafael.web.control.user
 
-import net.rafael.web.control.WebControl.Companion.logger
+import net.rafael.web.control.interfaces.ISaveable
+import net.rafael.web.control.interfaces.ILoadable
 import net.rafael.web.control.user.classes.User
+import java.util.LinkedList
 
 //------------------------------
 //
 // This class was developed by Rafael K.
-// On 1/22/2022 at 4:08 PM
+// On 1/22/2022 at 10:31 PM
 // In the project WebControl
 //
 //------------------------------
 
-class UserManager {
+class UserManager : ISaveable, ILoadable {
 
-    lateinit var users: List<User>
+    val users: List<User> = LinkedList()
 
-    init {
-        logger.info("Loading users...")
+    override fun save() {
+
+    }
+
+    override fun load() {
+
     }
 
 }
