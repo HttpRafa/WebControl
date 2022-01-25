@@ -44,7 +44,7 @@ class ApplicationLogger {
                 val currentTime = Date()
                 val format = ConsoleColor.toColouredString('§', "§8") + "[ " + ConsoleColor.toColouredString(
                     '§',
-                    "§3"
+                    "§b"
                 ) + formatter.format(currentTime) + ConsoleColor.toColouredString('§', "§8") + " ]"
                 consoleReader.print(
                     ConsoleReader.RESET_LINE.toString() + format + ConsoleColor.toColouredString(
@@ -61,7 +61,7 @@ class ApplicationLogger {
                 val currentTime = Date()
                 val format = ConsoleColor.toColouredString('§', "§8") + "[ " + ConsoleColor.toColouredString(
                     '§',
-                    "§3"
+                    "§b"
                 ) + formatter.format(currentTime) + ConsoleColor.toColouredString('§', "§8") + " ]"
                 consoleReader.print(
                     ConsoleReader.RESET_LINE.toString() + format + ConsoleColor.toColouredString(
@@ -88,7 +88,7 @@ class ApplicationLogger {
         }
     }
 
-    fun nextLine() {
+    private fun nextLine() {
         try {
             consoleReader.print("\n")
             consoleReader.drawLine()
@@ -103,7 +103,7 @@ class ApplicationLogger {
         val currentTime = Date()
         val format = ConsoleColor.toColouredString('§', "§8") + "[ " + ConsoleColor.toColouredString(
             '§',
-            "§3"
+            "§b"
         ) + formatter.format(currentTime) + ConsoleColor.toColouredString('§', "§8") + " ]"
         try {
             consoleReader.print(
@@ -117,11 +117,11 @@ class ApplicationLogger {
                         '§',
                         "§7"
                     )
-                }${ConsoleColor.toColouredString('§', obj.toString())}${ConsoleColor.toColouredString('§', "§r")}
-"""
+                }${ConsoleColor.toColouredString('§', obj.toString())}${ConsoleColor.toColouredString('§', "§r")}"""
             )
             consoleReader.drawLine()
             consoleReader.flush()
+            nextLine()
         } catch (e: IOException) {
             e.printStackTrace()
         }
@@ -132,7 +132,7 @@ class ApplicationLogger {
         val currentTime = Date()
         val format = ConsoleColor.toColouredString('§', "§8") + "[ " + ConsoleColor.toColouredString(
             '§',
-            "§3"
+            "§b"
         ) + formatter.format(currentTime) + ConsoleColor.toColouredString('§', "§8") + " ]"
         try {
             consoleReader.print(
@@ -146,11 +146,11 @@ class ApplicationLogger {
                         '§',
                         "§c"
                     )
-                }${ConsoleColor.toColouredString('§', obj.toString())}${ConsoleColor.toColouredString('§', "§r")}
-"""
+                }${ConsoleColor.toColouredString('§', obj.toString())}${ConsoleColor.toColouredString('§', "§r")}"""
             )
             consoleReader.drawLine()
             consoleReader.flush()
+            nextLine()
         } catch (e: IOException) {
             e.printStackTrace()
         }
@@ -161,7 +161,7 @@ class ApplicationLogger {
         val currentTime = Date()
         val format = ConsoleColor.toColouredString('§', "§8") + "[ " + ConsoleColor.toColouredString(
             '§',
-            "§3"
+            "§b"
         ) + formatter.format(currentTime) + ConsoleColor.toColouredString('§', "§8") + " ]"
         try {
             consoleReader.print(
@@ -175,11 +175,11 @@ class ApplicationLogger {
                         '§',
                         "§c"
                     )
-                }${ConsoleColor.toColouredString('§', obj.toString())}${ConsoleColor.toColouredString('§', "§r")}
-"""
+                }${ConsoleColor.toColouredString('§', obj.toString())}${ConsoleColor.toColouredString('§', "§r")}"""
             )
             consoleReader.drawLine()
             consoleReader.flush()
+            nextLine()
         } catch (e: IOException) {
             e.printStackTrace()
         }
@@ -191,7 +191,7 @@ class ApplicationLogger {
             val currentTime = Date()
             val format = ConsoleColor.toColouredString('§', "§8") + "[ " + ConsoleColor.toColouredString(
                 '§',
-                "§3"
+                "§b"
             ) + formatter.format(currentTime) + ConsoleColor.toColouredString('§', "§8") + " ]"
             try {
                 consoleReader.print(
@@ -205,11 +205,11 @@ class ApplicationLogger {
                             '§',
                             "§7"
                         )
-                    }${ConsoleColor.toColouredString('§', obj.toString())}${ConsoleColor.toColouredString('§', "§r")}
-"""
+                    }${ConsoleColor.toColouredString('§', obj.toString())}${ConsoleColor.toColouredString('§', "§r")}"""
                 )
                 consoleReader.drawLine()
                 consoleReader.flush()
+                nextLine()
             } catch (e: IOException) {
                 e.printStackTrace()
             }

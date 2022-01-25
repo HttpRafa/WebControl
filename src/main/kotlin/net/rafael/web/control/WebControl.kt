@@ -1,8 +1,16 @@
 package net.rafael.web.control
 
+import net.rafael.web.control.command.CommandManager
+import net.rafael.web.control.command.commands.UserCommand
+import net.rafael.web.control.command.commands.ClearCommand
+import net.rafael.web.control.command.commands.HelpCommand
+import net.rafael.web.control.command.commands.StopCommand
 import net.rafael.web.control.config.ConfigManager
 import net.rafael.web.control.logging.ApplicationLogger
+import net.rafael.web.control.logging.color.ConsoleColor
+import net.rafael.web.control.user.UserManager
 import java.io.File
+import kotlin.system.exitProcess
 
 //------------------------------
 //
@@ -14,15 +22,72 @@ import java.io.File
 
 class WebControl(args: Array<String>) {
 
-    private val configManager: ConfigManager
+    private lateinit var configManager: ConfigManager
+    private lateinit var commandManager: CommandManager
+    private lateinit var userManager: UserManager
 
     init {
 
         webControl = this
         logger = ApplicationLogger()
 
-        configManager = ConfigManager(File("configs/"), File("configs/config.json"))
+    }
 
+    fun start() {
+
+        configManager = ConfigManager(File("configs/"), File("configs/config.json"))
+        commandManager = CommandManager(logger)
+
+        load()
+
+        // Register commandList
+        commandManager.registerCommand(HelpCommand("help", null, "Displays all executable commands"))
+        commandManager.registerCommand(UserCommand("user", "§8<§badd§7, §bdelete§7, §binfo§8> §8<§busername§8>", "Create user of the interface"))
+        commandManager.registerCommand(ClearCommand("clear", null, "Deletes the displayed console"))
+        commandManager.registerCommand(ClearCommand("cls", null, "Deletes the displayed console"))
+        commandManager.registerCommand(StopCommand("stop", null, "Stops the WebControl application"))
+        commandManager.registerCommand(StopCommand("exit", null, "Stops the WebControl application"))
+
+        // Register Shutdown Hook
+        Runtime.getRuntime().addShutdownHook(Thread {
+            logger.info("Application is shutting down...")
+
+            logger.info("Stopping WebSocketServer...")
+            // TODO: Shutdown the WebSocketServer
+
+            logger.info("Saving everything...")
+            save()
+
+            logger.info("Bye :)")
+            println(ConsoleColor.toColouredString('§', "§r"))
+        })
+
+    }
+
+    fun exit() {
+
+        exitProcess(0)
+
+    }
+
+    private fun load() {
+        userManager = UserManager.load()
+    }
+
+    private fun save() {
+        userManager.save()
+    }
+
+    fun getCommandManager(): CommandManager {
+        return commandManager
+    }
+
+    fun getUserManager(): UserManager {
+        return userManager
+    }
+
+    fun getConfigManager(): ConfigManager {
+        return configManager
     }
 
     companion object {
