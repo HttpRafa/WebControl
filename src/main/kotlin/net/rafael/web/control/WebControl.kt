@@ -8,6 +8,7 @@ import net.rafael.web.control.command.commands.StopCommand
 import net.rafael.web.control.config.ConfigManager
 import net.rafael.web.control.logging.ApplicationLogger
 import net.rafael.web.control.logging.color.ConsoleColor
+import net.rafael.web.control.setup.ConsoleSetupManager
 import net.rafael.web.control.user.UserManager
 import java.io.File
 import kotlin.system.exitProcess
@@ -25,6 +26,7 @@ class WebControl(args: Array<String>) {
     private lateinit var configManager: ConfigManager
     private lateinit var commandManager: CommandManager
     private lateinit var userManager: UserManager
+    private lateinit var consoleSetupManager: ConsoleSetupManager
 
     init {
 
@@ -37,6 +39,7 @@ class WebControl(args: Array<String>) {
 
         configManager = ConfigManager(File("configs/"), File("configs/config.json"))
         commandManager = CommandManager(logger)
+        consoleSetupManager = ConsoleSetupManager()
 
         load()
 
@@ -65,9 +68,7 @@ class WebControl(args: Array<String>) {
     }
 
     fun exit() {
-
         exitProcess(0)
-
     }
 
     private fun load() {
@@ -80,6 +81,10 @@ class WebControl(args: Array<String>) {
 
     fun getCommandManager(): CommandManager {
         return commandManager
+    }
+
+    fun getConsoleSetupManager(): ConsoleSetupManager {
+        return consoleSetupManager
     }
 
     fun getUserManager(): UserManager {

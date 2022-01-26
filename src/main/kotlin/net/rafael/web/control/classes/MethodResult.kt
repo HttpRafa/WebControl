@@ -1,8 +1,6 @@
 package net.rafael.web.control.classes
 
-import net.rafael.web.control.classes.MethodResult
 import java.lang.SafeVarargs
-import java.util.Arrays
 
 //------------------------------
 //
@@ -17,12 +15,18 @@ class MethodResult<T> {
     private var t: MutableList<T>? = null
 
     fun of(t: T): MethodResult<T> {
+        if(this.t == null) {
+            this.t = mutableListOf()
+        }
         this.t!!.add(t)
         return this
     }
 
     @SafeVarargs
     fun of(vararg t: T): MethodResult<T> {
+        if(this.t == null) {
+            this.t = mutableListOf()
+        }
         this.t!!.addAll(listOf(*t))
         return this
     }
@@ -42,7 +46,17 @@ class MethodResult<T> {
         get() = t!!.size > 0
 
     fun get(): T {
+        if(this.t == null) {
+            this.t = mutableListOf()
+        }
         return t!![0]
+    }
+
+    fun get(index: Int): T {
+        if(this.t == null) {
+            this.t = mutableListOf()
+        }
+        return t!![index]
     }
 
 }
