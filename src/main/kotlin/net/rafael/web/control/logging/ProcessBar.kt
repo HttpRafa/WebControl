@@ -45,6 +45,5 @@ class ProcessBar(logger: ApplicationLogger, downloadSpeed: Int, end: Long, state
                 s1 + " % §7" + result.toString() + " §e" + state / 1000 + "KB §8/ §7" + end / 1000 + "KB §8| §e" + downloadSpeed + "KB/s"
             )
         }
-
     }
 }

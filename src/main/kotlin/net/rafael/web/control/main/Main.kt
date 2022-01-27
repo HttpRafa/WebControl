@@ -28,6 +28,6 @@ fun showName() {
             "§3▒█░░▒█ █▀▀ █▀▀▄ §b▒█▀▀█ █▀▀█ █▀▀▄ ▀▀█▀▀ █▀▀█ █▀▀█ █░░ \n" +
             "§3▒█▒█▒█ █▀▀ █▀▀▄ §b▒█░░░ █░░█ █░░█ ░░█░░ █▄▄▀ █░░█ █░░ \n" +
             "§3▒█▄▀▄█ ▀▀▀ ▀▀▀░ §b▒█▄▄█ ▀▀▀▀ ▀░░▀ ░░▀░░ ▀░▀▀ ▀▀▀▀ ▀▀▀§r"))
-    println(ConsoleColor.toColouredString('§', "§8«§3*§8» §3Web§bControl §7v§8.§70§8.§b2 §7by §3RafaDev§r"));
+    println(ConsoleColor.toColouredString('§', "§8«§3*§8» §3Web§bControl §7v§8.§70§8.§b1 §7by §3RafaDev§r"));
     println(" ")
 }

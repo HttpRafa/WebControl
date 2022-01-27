@@ -7,8 +7,8 @@ package net.rafael.web.control.interfaces
 // In the project WebControl
 //
 //------------------------------
-interface ObjectRunnable<T, K> {
+interface ObjectRunnable<A, R> {
 
-    fun run(t: T): K
+    fun run(t: A): R
 
 }

@@ -5,8 +5,6 @@ import net.rafael.web.control.command.executor.Command
 import net.rafael.web.control.logging.ApplicationLogger
 import net.rafael.web.control.logging.color.ConsoleColor
 import net.rafael.web.control.setup.classes.ConsoleSetup
-import java.lang.Exception
-import java.util.ArrayList
 
 //------------------------------
 //

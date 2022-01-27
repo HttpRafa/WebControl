@@ -1,6 +1,7 @@
 package net.rafael.web.control.setup.classes
 
 import net.rafael.web.control.WebControl
+import net.rafael.web.control.interfaces.ObjectRunnable
 import java.lang.Runnable
 import java.util.UUID
 import java.util.ArrayList
@@ -13,13 +14,13 @@ import java.util.ArrayList
 //
 //------------------------------
 
-class ConsoleSetup(finishedCallback: Runnable, vararg steps: ConsoleSetupStep) {
+class ConsoleSetup(finishedCallback: ObjectRunnable<ConsoleSetup, Any>, vararg steps: ConsoleSetupStep) {
 
     val uuid: UUID
     var step = 0
         private set
 
-    private val finishedCallback: MutableList<Runnable> = ArrayList()
+    private val finishedCallback: MutableList<ObjectRunnable<ConsoleSetup, Any>> = ArrayList()
     private val steps: MutableList<ConsoleSetupStep> = ArrayList()
 
     init {
@@ -40,7 +41,7 @@ class ConsoleSetup(finishedCallback: Runnable, vararg steps: ConsoleSetupStep) {
             step++
             if (step >= steps.size) {
                 for (runnable in finishedCallback) {
-                    runnable.run()
+                    runnable.run(this)
                 }
                 return true
             } else {
@@ -53,7 +54,7 @@ class ConsoleSetup(finishedCallback: Runnable, vararg steps: ConsoleSetupStep) {
         return false
     }
 
-    fun finishedCallback(callback: Runnable) {
+    fun finishedCallback(callback: ObjectRunnable<ConsoleSetup, Any>) {
         finishedCallback.add(callback)
     }
 

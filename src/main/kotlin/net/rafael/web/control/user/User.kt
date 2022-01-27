@@ -1,5 +1,6 @@
 package net.rafael.web.control.user
 
+import net.rafael.web.control.network.session.ClientSession
 import java.util.UUID
 
 //------------------------------
@@ -10,6 +11,6 @@ import java.util.UUID
 //
 //------------------------------
 
-class User(val username: String, val password: String, val uuid: UUID) {
+class User(val username: String, val password: String, val uuid: UUID, val session: MutableList<ClientSession>) {
 
 }

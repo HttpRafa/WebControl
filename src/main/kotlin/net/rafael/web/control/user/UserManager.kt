@@ -18,11 +18,11 @@ import java.util.*
 
 class UserManager : ISaveable {
 
-    private val users: MutableList<User> = ArrayList()
+    private val users: MutableList<User> = mutableListOf()
 
     fun createUser(username: String, password: String): MethodResult<User> {
         return if(findUser(username).isEmpty) {
-            val user = User(username, password, UUID.randomUUID())
+            val user = User(username, password, UUID.randomUUID(), mutableListOf())
             users.add(user)
             MethodResult<User>().of(user)
         } else {

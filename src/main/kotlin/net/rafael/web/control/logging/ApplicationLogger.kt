@@ -1,12 +1,10 @@
 package net.rafael.web.control.logging
 
-import jline.AnsiWindowsTerminal
 import jline.console.ConsoleReader
 import java.text.SimpleDateFormat
 import net.rafael.web.control.logging.color.ConsoleColor
 import net.rafael.web.control.logging.exeption.ExceptionHandler
 import java.io.IOException
-import java.io.PrintStream
 import java.lang.Exception
 import java.util.*
 

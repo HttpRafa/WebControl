@@ -6,6 +6,7 @@ import net.rafael.web.control.command.executor.Command
 import net.rafael.web.control.interfaces.ObjectRunnable
 import net.rafael.web.control.setup.classes.ConsoleSetup
 import net.rafael.web.control.setup.classes.ConsoleSetupStep
+import net.rafael.web.control.user.User
 
 //------------------------------
 //
@@ -24,8 +25,16 @@ class UserCommand(name: String, usage: String?, description: String) : Command(n
                 val username: String = args[1]
 
                 val setup: ConsoleSetup = ConsoleSetup(
-                    Runnable {
-                             WebControl.logger.warning("Finished")
+                    object : ObjectRunnable<ConsoleSetup, Any> {
+                        override fun run(t: ConsoleSetup): Any {
+                            val result: MethodResult<User> = WebControl.webControl.getUserManager().createUser(username, t.getSteps()[0].value as String)
+                            if(result.isObjectEmpty) {
+                                WebControl.logger.error("§cFailed to create user§8!")
+                            } else {
+                                WebControl.logger.info("User §acreated§8[§7username§8: §b$username§8]")
+                            }
+                            return "null"
+                        }
                     }, ConsoleSetupStep("Please write the password that the user should become into the console§8.",
                     object : ObjectRunnable<String, MethodResult<Any>> {
                         override fun run(t: String): MethodResult<Any> {

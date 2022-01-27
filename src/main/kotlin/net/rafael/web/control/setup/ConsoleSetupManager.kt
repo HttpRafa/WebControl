@@ -1,6 +1,7 @@
 package net.rafael.web.control.setup
 
 import net.rafael.web.control.WebControl
+import net.rafael.web.control.interfaces.ObjectRunnable
 import net.rafael.web.control.setup.classes.ConsoleSetup
 import java.util.ArrayList
 
@@ -17,9 +18,12 @@ class ConsoleSetupManager {
     private val setups: MutableList<ConsoleSetup> = mutableListOf()
 
     fun addSetup(setup: ConsoleSetup) {
-        setup.finishedCallback {
-            setPromptIcon()
-        }
+        setup.finishedCallback(object : ObjectRunnable<ConsoleSetup, Any> {
+            override fun run(t: ConsoleSetup): Any {
+                setPromptIcon()
+                return ""
+            }
+        })
         setups.add(setup)
         setup.init()
         setPromptIcon()
