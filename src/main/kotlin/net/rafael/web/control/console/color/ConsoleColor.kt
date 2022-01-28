@@ -1,7 +1,5 @@
-package net.rafael.web.control.logging.color
+package net.rafael.web.control.console.color
 
-import java.lang.NullPointerException
-import net.rafael.web.control.logging.color.ConsoleColor
 import org.fusesource.jansi.Ansi
 
 //------------------------------
@@ -80,12 +78,12 @@ enum class ConsoleColor(val colorName: String, val index: Char, val ansiCode: St
     }
 
     companion object {
-        fun toColouredString(triggerChar: Char, text: String?): String? {
-            var text = text ?: throw NullPointerException()
+        fun toColouredString(triggerChar: Char, text: String): String {
+            var value = text
             for (consoleColour in values()) {
-                text = text.replace(triggerChar.toString() + "" + consoleColour.index, consoleColour.ansiCode)
+                value = value.replace(triggerChar.toString() + "" + consoleColour.index, consoleColour.ansiCode)
             }
-            return text
+            return value
         }
     }
 

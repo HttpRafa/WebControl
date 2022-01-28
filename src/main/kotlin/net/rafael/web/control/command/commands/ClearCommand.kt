@@ -1,7 +1,7 @@
 package net.rafael.web.control.command.commands
 
 import net.rafael.web.control.WebControl
-import net.rafael.web.control.command.executor.Command
+import net.rafael.web.control.command.AbstractCommand
 
 //------------------------------
 //
@@ -11,10 +11,10 @@ import net.rafael.web.control.command.executor.Command
 //
 //------------------------------
 
-class ClearCommand(name: String, usage: String?, description: String) : Command(name, usage, description) {
+class ClearCommand(name: String) : AbstractCommand(name) {
 
     override fun execute(args: Array<String>) {
-        WebControl.logger.clearConsole()
+        WebControl.logger.getService().clearConsole()
     }
 
 }

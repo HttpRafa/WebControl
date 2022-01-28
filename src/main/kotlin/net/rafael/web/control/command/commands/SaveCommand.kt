@@ -1,12 +1,7 @@
 package net.rafael.web.control.command.commands
 
 import net.rafael.web.control.WebControl
-import net.rafael.web.control.classes.MethodResult
-import net.rafael.web.control.command.executor.Command
-import net.rafael.web.control.interfaces.ObjectRunnable
-import net.rafael.web.control.setup.classes.ConsoleSetup
-import net.rafael.web.control.setup.classes.ConsoleSetupStep
-import net.rafael.web.control.user.User
+import net.rafael.web.control.command.AbstractCommand
 
 //------------------------------
 //
@@ -16,7 +11,7 @@ import net.rafael.web.control.user.User
 //
 //------------------------------
 
-class SaveCommand(name: String, usage: String?, description: String) : Command(name, usage, description) {
+class SaveCommand(name: String) : AbstractCommand(name) {
 
     override fun execute(args: Array<String>) {
 

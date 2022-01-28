@@ -1,7 +1,7 @@
 package net.rafael.web.control.main
 
 import net.rafael.web.control.WebControl
-import net.rafael.web.control.logging.color.ConsoleColor
+import net.rafael.web.control.console.color.ConsoleColor
 import org.fusesource.jansi.AnsiConsole
 
 //------------------------------
