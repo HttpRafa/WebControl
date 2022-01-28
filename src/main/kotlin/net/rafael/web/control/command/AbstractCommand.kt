@@ -48,4 +48,8 @@ abstract class AbstractCommand(val name: String) {
         return aliases
     }
 
+    fun hasAlias(value: String): Boolean {
+        return getAliases().stream().anyMatch { item -> item.equals(value, ignoreCase = true) }
+    }
+
 }

@@ -46,7 +46,7 @@ class ApplicationLogger : IApplicationLogger {
         text = text
             .replace("%time%", dateFormat.format(Date()))
             .replace("%level%", "§" + level.levelColor.index + level.levelName)
-            .replace("%message%", obj.toString())
+            .replace("%message%", "§" + level.levelColor.index + obj.toString())
         loggingService.writeLine(text)
     }
 

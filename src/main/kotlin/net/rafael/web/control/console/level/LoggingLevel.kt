@@ -12,9 +12,9 @@ import net.rafael.web.control.console.color.ConsoleColor
 
 enum class LoggingLevel(val levelName: String, val levelColor: ConsoleColor) {
 
-    INFO("Info", ConsoleColor.GRAY),
-    WARNING("Warning", ConsoleColor.ORANGE),
-    DEBUG("Debug", ConsoleColor.AQUA),
-    ERROR("Error", ConsoleColor.RED);
+    INFO("INFO", ConsoleColor.GRAY),
+    WARNING("WARNING", ConsoleColor.ORANGE),
+    DEBUG("DEBUG", ConsoleColor.AQUA),
+    ERROR("ERROR", ConsoleColor.RED);
 
 }

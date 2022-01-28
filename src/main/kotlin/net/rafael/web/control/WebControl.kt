@@ -21,7 +21,6 @@ import kotlin.system.exitProcess
 class WebControl(args: Array<String>) {
 
     lateinit var commandManager: CommandManager
-
     lateinit var networkServer: NetworkServer
 
     init {
@@ -55,6 +54,15 @@ class WebControl(args: Array<String>) {
 
         // Register Shutdown Hook
         Runtime.getRuntime().addShutdownHook(Thread {
+            exit(false)
+        })
+
+    }
+
+    fun exit(exitProcess: Boolean) {
+        if(!stopping) {
+            stopping = true
+
             logger.info("Application is shutting down...")
 
             logger.info("Stopping WebSocketServer...")
@@ -64,13 +72,8 @@ class WebControl(args: Array<String>) {
             save()
 
             logger.info("Bye :)")
-            println(ConsoleColor.toColouredString('§', "§r"))
-        })
-
-    }
-
-    fun exit() {
-        exitProcess(0)
+            if(exitProcess) exitProcess(0)
+        }
     }
 
     fun load() {
@@ -84,6 +87,7 @@ class WebControl(args: Array<String>) {
     companion object {
         lateinit var webControl: WebControl private set
         lateinit var logger: IApplicationLogger private set
+        var stopping: Boolean = false
     }
 
 }

@@ -15,7 +15,7 @@ class StopCommand(name: String) : AbstractCommand(name) {
 
     override fun execute(args: Array<String>) {
 
-        WebControl.webControl.exit()
+        WebControl.webControl.exit(true)
 
     }
 
