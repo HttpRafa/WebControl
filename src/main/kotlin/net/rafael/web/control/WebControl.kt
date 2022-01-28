@@ -47,8 +47,8 @@ class WebControl(args: Array<String>) {
             CommandUsage().add("username")
         ).withDescription("Create user of the interface"))
         commandManager.registerCommand(SaveCommand("save").withDescription("Saves everything"))
-        commandManager.registerCommand(ClearCommand("clear").withDescription("Deletes the displayed console"))
-        commandManager.registerCommand(StopCommand("stop").withDescription("Stops the WebControl application"))
+        commandManager.registerCommand(ClearCommand("clear").withAlias("cls").withDescription("Deletes the displayed console"))
+        commandManager.registerCommand(StopCommand("stop").withAlias("exit").withAlias("end").withDescription("Stops the WebControl application"))
 
         // Start NetworkServer
         networkServer.start()

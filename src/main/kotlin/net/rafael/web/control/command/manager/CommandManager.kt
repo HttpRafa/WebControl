@@ -22,6 +22,13 @@ class CommandManager(service: IApplicationLoggingService) {
     init {
         service.getConsoleThread().registerTask(InputTask(InputTask.PRIORITY_ZERO, object : InputTaskCallback {
             override fun run(line: String): MethodResult<Boolean> {
+
+                for (abstractCommand in commandList) {
+                    if(abstractCommand.name == "help") {
+                        abstractCommand.execute(arrayOf(""))
+                    }
+                }
+
                 return MethodResult<Boolean>().of(false, false)
             }
         }))
