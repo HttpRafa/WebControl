@@ -26,6 +26,6 @@ interface IApplicationLogger {
     fun getStyle(): String
     fun setStyle(style: String)
 
-    fun getService(): IApplicationLoggingService
+    fun getConsole(): IApplicationConsole
 
 }

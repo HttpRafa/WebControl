@@ -8,7 +8,7 @@ package net.rafael.web.control.console.input.task
 //
 //------------------------------
 
-class InputTask(val priority: Int, val callback: InputTaskCallback) {
+class InputHandler(val priority: Int, val callback: InputHandlerCallback) {
 
     companion object {
         val PRIORITY_VERY_HIGH = 7

@@ -14,7 +14,11 @@ import net.rafael.web.control.command.AbstractCommand
 class ClearCommand(name: String) : AbstractCommand(name) {
 
     override fun execute(args: Array<String>) {
-        WebControl.logger.getService().clearConsole()
+        if(WebControl.logger.getConsole().isReadyToClear()) {
+            WebControl.logger.getConsole().clearConsole()
+        } else {
+            WebControl.logger.error("§7You cant clear the console while an animation is running§8.")
+        }
     }
 
 }

@@ -3,10 +3,9 @@ package net.rafael.web.control.command.manager
 import net.rafael.web.control.WebControl
 import net.rafael.web.control.classes.MethodResult
 import net.rafael.web.control.command.AbstractCommand
-import net.rafael.web.control.console.input.task.InputTask
-import net.rafael.web.control.console.input.task.InputTaskCallback
-import net.rafael.web.control.console.interfaces.IApplicationLoggingService
-import java.util.*
+import net.rafael.web.control.console.input.task.InputHandler
+import net.rafael.web.control.console.input.task.InputHandlerCallback
+import net.rafael.web.control.console.interfaces.IApplicationConsole
 import java.util.stream.Collectors
 
 //------------------------------
@@ -17,12 +16,12 @@ import java.util.stream.Collectors
 //
 //------------------------------
 
-class CommandManager(service: IApplicationLoggingService) {
+class CommandManager(service: IApplicationConsole) {
 
     private val commandList: MutableList<AbstractCommand> = mutableListOf()
 
     init {
-        service.getConsoleThread().registerTask(InputTask(InputTask.PRIORITY_ZERO, object : InputTaskCallback {
+        service.getConsoleThread().registerTask(InputHandler(InputHandler.PRIORITY_ZERO, object : InputHandlerCallback {
             override fun run(line: String): MethodResult<Boolean> {
                 if(line.isNotEmpty() && line.isNotBlank()) {
                     val command = line.split(" ")[0]

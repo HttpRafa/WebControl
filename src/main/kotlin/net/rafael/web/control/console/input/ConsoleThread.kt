@@ -1,9 +1,10 @@
 package net.rafael.web.control.console.input
 
-import net.rafael.web.control.console.interfaces.IApplicationLoggingService
-import net.rafael.web.control.console.input.task.InputTask
+import net.rafael.web.control.console.input.task.InputHandler
+import net.rafael.web.control.console.interfaces.IApplicationConsole
 import org.jline.reader.EndOfFileException
 import org.jline.reader.UserInterruptException
+
 
 //------------------------------
 //
@@ -13,16 +14,21 @@ import org.jline.reader.UserInterruptException
 //
 //------------------------------
 
-class ConsoleThread(private val applicationLogger: IApplicationLoggingService) : Thread() {
+class ConsoleThread(private val applicationLogger: IApplicationConsole) : Thread() {
 
-    private val currentTasks: MutableList<InputTask> = mutableListOf()
+    private val currentHandlers: MutableList<InputHandler> = mutableListOf()
 
     override fun run() {
         var line: String? = null
+        var first = true
         while (!interrupted() && this.readLine().also { line = it } != null) {
-            currentTasks.sortWith(nullsLast(compareBy { it.priority }))
+            for (animation in this.applicationLogger.getRunningAnimations()) {
+                animation.addToCursor(1)
+            }
 
-            val iterator = currentTasks.iterator()
+            currentHandlers.sortWith(nullsLast(compareBy { it.priority }))
+
+            val iterator = currentHandlers.iterator()
             var cancelled = false
             while (iterator.hasNext()) {
                 val input = iterator.next()
@@ -41,8 +47,8 @@ class ConsoleThread(private val applicationLogger: IApplicationLoggingService) :
         }
     }
 
-    fun registerTask(task: InputTask) {
-        currentTasks.add(task)
+    fun registerTask(task: InputHandler) {
+        currentHandlers.add(task)
     }
 
     private fun readLine(): String? {

@@ -1,10 +1,10 @@
 package net.rafael.web.control.console.logger
 
 import net.rafael.web.control.console.interfaces.IApplicationLogger
-import net.rafael.web.control.console.service.ApplicationLoggingService
+import net.rafael.web.control.console.service.ApplicationConsole
 import java.text.SimpleDateFormat
 import net.rafael.web.control.console.level.LoggingLevel
-import net.rafael.web.control.console.interfaces.IApplicationLoggingService
+import net.rafael.web.control.console.interfaces.IApplicationConsole
 import java.util.*
 
 //------------------------------
@@ -17,7 +17,7 @@ import java.util.*
 
 class ApplicationLogger : IApplicationLogger {
 
-    private val loggingService: ApplicationLoggingService = ApplicationLoggingService()
+    private val loggingService: ApplicationConsole = ApplicationConsole()
     private var dateFormat: SimpleDateFormat
     private var loggingStyle = System.getProperty("web-control.console.style", "§8[§b%time%§8] §7%level% §8» §7%message%")
 
@@ -50,7 +50,7 @@ class ApplicationLogger : IApplicationLogger {
         loggingService.writeLine(text)
     }
 
-    override fun getService(): IApplicationLoggingService {
+    override fun getConsole(): IApplicationConsole {
         return loggingService
     }
 

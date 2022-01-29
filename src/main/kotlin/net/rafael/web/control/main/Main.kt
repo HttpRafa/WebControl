@@ -24,7 +24,8 @@ fun main(args: Array<String>) {
 }
 
 fun showName() {
-    println(ConsoleColor.toColouredString('§', "\n \n" +
+    println(
+        ConsoleColor.toColouredString('§', "\n \n" +
             "§3▒█░░▒█ █▀▀ █▀▀▄ §b▒█▀▀█ █▀▀█ █▀▀▄ ▀▀█▀▀ █▀▀█ █▀▀█ █░░ \n" +
             "§3▒█▒█▒█ █▀▀ █▀▀▄ §b▒█░░░ █░░█ █░░█ ░░█░░ █▄▄▀ █░░█ █░░ \n" +
             "§3▒█▄▀▄█ ▀▀▀ ▀▀▀░ §b▒█▄▄█ ▀▀▀▀ ▀░░▀ ░░▀░░ ▀░▀▀ ▀▀▀▀ ▀▀▀§r"))

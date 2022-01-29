@@ -10,7 +10,7 @@ import net.rafael.web.control.classes.MethodResult
 //
 //------------------------------
 
-interface InputTaskCallback {
+interface InputHandlerCallback {
 
     fun run(line: String): MethodResult<Boolean>
 

@@ -1,7 +1,5 @@
 package net.rafael.web.control.console.lib
 
-import net.rafael.web.control.console.lib.InternalLineReaderBuilder
-import net.rafael.web.control.console.lib.InternalLineReader
 import org.jline.reader.Completer
 import org.jline.reader.LineReader
 import org.jline.terminal.Terminal
