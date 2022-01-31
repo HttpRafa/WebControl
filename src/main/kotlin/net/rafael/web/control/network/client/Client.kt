@@ -1,5 +1,7 @@
 package net.rafael.web.control.network.client
 
+import net.rafael.web.control.WebControl
+import net.rafael.web.control.network.packet.Packet
 import net.rafael.web.control.user.User
 import org.java_websocket.WebSocket
 
@@ -14,5 +16,9 @@ import org.java_websocket.WebSocket
 class Client(val webSocket: WebSocket) {
 
     var user: User? = null
+
+    fun sendPacket(packet: Packet) {
+        WebControl.webControl.networkServer.sendPacket(this, packet)
+    }
 
 }

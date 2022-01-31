@@ -55,7 +55,7 @@ class WebControl(args: Array<String>) {
         commandManager.registerCommand(StopCommand("stop").withAlias("exit").withAlias("end").withDescription("Stops the WebControl application"))
 
         // Start NetworkServer
-        //networkServer.start()
+        networkServer.start()
 
         // Register Shutdown Hook
         Runtime.getRuntime().addShutdownHook(Thread {

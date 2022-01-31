@@ -20,6 +20,11 @@ interface IApplicationLogger {
 
     fun log(obj: Any, level: LoggingLevel)
 
+    fun enableDebugging()
+    fun disableDebugging()
+
+    fun getDebuggingState(): Boolean
+
     fun getDateFormat(): SimpleDateFormat
     fun setDateFormat(dateFormat: SimpleDateFormat)
 

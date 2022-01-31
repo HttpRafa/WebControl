@@ -25,7 +25,7 @@ class ClientHandler {
     }
 
     fun getByConnection(connection: WebSocket): Optional<Client> {
-        return clients.stream().filter { item: Client -> item.webSocket === connection }.findAny()
+        return clients.stream().filter { item: Client -> item.webSocket == connection }.findAny()
     }
 
 }

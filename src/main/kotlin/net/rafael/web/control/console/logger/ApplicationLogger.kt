@@ -21,6 +21,8 @@ class ApplicationLogger : IApplicationLogger {
     private var dateFormat: SimpleDateFormat
     private var loggingStyle = System.getProperty("web-control.console.style", "§8[§b%time%§8] §7%level% §8» §7%message%")
 
+    private var debugging = false;
+
     init {
         dateFormat = SimpleDateFormat("dd.MM.yyyy HH:mm:ss")
     }
@@ -38,16 +40,35 @@ class ApplicationLogger : IApplicationLogger {
     }
 
     override fun error(obj: Any) {
-        log(obj, LoggingLevel.ERROR)
+        if(obj is Throwable) {
+            for (stackTraceElement in obj.stackTrace) {
+                log(stackTraceElement.toString(), LoggingLevel.ERROR)
+            }
+        }
     }
 
     override fun log(obj: Any, level: LoggingLevel) {
+        if(level == LoggingLevel.DEBUG && !debugging) {
+            return
+        }
         var text = loggingStyle
         text = text
             .replace("%time%", dateFormat.format(Date()))
             .replace("%level%", "§" + level.levelColor.index + level.levelName)
-            .replace("%message%", "§" + level.levelColor.index + obj.toString())
+            .replace("%message%", "§" + level.textColor.index + obj.toString())
         loggingService.writeLine(text)
+    }
+
+    override fun enableDebugging() {
+        this.debugging = true;
+    }
+
+    override fun disableDebugging() {
+        this.debugging = false;
+    }
+
+    override fun getDebuggingState(): Boolean {
+        return this.debugging
     }
 
     override fun getConsole(): IApplicationConsole {
