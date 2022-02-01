@@ -49,6 +49,14 @@ class NetworkServer(address: InetSocketAddress?) : WebSocketServer(address) {
     }
 
     override fun onMessage(connection: WebSocket, message: String) {
+        WebControl.logger.debug("[Network] PacketIn -> " + TextHighlighter.highlightJson(message))
+        val client = clientHandler.getByConnection(connection)
+        if (client.isPresent) {
+            val user: User? = client.get().user
+            if(user != null) {
+
+            }
+        }
     }
 
     override fun onError(connection: WebSocket, exception: Exception) {
