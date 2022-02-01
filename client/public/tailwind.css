@@ -169,6 +169,7 @@
         width: 80px;
         height: 80px;
     }
+
     .lds-ellipsis div {
         @apply bg-green-500;
         position: absolute;
