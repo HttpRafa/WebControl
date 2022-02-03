@@ -2,6 +2,10 @@ import {NodeConnection} from "../connection/NodeConnection";
 import {PacketOutLogin} from "../packet/out/PacketOutLogin";
 
 import type {ControlUser} from "../user/ControlUser";
+import {PacketOutRequestSession} from "../packet/out/PacketOutRequestSession";
+import {currentError, networkManager} from "../../Store";
+import {ApplicationError} from "../../ApplicationError";
+import {ErrorIds} from "../../ids/ErrorIds";
 
 export class ControlNode {
 
@@ -41,8 +45,69 @@ export class ControlNode {
         });
     }
 
+    requestLogin(): Promise<number> {
+        return new Promise<number>(resolve => {
+            let handled = false;
+
+            let handlerId = this._nodeConnection.addHandler(packet => {
+                if(packet.id == 1) {
+                    // @ts-ignore
+                    let result: boolean = packet.document.data.result;
+
+                    this._nodeConnection.removeHandler(handlerId);
+                    handled = true;
+                    resolve(result ? 1 : 0);
+                }
+            })
+            this._nodeConnection.sendPacket(new PacketOutLogin(this._user.username, this._user.session));
+            setTimeout(() => {
+                if(!handled) {
+                    this._nodeConnection.removeHandler(handlerId);
+                    currentError.set(new ApplicationError(ErrorIds.session_outdated, "Session check took to long"));
+                    resolve(-1);
+                }
+            }, 5000);
+        });
+    }
+
+    requestLoginSession(username: string, password: string, save: boolean): Promise<string> {
+        return new Promise<string>(resolve => {
+
+            let handled = false;
+
+            let handlerId = this._nodeConnection.addHandler(packet => {
+                if(packet.id == 2) {
+                    // @ts-ignore
+                    let result: boolean = packet.document.data.result;
+                    // @ts-ignore
+                    let session: string = packet.document.data.session;
+
+                    this._nodeConnection.removeHandler(handlerId);
+                    handled = true;
+                    resolve(result ? session : undefined);
+                }
+            });
+            this._nodeConnection.sendPacket(new PacketOutRequestSession(username, password));
+            setTimeout(() => {
+                if(!handled) {
+                    this._nodeConnection.removeHandler(handlerId);
+                    currentError.set(new ApplicationError(ErrorIds.create_session, "Creating a session took too long"));
+                    resolve(undefined);
+                }
+            }, 5000);
+        });
+    }
+
     hasUser(): boolean {
         return this._user.exists();
+    }
+
+    saveUser(username: string, session: string) {
+        this._user.set(username, session);
+        networkManager.update(value => {
+            value.nodeManager.storeNodes();
+            return value;
+        })
     }
 
     get nodeConnection(): NodeConnection {

@@ -2,11 +2,11 @@ import {ControlNode, StoredControlNode} from "./ControlNode";
 import {currentError, currentNode} from "../../Store";
 import {ApplicationError} from "../../ApplicationError";
 import {ControlUser} from "../user/ControlUser";
+import {ErrorIds} from "../../ids/ErrorIds";
 
 export class NodeManager {
 
     private readonly _nodes: Array<ControlNode>
-    private _connectNode: ControlNode
 
     constructor() {
         this._nodes = [];
@@ -17,7 +17,7 @@ export class NodeManager {
             let node = this.getNodeById(nodeId);
             node.connect().then(result => {
                 if(result == -1) {
-                    currentError.set(new ApplicationError(1, "Error while connecting to the node[" + node.host + ":" + node.port + "]"));
+                    currentError.set(new ApplicationError(ErrorIds.node_connect, "Error while connecting to the node[" + node.host + ":" + node.port + "]"));
                 }
                 resultCallback(result, node);
             });
@@ -29,7 +29,11 @@ export class NodeManager {
         const storedData: Array<StoredControlNode> = window.localStorage.getItem("nodes") ? JSON.parse(window.localStorage.getItem("nodes")) : [];
         for (let i = 0; i < storedData.length; i++) {
             const storedNode = storedData[i];
-            this._nodes.push(new ControlNode(storedNode.id, storedNode.host, storedNode.port, new ControlUser(storedNode.user.username, storedNode.user.session)));
+            if(storedNode.user == undefined) {
+                this._nodes.push(new ControlNode(storedNode.id, storedNode.host, storedNode.port, new ControlUser(undefined, undefined)));
+            } else {
+                this._nodes.push(new ControlNode(storedNode.id, storedNode.host, storedNode.port, new ControlUser(storedNode.user.username, storedNode.user.session)));
+            }
         }
         console.log("Loaded " + this._nodes.length + " Nodes.");
     }
@@ -93,10 +97,6 @@ export class NodeManager {
 
     get nodes(): Array<ControlNode> {
         return this._nodes;
-    }
-
-    get connectNode(): ControlNode {
-        return this._connectNode;
     }
 
 }

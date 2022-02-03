@@ -6,9 +6,10 @@
     import AddNodeContent from "./components/AddNodeContent.svelte";
     import RegisterContent from "./components/RegisterContent.svelte";
 
-    import {PageIds} from "./js/PageIds";
+    import {PageIds} from "./js/ids/PageIds";
     import {ApplicationError} from "./js/ApplicationError";
     import {currentError, currentNode, networkManager} from "./js/Store";
+    import {ErrorIds} from "./js/ids/ErrorIds";
 
     let sideId = PageIds.loading;
 
@@ -19,7 +20,7 @@
             sideId = PageIds.addNode;
         } else {
             currentNode.update(nodeId => {
-                connectToNode(nodeId);
+                connectToNode();
                 return nodeId;
             })
         }
@@ -27,14 +28,14 @@
         return value;
     })
 
-    function connectToNode(id: number) {
+    function connectToNode() {
         sideId = PageIds.loading;
 
         networkManager.update(manager => {
             manager.nodeManager.connect((result, node) => {
                 if(result == 1) {
                     if(node.hasUser()) {
-
+                        sendClientLoginRequest();
                     } else {
                         sideId = PageIds.login;
                     }
@@ -44,11 +45,44 @@
         })
     }
 
+    function sendClientLoginRequest() {
+        sideId = PageIds.loading;
+
+        networkManager.update(value => {
+            currentNode.update(nodeId => {
+                let node = value.nodeManager.getNodeById(nodeId);
+                node.requestLogin().then(result => {
+                    if(result == 1) {
+                        sideId = PageIds.home;
+
+                        // TODO: Load applications and currentApplication
+                    } else if(result == 0) {
+                        node.user.delete();
+                        currentError.set(new ApplicationError(ErrorIds.session_outdated, "Your session is out of date or has errors, please log in again."));
+                        sideId = PageIds.login;
+                    } else {
+                        sideId = PageIds.login;
+                    }
+                })
+                return nodeId;
+            });
+            return value;
+        });
+    }
+
     function requestLogin(username: string, password: string, checked: boolean) {
         console.log("Try to create login session for user[" + username + "].");
         networkManager.update(value => {
             currentNode.update(nodeId => {
                 let node = value.nodeManager.getNodeById(nodeId);
+                node.requestLoginSession(username, password, checked).then(result => {
+                    if(result == undefined) {
+                        currentError.set(new ApplicationError(ErrorIds.create_session, "Password or username is wrong"));
+                    } else {
+                        node.saveUser(username, result);
+                        sendClientLoginRequest();
+                    }
+                });
                 return nodeId;
             })
             return value;
@@ -61,9 +95,9 @@
             value.nodeManager.testNode(host, port, () => {
                 let id = value.nodeManager.addNode(host, port);
                 currentNode.set(id);
-                connectToNode(id);
+                connectToNode();
             }, () => {
-                currentError.set(new ApplicationError(1000, "Error while connecting to the node[" + host + ":" + port + "]"))
+                currentError.set(new ApplicationError(ErrorIds.node_connect, "Error while connecting to the node[" + host + ":" + port + "]"))
             });
             return value;
         })

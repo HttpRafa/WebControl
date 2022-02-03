@@ -34,7 +34,7 @@
     <Icon src={Hashtag} size="18" class="mr-1 ml-1 title-slash" />
     <h5 class='title-text'>{title}</h5>
     <span on:click={changeTheme}>
-        {#if darkMode}
+        {#if $darkMode}
             <Icon src={Sun} class="top-navigation-icon" size="24" />
         {:else}
             <Icon src={Moon} class="top-navigation-icon" size="24" />

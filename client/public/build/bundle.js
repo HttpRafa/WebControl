@@ -41,6 +41,21 @@ var app = (function () {
     function is_empty(obj) {
         return Object.keys(obj).length === 0;
     }
+    function validate_store(store, name) {
+        if (store != null && typeof store.subscribe !== 'function') {
+            throw new Error(`'${name}' is not a store with a 'subscribe' method`);
+        }
+    }
+    function subscribe(store, ...callbacks) {
+        if (store == null) {
+            return noop;
+        }
+        const unsub = store.subscribe(...callbacks);
+        return unsub.unsubscribe ? () => unsub.unsubscribe() : unsub;
+    }
+    function component_subscribe(component, store, callback) {
+        component.$$.on_destroy.push(subscribe(store, callback));
+    }
     function exclude_internal_props(props) {
         const result = {};
         for (const k in props)
@@ -1603,6 +1618,7 @@ var app = (function () {
 
     class NodeConnection {
         constructor(node) {
+            this._packetHandler = [];
             this._node = node;
             this._webSocket = undefined;
         }
@@ -1635,6 +1651,17 @@ var app = (function () {
         handleError(event) {
         }
         handleMessage(event) {
+            let data = JSON.parse(event.data);
+            console.table(data);
+            for (let i = 0; i < this._packetHandler.length; i++) {
+                this._packetHandler[i](data);
+            }
+        }
+        addHandler(handler) {
+            return this._packetHandler.push(handler) - 1;
+        }
+        removeHandler(index) {
+            this._packetHandler.splice(index, 1);
         }
         get node() {
             return this._node;
@@ -1732,6 +1759,31 @@ var app = (function () {
         }
     }
 
+    class PacketOutRequestSession extends Packet {
+        constructor(username, password) {
+            super(2, { username: username, password: password });
+        }
+    }
+
+    class ApplicationError {
+        constructor(id, message) {
+            this._id = id;
+            this._message = message;
+        }
+        get id() {
+            return this._id;
+        }
+        get message() {
+            return this._message;
+        }
+    }
+
+    const ErrorIds = {
+        node_connect: -1,
+        create_session: -2,
+        session_outdated: -3
+    };
+
     class ControlNode {
         constructor(id, host, port, user) {
             this._id = id;
@@ -1757,8 +1809,61 @@ var app = (function () {
                 resolve(1);
             });
         }
+        requestLogin() {
+            return new Promise(resolve => {
+                let handled = false;
+                let handlerId = this._nodeConnection.addHandler(packet => {
+                    if (packet.id == 1) {
+                        // @ts-ignore
+                        let result = packet.document.data.result;
+                        this._nodeConnection.removeHandler(handlerId);
+                        handled = true;
+                        resolve(result ? 1 : 0);
+                    }
+                });
+                this._nodeConnection.sendPacket(new PacketOutLogin(this._user.username, this._user.session));
+                setTimeout(() => {
+                    if (!handled) {
+                        this._nodeConnection.removeHandler(handlerId);
+                        currentError.set(new ApplicationError(ErrorIds.session_outdated, "Session check took to long"));
+                        resolve(-1);
+                    }
+                }, 5000);
+            });
+        }
+        requestLoginSession(username, password, save) {
+            return new Promise(resolve => {
+                let handled = false;
+                let handlerId = this._nodeConnection.addHandler(packet => {
+                    if (packet.id == 2) {
+                        // @ts-ignore
+                        let result = packet.document.data.result;
+                        // @ts-ignore
+                        let session = packet.document.data.session;
+                        this._nodeConnection.removeHandler(handlerId);
+                        handled = true;
+                        resolve(result ? session : undefined);
+                    }
+                });
+                this._nodeConnection.sendPacket(new PacketOutRequestSession(username, password));
+                setTimeout(() => {
+                    if (!handled) {
+                        this._nodeConnection.removeHandler(handlerId);
+                        currentError.set(new ApplicationError(ErrorIds.create_session, "Creating a session took too long"));
+                        resolve(undefined);
+                    }
+                }, 5000);
+            });
+        }
         hasUser() {
             return this._user.exists();
+        }
+        saveUser(username, session) {
+            this._user.set(username, session);
+            networkManager.update(value => {
+                value.nodeManager.storeNodes();
+                return value;
+            });
         }
         get nodeConnection() {
             return this._nodeConnection;
@@ -1797,26 +1902,21 @@ var app = (function () {
         }
     }
 
-    class ApplicationError {
-        constructor(id, message) {
-            this._id = id;
-            this._message = message;
-        }
-        get id() {
-            return this._id;
-        }
-        get message() {
-            return this._message;
-        }
-    }
-
     class ControlUser {
         constructor(username, session) {
             this.username = username;
             this.session = session;
         }
+        set(username, session) {
+            this.username = username;
+            this.session = session;
+        }
+        delete() {
+            this.username = null;
+            this.session = null;
+        }
         exists() {
-            return false;
+            return !(this.username == null && this.session == null);
         }
     }
 
@@ -1829,7 +1929,7 @@ var app = (function () {
                 let node = this.getNodeById(nodeId);
                 node.connect().then(result => {
                     if (result == -1) {
-                        currentError.set(new ApplicationError(1, "Error while connecting to the node[" + node.host + ":" + node.port + "]"));
+                        currentError.set(new ApplicationError(ErrorIds.node_connect, "Error while connecting to the node[" + node.host + ":" + node.port + "]"));
                     }
                     resultCallback(result, node);
                 });
@@ -1840,7 +1940,12 @@ var app = (function () {
             const storedData = window.localStorage.getItem("nodes") ? JSON.parse(window.localStorage.getItem("nodes")) : [];
             for (let i = 0; i < storedData.length; i++) {
                 const storedNode = storedData[i];
-                this._nodes.push(new ControlNode(storedNode.id, storedNode.host, storedNode.port, new ControlUser(storedNode.user.username, storedNode.user.session)));
+                if (storedNode.user == undefined) {
+                    this._nodes.push(new ControlNode(storedNode.id, storedNode.host, storedNode.port, new ControlUser(undefined, undefined)));
+                }
+                else {
+                    this._nodes.push(new ControlNode(storedNode.id, storedNode.host, storedNode.port, new ControlUser(storedNode.user.username, storedNode.user.session)));
+                }
             }
             console.log("Loaded " + this._nodes.length + " Nodes.");
         }
@@ -1896,9 +2001,6 @@ var app = (function () {
         }
         get nodes() {
             return this._nodes;
-        }
-        get connectNode() {
-            return this._connectNode;
         }
     }
 
@@ -1982,7 +2084,7 @@ var app = (function () {
     	return block;
     }
 
-    // (28:8) {#if darkMode}
+    // (28:8) {#if $darkMode}
     function create_if_block$4(ctx) {
     	let icon;
     	let current;
@@ -2023,7 +2125,7 @@ var app = (function () {
     		block,
     		id: create_if_block$4.name,
     		type: "if",
-    		source: "(28:8) {#if darkMode}",
+    		source: "(28:8) {#if $darkMode}",
     		ctx
     	});
 
@@ -2061,11 +2163,11 @@ var app = (function () {
     	const if_blocks = [];
 
     	function select_block_type(ctx, dirty) {
-    		if (darkMode) return 0;
+    		if (/*$darkMode*/ ctx[1]) return 0;
     		return 1;
     	}
 
-    	current_block_type_index = select_block_type();
+    	current_block_type_index = select_block_type(ctx);
     	if_block = if_blocks[current_block_type_index] = if_block_creators[current_block_type_index](ctx);
 
     	icon1 = new Icon({
@@ -2119,13 +2221,37 @@ var app = (function () {
     			current = true;
 
     			if (!mounted) {
-    				dispose = listen_dev(span, "click", /*changeTheme*/ ctx[1], false, false, false);
+    				dispose = listen_dev(span, "click", /*changeTheme*/ ctx[2], false, false, false);
     				mounted = true;
     			}
     		},
     		p: function update(ctx, [dirty]) {
     			if (!current || dirty & /*title*/ 1) set_data_dev(t3, /*title*/ ctx[0]);
-    			if_block.p(ctx, dirty);
+    			let previous_block_index = current_block_type_index;
+    			current_block_type_index = select_block_type(ctx);
+
+    			if (current_block_type_index === previous_block_index) {
+    				if_blocks[current_block_type_index].p(ctx, dirty);
+    			} else {
+    				group_outros();
+
+    				transition_out(if_blocks[previous_block_index], 1, 1, () => {
+    					if_blocks[previous_block_index] = null;
+    				});
+
+    				check_outros();
+    				if_block = if_blocks[current_block_type_index];
+
+    				if (!if_block) {
+    					if_block = if_blocks[current_block_type_index] = if_block_creators[current_block_type_index](ctx);
+    					if_block.c();
+    				} else {
+    					if_block.p(ctx, dirty);
+    				}
+
+    				transition_in(if_block, 1);
+    				if_block.m(span, null);
+    			}
     		},
     		i: function intro(local) {
     			if (current) return;
@@ -2167,6 +2293,9 @@ var app = (function () {
     }
 
     function instance$6($$self, $$props, $$invalidate) {
+    	let $darkMode;
+    	validate_store(darkMode, 'darkMode');
+    	component_subscribe($$self, darkMode, $$value => $$invalidate(1, $darkMode = $$value));
     	let { $$slots: slots = {}, $$scope } = $$props;
     	validate_slots('TopNavigation', slots, []);
     	let { title } = $$props;
@@ -2205,7 +2334,8 @@ var app = (function () {
     		darkMode,
     		title,
     		changeTheme,
-    		update
+    		update,
+    		$darkMode
     	});
 
     	$$self.$inject_state = $$props => {
@@ -2216,7 +2346,7 @@ var app = (function () {
     		$$self.$inject_state($$props.$$inject);
     	}
 
-    	return [title, changeTheme];
+    	return [title, $darkMode, changeTheme];
     }
 
     class TopNavigation extends SvelteComponentDev {
@@ -2474,7 +2604,7 @@ var app = (function () {
     /* src\components\LoginContent.svelte generated by Svelte v3.46.3 */
     const file$3 = "src\\components\\LoginContent.svelte";
 
-    // (54:32) {:else}
+    // (66:32) {:else}
     function create_else_block$2(ctx) {
     	let icon;
     	let current;
@@ -2516,14 +2646,14 @@ var app = (function () {
     		block,
     		id: create_else_block$2.name,
     		type: "else",
-    		source: "(54:32) {:else}",
+    		source: "(66:32) {:else}",
     		ctx
     	});
 
     	return block;
     }
 
-    // (52:32) {#if siteState}
+    // (64:32) {#if siteState}
     function create_if_block$3(ctx) {
     	let icon;
     	let current;
@@ -2565,7 +2695,7 @@ var app = (function () {
     		block,
     		id: create_if_block$3.name,
     		type: "if",
-    		source: "(52:32) {#if siteState}",
+    		source: "(64:32) {#if siteState}",
     		ctx
     	});
 
@@ -2687,18 +2817,18 @@ var app = (function () {
     			attr_dev(img, "class", "mx-auto h-24 w-24");
     			if (!src_url_equal(img.src, img_src_value = "/images/logo512.png")) attr_dev(img, "src", img_src_value);
     			attr_dev(img, "alt", "Workflow");
-    			add_location(img, file$3, 12, 20, 478);
+    			add_location(img, file$3, 24, 20, 829);
     			attr_dev(h2, "class", "text-center text-3xl font-extrabold text-gray-900 dark:text-gray-300");
-    			add_location(h2, file$3, 13, 20, 573);
+    			add_location(h2, file$3, 25, 20, 924);
     			attr_dev(span0, "class", "cursor-pointer font-medium dark:text-indigo-400 text-indigo-600 hover:text-indigo-500");
-    			add_location(span0, file$3, 14, 96, 778);
+    			add_location(span0, file$3, 26, 96, 1129);
     			attr_dev(p, "class", "mt-2 text-center text-sm text-gray-600 dark:text-gray-400");
-    			add_location(p, file$3, 14, 20, 702);
-    			add_location(div0, file$3, 11, 16, 451);
+    			add_location(p, file$3, 26, 20, 1053);
+    			add_location(div0, file$3, 23, 16, 802);
     			attr_dev(input0, "type", "hidden");
     			attr_dev(input0, "name", "remember");
     			attr_dev(input0, "defaultvalue", "true");
-    			add_location(input0, file$3, 25, 20, 1414);
+    			add_location(input0, file$3, 37, 20, 1765);
     			attr_dev(input1, "id", "loginUsernameInput");
     			attr_dev(input1, "name", "loginUsernameInput");
     			attr_dev(input1, "type", "text");
@@ -2706,8 +2836,8 @@ var app = (function () {
     			input1.required = true;
     			attr_dev(input1, "class", "appearance-none rounded-none relative block w-full px-3 py-2 border bg-gray-white dark:bg-gray-800 dark:border-gray-700 border-gray-300 dark:placeholder-gray-600 placeholder-gray-400 dark:text-gray-300 text-gray-500 rounded-t-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 focus:z-10 sm:text-sm");
     			attr_dev(input1, "placeholder", "Username");
-    			add_location(input1, file$3, 28, 28, 1602);
-    			add_location(div1, file$3, 27, 24, 1567);
+    			add_location(input1, file$3, 40, 28, 1953);
+    			add_location(div1, file$3, 39, 24, 1918);
     			attr_dev(input2, "id", "loginPasswordInput");
     			attr_dev(input2, "name", "loginPasswordInput");
     			attr_dev(input2, "type", "password");
@@ -2715,44 +2845,44 @@ var app = (function () {
     			input2.required = true;
     			attr_dev(input2, "class", "appearance-none rounded-none relative block w-full px-3 py-2 border bg-gray-white dark:bg-gray-800 dark:border-gray-700 border-gray-300 dark:placeholder-gray-600 placeholder-gray-400 dark:text-gray-300 text-gray-500 rounded-b-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 focus:z-10 sm:text-sm");
     			attr_dev(input2, "placeholder", "Password");
-    			add_location(input2, file$3, 31, 28, 2141);
-    			add_location(div2, file$3, 30, 24, 2106);
+    			add_location(input2, file$3, 43, 28, 2492);
+    			add_location(div2, file$3, 42, 24, 2457);
     			attr_dev(div3, "class", "rounded-md shadow-sm -space-y-px");
-    			add_location(div3, file$3, 26, 20, 1495);
+    			add_location(div3, file$3, 38, 20, 1846);
     			attr_dev(input3, "id", "remember-me");
     			attr_dev(input3, "name", "remember-me");
     			attr_dev(input3, "type", "checkbox");
     			attr_dev(input3, "class", "h-4 w-4 text-indigo-600 bg-white dark:bg-gray-500 focus:ring-indigo-500 border-gray-300 rounded");
-    			add_location(input3, file$3, 37, 28, 2821);
+    			add_location(input3, file$3, 49, 28, 3172);
     			attr_dev(label, "for", "remember-me");
     			attr_dev(label, "class", "ml-2 block text-sm dark:text-gray-300 text-gray-500");
-    			add_location(label, file$3, 38, 28, 3015);
+    			add_location(label, file$3, 50, 28, 3366);
     			attr_dev(div4, "class", "flex items-center");
-    			add_location(div4, file$3, 36, 24, 2760);
+    			add_location(div4, file$3, 48, 24, 3111);
     			attr_dev(span1, "class", "cursor-pointer font-medium dark:text-indigo-400 text-indigo-600 hover:text-indigo-500");
-    			add_location(span1, file$3, 44, 28, 3294);
+    			add_location(span1, file$3, 56, 28, 3645);
     			attr_dev(div5, "class", "text-sm");
-    			add_location(div5, file$3, 43, 24, 3243);
+    			add_location(div5, file$3, 55, 24, 3594);
     			attr_dev(div6, "class", "flex items-center justify-between");
-    			add_location(div6, file$3, 35, 20, 2687);
+    			add_location(div6, file$3, 47, 20, 3038);
     			attr_dev(span2, "class", "absolute left-0 inset-y-0 flex items-center pl-3");
-    			add_location(span2, file$3, 50, 28, 3825);
+    			add_location(span2, file$3, 62, 28, 4176);
     			attr_dev(button, "type", "submit");
     			attr_dev(button, "class", "group relative w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500");
-    			add_location(button, file$3, 49, 24, 3537);
-    			add_location(div7, file$3, 48, 20, 3506);
+    			add_location(button, file$3, 61, 24, 3888);
+    			add_location(div7, file$3, 60, 20, 3857);
     			attr_dev(form, "class", "mt-8 space-y-6");
     			attr_dev(form, "action", "#");
     			attr_dev(form, "method", "POST");
-    			add_location(form, file$3, 16, 16, 941);
+    			add_location(form, file$3, 28, 16, 1292);
     			attr_dev(div8, "class", "max-w-md w-full space-y-8");
-    			add_location(div8, file$3, 10, 12, 394);
+    			add_location(div8, file$3, 22, 12, 745);
     			attr_dev(div9, "class", "mt-9 flex justify-center py-12 px-4 sm:px-6 lg:px-8");
-    			add_location(div9, file$3, 9, 8, 315);
+    			add_location(div9, file$3, 21, 8, 666);
     			attr_dev(div10, "class", "content-list");
-    			add_location(div10, file$3, 8, 4, 279);
+    			add_location(div10, file$3, 20, 4, 630);
     			attr_dev(div11, "class", "content-container");
-    			add_location(div11, file$3, 6, 0, 204);
+    			add_location(div11, file$3, 18, 0, 555);
     		},
     		l: function claim(nodes) {
     			throw new Error("options.hydrate only works if the component was compiled with the `hydratable: true` option");
@@ -2867,6 +2997,17 @@ var app = (function () {
     function instance$3($$self, $$props, $$invalidate) {
     	let { $$slots: slots = {}, $$scope } = $$props;
     	validate_slots('LoginContent', slots, []);
+
+    	onMount(() => {
+    		currentError.subscribe(value => {
+    			if (value != undefined) {
+    				if (value.id == ErrorIds.create_session) {
+    					$$invalidate(1, siteState = false);
+    				}
+    			}
+    		});
+    	});
+
     	let { submitCallback } = $$props;
     	let siteState = false;
     	const writable_props = ['submitCallback'];
@@ -2893,6 +3034,9 @@ var app = (function () {
     		Icon,
     		LockClosed,
     		Refresh,
+    		onMount,
+    		currentError,
+    		ErrorIds,
     		submitCallback,
     		siteState
     	});
@@ -2941,7 +3085,7 @@ var app = (function () {
     /* src\components\AddNodeContent.svelte generated by Svelte v3.46.3 */
     const file$2 = "src\\components\\AddNodeContent.svelte";
 
-    // (53:32) {:else}
+    // (54:32) {:else}
     function create_else_block$1(ctx) {
     	let icon;
     	let current;
@@ -2983,14 +3127,14 @@ var app = (function () {
     		block,
     		id: create_else_block$1.name,
     		type: "else",
-    		source: "(53:32) {:else}",
+    		source: "(54:32) {:else}",
     		ctx
     	});
 
     	return block;
     }
 
-    // (51:32) {#if siteState}
+    // (52:32) {#if siteState}
     function create_if_block$2(ctx) {
     	let icon;
     	let current;
@@ -3032,7 +3176,7 @@ var app = (function () {
     		block,
     		id: create_if_block$2.name,
     		type: "if",
-    		source: "(51:32) {#if siteState}",
+    		source: "(52:32) {#if siteState}",
     		ctx
     	});
 
@@ -3122,16 +3266,16 @@ var app = (function () {
     			attr_dev(img, "class", "mx-auto h-24 w-24");
     			if (!src_url_equal(img.src, img_src_value = "/images/logo512.png")) attr_dev(img, "src", img_src_value);
     			attr_dev(img, "alt", "Workflow");
-    			add_location(img, file$2, 23, 20, 761);
+    			add_location(img, file$2, 24, 20, 826);
     			attr_dev(h2, "class", "text-center text-3xl font-extrabold text-gray-900 dark:text-gray-300");
-    			add_location(h2, file$2, 24, 20, 856);
+    			add_location(h2, file$2, 25, 20, 921);
     			attr_dev(p, "class", "mt-2 text-center text-sm text-gray-600 dark:text-gray-400");
-    			add_location(p, file$2, 25, 20, 972);
-    			add_location(div0, file$2, 22, 16, 734);
+    			add_location(p, file$2, 26, 20, 1037);
+    			add_location(div0, file$2, 23, 16, 799);
     			attr_dev(input0, "type", "hidden");
     			attr_dev(input0, "name", "remember");
     			attr_dev(input0, "defaultvalue", "true");
-    			add_location(input0, file$2, 38, 20, 1626);
+    			add_location(input0, file$2, 39, 20, 1691);
     			attr_dev(input1, "id", "nodeServerAddressInput");
     			attr_dev(input1, "name", "nodeServerAddressInput");
     			attr_dev(input1, "type", "text");
@@ -3139,8 +3283,8 @@ var app = (function () {
     			input1.required = true;
     			attr_dev(input1, "class", "appearance-none rounded-none relative block w-full px-3 py-2 border bg-gray-white dark:bg-gray-800 dark:border-gray-700 border-gray-300 dark:placeholder-gray-600 placeholder-gray-400 dark:text-gray-300 text-gray-500 rounded-t-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 focus:z-10 sm:text-sm");
     			attr_dev(input1, "placeholder", "Server address");
-    			add_location(input1, file$2, 41, 28, 1814);
-    			add_location(div1, file$2, 40, 24, 1779);
+    			add_location(input1, file$2, 42, 28, 1879);
+    			add_location(div1, file$2, 41, 24, 1844);
     			attr_dev(input2, "id", "nodePortInput");
     			attr_dev(input2, "name", "nodePortInput");
     			attr_dev(input2, "type", "number");
@@ -3148,28 +3292,28 @@ var app = (function () {
     			input2.required = true;
     			attr_dev(input2, "class", "appearance-none rounded-none relative block w-full px-3 py-2 border bg-gray-white dark:bg-gray-800 dark:border-gray-700 border-gray-300 dark:placeholder-gray-600 placeholder-gray-400 dark:text-gray-300 text-gray-500 rounded-b-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 focus:z-10 sm:text-sm");
     			attr_dev(input2, "placeholder", "Port");
-    			add_location(input2, file$2, 44, 28, 2367);
-    			add_location(div2, file$2, 43, 24, 2332);
+    			add_location(input2, file$2, 45, 28, 2432);
+    			add_location(div2, file$2, 44, 24, 2397);
     			attr_dev(div3, "class", "rounded-md shadow-sm -space-y-px");
-    			add_location(div3, file$2, 39, 20, 1707);
+    			add_location(div3, file$2, 40, 20, 1772);
     			attr_dev(span, "class", "absolute left-0 inset-y-0 flex items-center pl-3");
-    			add_location(span, file$2, 49, 28, 3202);
+    			add_location(span, file$2, 50, 28, 3267);
     			attr_dev(button, "type", "submit");
     			attr_dev(button, "class", "group relative w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500");
-    			add_location(button, file$2, 48, 24, 2914);
-    			add_location(div4, file$2, 47, 20, 2883);
+    			add_location(button, file$2, 49, 24, 2979);
+    			add_location(div4, file$2, 48, 20, 2948);
     			attr_dev(form, "class", "mt-8 space-y-6");
     			attr_dev(form, "action", "#");
     			attr_dev(form, "method", "POST");
-    			add_location(form, file$2, 29, 16, 1202);
+    			add_location(form, file$2, 30, 16, 1267);
     			attr_dev(div5, "class", "max-w-md w-full space-y-8");
-    			add_location(div5, file$2, 21, 12, 677);
+    			add_location(div5, file$2, 22, 12, 742);
     			attr_dev(div6, "class", "mt-9 flex justify-center py-12 px-4 sm:px-6 lg:px-8");
-    			add_location(div6, file$2, 20, 8, 598);
+    			add_location(div6, file$2, 21, 8, 663);
     			attr_dev(div7, "class", "content-list");
-    			add_location(div7, file$2, 19, 4, 562);
+    			add_location(div7, file$2, 20, 4, 627);
     			attr_dev(div8, "class", "content-container");
-    			add_location(div8, file$2, 17, 0, 488);
+    			add_location(div8, file$2, 18, 0, 553);
     		},
     		l: function claim(nodes) {
     			throw new Error("options.hydrate only works if the component was compiled with the `hydratable: true` option");
@@ -3276,7 +3420,7 @@ var app = (function () {
     	onMount(() => {
     		currentError.subscribe(value => {
     			if (value != undefined) {
-    				if (value.id == 1000) {
+    				if (value.id == ErrorIds.node_connect) {
     					$$invalidate(1, siteState = false);
     				}
     			}
@@ -3311,6 +3455,7 @@ var app = (function () {
     		LockClosed,
     		onMount,
     		currentError,
+    		ErrorIds,
     		submitCallback,
     		siteState
     	});
@@ -3798,7 +3943,7 @@ var app = (function () {
     const { console: console_1 } = globals;
     const file = "src\\App.svelte";
 
-    // (74:41) 
+    // (109:41) 
     function create_if_block_4(ctx) {
     	let addnodecontent;
     	let current;
@@ -3835,14 +3980,14 @@ var app = (function () {
     		block,
     		id: create_if_block_4.name,
     		type: "if",
-    		source: "(74:41) ",
+    		source: "(109:41) ",
     		ctx
     	});
 
     	return block;
     }
 
-    // (72:42) 
+    // (107:42) 
     function create_if_block_3(ctx) {
     	let registercontent;
     	let current;
@@ -3875,14 +4020,14 @@ var app = (function () {
     		block,
     		id: create_if_block_3.name,
     		type: "if",
-    		source: "(72:42) ",
+    		source: "(107:42) ",
     		ctx
     	});
 
     	return block;
     }
 
-    // (70:39) 
+    // (105:39) 
     function create_if_block_2(ctx) {
     	let logincontent;
     	let current;
@@ -3919,14 +4064,14 @@ var app = (function () {
     		block,
     		id: create_if_block_2.name,
     		type: "if",
-    		source: "(70:39) ",
+    		source: "(105:39) ",
     		ctx
     	});
 
     	return block;
     }
 
-    // (68:41) 
+    // (103:41) 
     function create_if_block_1(ctx) {
     	let loadingcontent;
     	let current;
@@ -3959,14 +4104,14 @@ var app = (function () {
     		block,
     		id: create_if_block_1.name,
     		type: "if",
-    		source: "(68:41) ",
+    		source: "(103:41) ",
     		ctx
     	});
 
     	return block;
     }
 
-    // (66:4) {#if sideId === PageIds.home}
+    // (101:4) {#if sideId === PageIds.home}
     function create_if_block(ctx) {
     	let homecontent;
     	let current;
@@ -3999,7 +4144,7 @@ var app = (function () {
     		block,
     		id: create_if_block.name,
     		type: "if",
-    		source: "(66:4) {#if sideId === PageIds.home}",
+    		source: "(101:4) {#if sideId === PageIds.home}",
     		ctx
     	});
 
@@ -4045,7 +4190,7 @@ var app = (function () {
     			t = space();
     			if (if_block) if_block.c();
     			attr_dev(main, "class", "flex");
-    			add_location(main, file, 63, 0, 2198);
+    			add_location(main, file, 98, 0, 3641);
     		},
     		l: function claim(nodes) {
     			throw new Error("options.hydrate only works if the component was compiled with the `hydratable: true` option");
@@ -4149,13 +4294,15 @@ var app = (function () {
     		return value;
     	});
 
-    	function connectToNode(id) {
+    	function connectToNode() {
     		$$invalidate(0, sideId = PageIds.loading);
 
     		networkManager.update(manager => {
     			manager.nodeManager.connect((result, node) => {
     				if (result == 1) {
-    					if (node.hasUser()) ; else {
+    					if (node.hasUser()) {
+    						sendClientLoginRequest();
+    					} else {
     						$$invalidate(0, sideId = PageIds.login);
     					}
     				}
@@ -4165,12 +4312,48 @@ var app = (function () {
     		});
     	}
 
+    	function sendClientLoginRequest() {
+    		$$invalidate(0, sideId = PageIds.loading);
+
+    		networkManager.update(value => {
+    			currentNode.update(nodeId => {
+    				let node = value.nodeManager.getNodeById(nodeId);
+
+    				node.requestLogin().then(result => {
+    					if (result == 1) {
+    						$$invalidate(0, sideId = PageIds.home);
+    					} else if (result == 0) {
+    						node.user.delete(); // TODO: Load applications and currentApplication
+    						currentError.set(new ApplicationError(ErrorIds.session_outdated, "Your session is out of date or has errors, please log in again."));
+    						$$invalidate(0, sideId = PageIds.login);
+    					} else {
+    						$$invalidate(0, sideId = PageIds.login);
+    					}
+    				});
+
+    				return nodeId;
+    			});
+
+    			return value;
+    		});
+    	}
+
     	function requestLogin(username, password, checked) {
     		console.log("Try to create login session for user[" + username + "].");
 
     		networkManager.update(value => {
     			currentNode.update(nodeId => {
-    				value.nodeManager.getNodeById(nodeId);
+    				let node = value.nodeManager.getNodeById(nodeId);
+
+    				node.requestLoginSession(username, password, checked).then(result => {
+    					if (result == undefined) {
+    						currentError.set(new ApplicationError(ErrorIds.create_session, "Password or username is wrong"));
+    					} else {
+    						node.saveUser(username, result);
+    						sendClientLoginRequest();
+    					}
+    				});
+
     				return nodeId;
     			});
 
@@ -4191,7 +4374,7 @@ var app = (function () {
     					connectToNode();
     				},
     				() => {
-    					currentError.set(new ApplicationError(1000, "Error while connecting to the node[" + host + ":" + port + "]"));
+    					currentError.set(new ApplicationError(ErrorIds.node_connect, "Error while connecting to the node[" + host + ":" + port + "]"));
     				}
     			);
 
@@ -4217,8 +4400,10 @@ var app = (function () {
     		currentError,
     		currentNode,
     		networkManager,
+    		ErrorIds,
     		sideId,
     		connectToNode,
+    		sendClientLoginRequest,
     		requestLogin,
     		addNode
     	});

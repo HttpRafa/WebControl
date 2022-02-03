@@ -1,6 +1,5 @@
 package net.rafael.web.control.network
 
-import com.google.gson.Gson
 import com.google.gson.GsonBuilder
 import net.rafael.web.control.WebControl
 import net.rafael.web.control.console.text.TextHighlighter
@@ -10,6 +9,9 @@ import net.rafael.web.control.network.client.ClientHandler
 import org.java_websocket.handshake.ClientHandshake
 import net.rafael.web.control.network.client.Client
 import net.rafael.web.control.network.packet.Packet
+import net.rafael.web.control.network.packet.PacketHandler
+import net.rafael.web.control.network.packet.`in`.PacketInLogin
+import net.rafael.web.control.network.packet.`in`.PacketInRequestSession
 import net.rafael.web.control.network.packet.out.PacketOutWelcome
 import net.rafael.web.control.user.User
 import org.java_websocket.WebSocket
@@ -25,9 +27,15 @@ import java.lang.Exception
 
 class NetworkServer(address: InetSocketAddress?) : WebSocketServer(address) {
 
-    private val gson: Gson = GsonBuilder().create()
+    private val gson = GsonBuilder().create()
 
-    private val clientHandler: ClientHandler = ClientHandler()
+    private val clientHandler = ClientHandler()
+    private val packetHandler = PacketHandler();
+
+    init {
+        packetHandler.register(PacketInRequestSession())
+        packetHandler.register(PacketInLogin())
+    }
 
     override fun onOpen(connection: WebSocket, handshake: ClientHandshake) {
         val client = Client(connection)
@@ -52,9 +60,11 @@ class NetworkServer(address: InetSocketAddress?) : WebSocketServer(address) {
         WebControl.logger.debug("[Network] PacketIn -> " + TextHighlighter.highlightJson(message))
         val client = clientHandler.getByConnection(connection)
         if (client.isPresent) {
-            val user: User? = client.get().user
-            if(user != null) {
-
+            try {
+                val packet = gson.fromJson(message, Packet::class.java)
+                this.packetHandler.handle(client.get(), packet)
+            } catch(exception: Exception) {
+                WebControl.logger.error(exception);
             }
         }
     }

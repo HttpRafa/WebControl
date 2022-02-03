@@ -1,5 +1,7 @@
 package net.rafael.web.control.network.packet
 
+import net.rafael.web.control.network.client.Client
+
 //------------------------------
 //
 // This class was developed by Rafael K.
@@ -9,7 +11,7 @@ package net.rafael.web.control.network.packet
 //------------------------------
 interface IPacketHandler {
 
-    fun handle(packet: Packet)
+    fun handle(client: Client, packet: Packet)
 
     val packetId: Int
 

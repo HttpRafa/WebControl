@@ -4,11 +4,12 @@
     import {onMount} from "svelte";
 
     import {currentError} from "../js/Store";
+    import {ErrorIds} from "../js/ids/ErrorIds";
 
     onMount(() => {
        currentError.subscribe(value => {
            if(value != undefined) {
-               if(value.id == 1000) {
+               if(value.id == ErrorIds.node_connect) {
                     siteState = false;
                }
            }

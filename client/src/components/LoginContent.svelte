@@ -1,6 +1,19 @@
 <script lang="ts">
     import TopNavigation from "./top/TopNavigation.svelte";
     import {Icon, LockClosed, Refresh} from "svelte-hero-icons";
+    import {onMount} from "svelte";
+    import {currentError} from "../js/Store";
+    import {ErrorIds} from "../js/ids/ErrorIds";
+
+    onMount(() => {
+        currentError.subscribe(value => {
+            if(value != undefined) {
+                if(value.id == ErrorIds.create_session) {
+                    siteState = false;
+                }
+            }
+        })
+    });
 
     export let submitCallback;
 
