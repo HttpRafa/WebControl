@@ -1,5 +1,5 @@
 <script lang="ts">
-    import TopNavigation from "../top/TopNavigation.svelte";
+    import TopNavigation from "./top/TopNavigation.svelte";
     import {Icon, LockClosed, Refresh} from "svelte-hero-icons";
 
     let iconState = false;

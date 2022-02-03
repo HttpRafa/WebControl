@@ -23,9 +23,32 @@ export class NodeConnection {
         }
     }
 
-    createConnection() {
-        this.closeConnection();
-        this._webSocket = new WebSocket("ws://" + this._node.host + ":" + this._node.port);
+    createConnection(): Promise<number> {
+        return new Promise<number>(resolve => {
+            this.closeConnection();
+            this._webSocket = new WebSocket("ws://" + this._node.host + ":" + this._node.port);
+            this._webSocket.addEventListener('open', event => {
+                resolve(1);
+            });
+            this._webSocket.addEventListener('error', event => {
+                resolve(-1);
+            });
+            this._webSocket.addEventListener('open', ev => {this.handleOpen(ev)})
+            this._webSocket.addEventListener('error', ev => {this.handleError(ev)})
+            this._webSocket.addEventListener('message', ev => {this.handleMessage(ev)})
+        });
+    }
+
+    handleOpen(event: Event) {
+
+    }
+
+    handleError(event: Event) {
+
+    }
+
+    handleMessage(event: Event) {
+
     }
 
     get node(): ControlNode {

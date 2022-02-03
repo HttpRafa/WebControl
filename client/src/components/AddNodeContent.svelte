@@ -1,8 +1,9 @@
 <script lang="ts">
-    import TopNavigation from "../top/TopNavigation.svelte";
+    import TopNavigation from "./top/TopNavigation.svelte";
     import { Icon, Refresh, LockClosed } from "svelte-hero-icons";
     import {onMount} from "svelte";
-    import {currentError} from "../store";
+
+    import {currentError} from "../js/Store";
 
     onMount(() => {
        currentError.subscribe(value => {

@@ -1,6 +1,8 @@
 import {NodeConnection} from "../connection/NodeConnection";
 import {PacketOutLogin} from "../packet/out/PacketOutLogin";
 
+import type {ControlUser} from "../user/ControlUser";
+
 export class ControlNode {
 
     private _id: number
@@ -9,23 +11,20 @@ export class ControlNode {
     private _port: number
 
     private _nodeConnection: NodeConnection
+    private _user: ControlUser;
 
-    private _username: string = undefined;
-    private _session: string = undefined;
-
-    constructor(id: number, host: string, port: number, username: string, session: string) {
+    constructor(id: number, host: string, port: number, user: ControlUser) {
         this._id = id;
         this._host = host;
         this._port = port;
-        this._username = username;
-        this._session = session;
+        this._user = user;
     }
 
-    connect() {
+    connect(): Promise<number> {
         if(this._nodeConnection == undefined) {
             this._nodeConnection = new NodeConnection(this);
         }
-        this._nodeConnection.createConnection();
+        return this._nodeConnection.createConnection();
     }
 
     destroyConnection() {
@@ -37,13 +36,13 @@ export class ControlNode {
 
     login(): Promise<number> {
         return new Promise(resolve => {
-            this._nodeConnection.sendPacket(new PacketOutLogin(this._username, this._session));
+            this._nodeConnection.sendPacket(new PacketOutLogin(this._user.username, this._user.session));
             resolve(1);
         });
     }
 
-    isLoggedIn() {
-        return this._username == undefined && this._session == undefined;
+    hasUser(): boolean {
+        return this._user.exists();
     }
 
     get nodeConnection(): NodeConnection {
@@ -66,20 +65,12 @@ export class ControlNode {
         this._port = value;
     }
 
-    get username(): string {
-        return this._username;
+    get user(): ControlUser {
+        return this._user;
     }
 
-    set username(value: string) {
-        this._username = value;
-    }
-
-    get session(): string {
-        return this._session;
-    }
-
-    set session(value: string) {
-        this._session = value;
+    set user(value: ControlUser) {
+        this._user = value;
     }
 
     get id(): number {
@@ -99,15 +90,13 @@ export class StoredControlNode {
     host: string
     port: number
 
-    username: string
-    session: string
+    user: ControlUser
 
-    constructor(id: number, host: string, port: number, username: string, session: string) {
+    constructor(id: number, host: string, port: number, user: ControlUser) {
         this.id = id;
         this.host = host;
         this.port = port;
-        this.username = username;
-        this.session = session;
+        this.user = user;
     }
 
 }

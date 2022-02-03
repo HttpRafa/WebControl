@@ -1,7 +1,8 @@
 <script lang="ts">
     import {Icon, Moon, Sun, Hashtag, UserCircle} from "svelte-hero-icons";
-    import {darkMode} from "../store";
     import {onMount} from "svelte";
+
+    import {darkMode} from "../../js/Store";
 
     export let title: string;
 

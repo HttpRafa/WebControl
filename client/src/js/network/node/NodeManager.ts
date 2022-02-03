@@ -1,5 +1,7 @@
 import {ControlNode, StoredControlNode} from "./ControlNode";
-import {writable} from "svelte/store";
+import {currentError, currentNode} from "../../Store";
+import {ApplicationError} from "../../ApplicationError";
+import {ControlUser} from "../user/ControlUser";
 
 export class NodeManager {
 
@@ -10,16 +12,16 @@ export class NodeManager {
         this._nodes = [];
     }
 
-    connect(node: ControlNode): Promise<number> {
-        return new Promise<number>(resolve => {
-            node.connect();
-            node.nodeConnection.webSocket.onopen = event => {
-                this._connectNode = node;
-                resolve(1);
-            };
-            node.nodeConnection.webSocket.onerror = event => {
-                resolve(-1);
-            }
+    connect(resultCallback: (result: number, node: ControlNode) => void) {
+        currentNode.update(nodeId => {
+            let node = this.getNodeById(nodeId);
+            node.connect().then(result => {
+                if(result == -1) {
+                    currentError.set(new ApplicationError(1, "Error while connecting to the node[" + node.host + ":" + node.port + "]"));
+                }
+                resultCallback(result, node);
+            });
+            return nodeId;
         });
     }
 
@@ -27,7 +29,7 @@ export class NodeManager {
         const storedData: Array<StoredControlNode> = window.localStorage.getItem("nodes") ? JSON.parse(window.localStorage.getItem("nodes")) : [];
         for (let i = 0; i < storedData.length; i++) {
             const storedNode = storedData[i];
-            this._nodes.push(new ControlNode(storedNode.id, storedNode.host, storedNode.port, storedNode.username, storedNode.session));
+            this._nodes.push(new ControlNode(storedNode.id, storedNode.host, storedNode.port, new ControlUser(storedNode.user.username, storedNode.user.session)));
         }
         console.log("Loaded " + this._nodes.length + " Nodes.");
     }
@@ -36,15 +38,18 @@ export class NodeManager {
         const storedData: Array<StoredControlNode> = [];
         for (let i = 0; i < this._nodes.length; i++) {
             let node = this._nodes[i];
-            storedData.push(new StoredControlNode(node.id, node.host, node.port, node.username, node.session));
+            storedData.push(new StoredControlNode(node.id, node.host, node.port, node.user));
         }
         window.localStorage.setItem("nodes", JSON.stringify(storedData));
     }
 
-    addNode(host: string, port: number) {
+    addNode(host: string, port: number): number {
+        const id = this.findNewId();
+
         console.log("Added node[" + host + ":" + port + "]")
-        this._nodes.push(new ControlNode(this.findNewId(), host, port, undefined, undefined));
+        this._nodes.push(new ControlNode(id, host, port, new ControlUser(undefined, undefined)));
         this.storeNodes();
+        return id;
     }
 
     getNodeById(id: number): ControlNode {
@@ -95,9 +100,3 @@ export class NodeManager {
     }
 
 }
-
-export const currentNode = writable(window.localStorage.getItem("currentNode") ? Number(JSON.parse(window.localStorage.getItem("currentNode"))) : 0);
-
-currentNode.subscribe(value => {
-    window.localStorage.setItem("currentNode", JSON.stringify(value));
-})

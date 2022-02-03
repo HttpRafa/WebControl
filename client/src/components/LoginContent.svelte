@@ -1,8 +1,10 @@
 <script lang="ts">
-    import TopNavigation from "../top/TopNavigation.svelte";
-    import { Icon, Refresh } from "svelte-hero-icons";
+    import TopNavigation from "./top/TopNavigation.svelte";
+    import {Icon, LockClosed, Refresh} from "svelte-hero-icons";
 
-    let iconState = false;
+    export let submitCallback;
+
+    let siteState = false;
 </script>
 
 <div class='content-container'>
@@ -18,7 +20,11 @@
                 <form class="mt-8 space-y-6" action="#" method="POST" on:submit={function(event) {
                     event.preventDefault();
 
-                    iconState = true;
+                    if(!siteState) {
+                        submitCallback(document.getElementById("loginUsernameInput").value, document.getElementById("loginPasswordInput").value, document.getElementById("remember-me").checked);
+
+                        siteState = true;
+                    }
                 }}>
                     <input type="hidden" name="remember" defaultValue="true" />
                     <div class="rounded-md shadow-sm -space-y-px">
@@ -46,10 +52,10 @@
                     <div>
                         <button type="submit" class="group relative w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
                             <span class="absolute left-0 inset-y-0 flex items-center pl-3">
-                                {#if iconState}
+                                {#if siteState}
                                     <Icon src={Refresh} size="19" class="h-5 w-5 text-indigo-500 group-hover:text-indigo-400 service-button-loading" aria-hidden="true" />
                                 {:else}
-                                    <Icon src={Refresh} size="19" class="h-5 w-5 text-indigo-500 group-hover:text-indigo-400" aria-hidden="true" />
+                                    <Icon src={LockClosed} size="19" class="h-5 w-5 text-indigo-500 group-hover:text-indigo-400" aria-hidden="true" />
                                 {/if}
                             </span>Login
                         </button>
