@@ -1,8 +1,22 @@
 <script lang="ts">
     import TopNavigation from "../top/TopNavigation.svelte";
     import { Icon, Refresh, LockClosed } from "svelte-hero-icons";
+    import {onMount} from "svelte";
+    import {currentError} from "../store";
 
-    let iconState = false;
+    onMount(() => {
+       currentError.subscribe(value => {
+           if(value != undefined) {
+               if(value.id == 1000) {
+                    siteState = false;
+               }
+           }
+       })
+    });
+
+    export let submitCallback;
+
+    let siteState = false;
 </script>
 
 <div class='content-container'>
@@ -20,7 +34,11 @@
                 <form class="mt-8 space-y-6" action="#" method="POST" on:submit={function(event) {
                     event.preventDefault();
 
-                    iconState = true;
+                    if(!siteState) {
+                        submitCallback(document.getElementById("nodeServerAddressInput").value, document.getElementById("nodePortInput").value);
+
+                        siteState = true;
+                    }
                 }}>
                     <input type="hidden" name="remember" defaultValue="true" />
                     <div class="rounded-md shadow-sm -space-y-px">
@@ -34,7 +52,7 @@
                     <div>
                         <button type="submit" class="group relative w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
                             <span class="absolute left-0 inset-y-0 flex items-center pl-3">
-                                {#if iconState}
+                                {#if siteState}
                                     <Icon src={Refresh} size="19" class="h-5 w-5 text-indigo-500 group-hover:text-indigo-400 service-button-loading" aria-hidden="true" />
                                 {:else}
                                     <Icon src={LockClosed} size="19" class="h-5 w-5 text-indigo-500 group-hover:text-indigo-400" aria-hidden="true" />
