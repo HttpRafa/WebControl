@@ -7,6 +7,8 @@ export class NodeConnection {
 
     private _webSocket: WebSocket
 
+    private _packetHandler: ((packet: Packet) => void)[] = [];
+
     constructor(node: ControlNode) {
         this._node = node;
         this._webSocket = undefined;
@@ -47,8 +49,20 @@ export class NodeConnection {
 
     }
 
-    handleMessage(event: Event) {
+    handleMessage(event: MessageEvent) {
+        let data: Packet = JSON.parse(event.data);
+        console.table(data);
+        for (let i = 0; i < this._packetHandler.length; i++) {
+            this._packetHandler[i](data);
+        }
+    }
 
+    addHandler(handler: (packet: Packet) => void): number {
+        return this._packetHandler.push(handler) - 1;
+    }
+
+    removeHandler(index: number) {
+        this._packetHandler.splice(index, 1);
     }
 
     get node(): ControlNode {

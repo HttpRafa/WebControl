@@ -8,8 +8,18 @@ export class ControlUser {
         this.session = session;
     }
 
+    set(username: string, session: string) {
+        this.username = username;
+        this.session = session;
+    }
+
+    delete() {
+        this.username = null;
+        this.session = null;
+    }
+
     exists(): boolean {
-        return false;
+        return !(this.username == null && this.session == null);
     }
 
 }

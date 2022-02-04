@@ -1,7 +1,9 @@
-package net.rafael.web.control.network.packet.`in`
+package net.rafael.web.control.network.packet.input
 
+import net.rafael.web.control.network.client.Client
 import net.rafael.web.control.network.packet.IPacketHandler
 import net.rafael.web.control.network.packet.Packet
+import net.rafael.web.control.network.packet.output.PacketOutLoginAnswer
 
 //------------------------------
 //
@@ -13,8 +15,8 @@ import net.rafael.web.control.network.packet.Packet
 
 class PacketInLogin : IPacketHandler {
 
-    override fun handle(packet: Packet) {
-
+    override fun handle(client: Client, packet: Packet) {
+        client.sendPacket(PacketOutLoginAnswer(true))
     }
 
     override val packetId: Int

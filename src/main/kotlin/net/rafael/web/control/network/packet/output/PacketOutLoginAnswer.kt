@@ -1,4 +1,4 @@
-package net.rafael.web.control.network.packet.out
+package net.rafael.web.control.network.packet.output
 
 import net.rafael.web.control.network.document.Document
 import net.rafael.web.control.network.packet.Packet
@@ -6,11 +6,9 @@ import net.rafael.web.control.network.packet.Packet
 //------------------------------
 //
 // This class was developed by Rafael K.
-// On 1/31/2022 at 10:37 AM
+// On 2/3/2022 at 4:58 PM
 // In the project WebControl
 //
 //------------------------------
 
-class PacketOutWelcome : Packet(0, Document()) {
-
-}
+class PacketOutLoginAnswer(result: Boolean) : Packet(1, Document().append("result", result)) {}
