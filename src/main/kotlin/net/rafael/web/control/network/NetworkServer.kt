@@ -10,10 +10,10 @@ import org.java_websocket.handshake.ClientHandshake
 import net.rafael.web.control.network.client.Client
 import net.rafael.web.control.network.packet.Packet
 import net.rafael.web.control.network.packet.PacketHandler
-import net.rafael.web.control.network.packet.`in`.PacketInCreateAccount
-import net.rafael.web.control.network.packet.`in`.PacketInLogin
-import net.rafael.web.control.network.packet.`in`.PacketInRequestSession
-import net.rafael.web.control.network.packet.out.PacketOutWelcome
+import net.rafael.web.control.network.packet.input.PacketInCreateAccount
+import net.rafael.web.control.network.packet.input.PacketInLogin
+import net.rafael.web.control.network.packet.input.PacketInRequestSession
+import net.rafael.web.control.network.packet.output.PacketOutWelcome
 import net.rafael.web.control.user.User
 import org.java_websocket.WebSocket
 import java.lang.Exception

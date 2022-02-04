@@ -1,11 +1,9 @@
-package net.rafael.web.control.network.packet.`in`
+package net.rafael.web.control.network.packet.input
 
 import net.rafael.web.control.network.client.Client
 import net.rafael.web.control.network.packet.IPacketHandler
 import net.rafael.web.control.network.packet.Packet
-import net.rafael.web.control.network.packet.out.PacketOutCreateAccountAnswer
-import net.rafael.web.control.network.packet.out.PacketOutRequestSessionAnswer
-import java.util.*
+import net.rafael.web.control.network.packet.output.PacketOutLoginAnswer
 
 //------------------------------
 //
@@ -15,13 +13,13 @@ import java.util.*
 //
 //------------------------------
 
-class PacketInCreateAccount : IPacketHandler {
+class PacketInLogin : IPacketHandler {
 
     override fun handle(client: Client, packet: Packet) {
-        client.sendPacket(PacketOutCreateAccountAnswer(true))
+        client.sendPacket(PacketOutLoginAnswer(true))
     }
 
     override val packetId: Int
-        get() = 3
+        get() = 1
 
 }

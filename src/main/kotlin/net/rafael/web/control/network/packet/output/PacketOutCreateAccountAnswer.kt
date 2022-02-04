@@ -1,4 +1,4 @@
-package net.rafael.web.control.network.packet.out
+package net.rafael.web.control.network.packet.output
 
 import net.rafael.web.control.network.document.Document
 import net.rafael.web.control.network.packet.Packet
