@@ -10,6 +10,7 @@ import org.java_websocket.handshake.ClientHandshake
 import net.rafael.web.control.network.client.Client
 import net.rafael.web.control.network.packet.Packet
 import net.rafael.web.control.network.packet.PacketHandler
+import net.rafael.web.control.network.packet.`in`.PacketInCreateAccount
 import net.rafael.web.control.network.packet.`in`.PacketInLogin
 import net.rafael.web.control.network.packet.`in`.PacketInRequestSession
 import net.rafael.web.control.network.packet.out.PacketOutWelcome
@@ -35,6 +36,7 @@ class NetworkServer(address: InetSocketAddress?) : WebSocketServer(address) {
     init {
         packetHandler.register(PacketInRequestSession())
         packetHandler.register(PacketInLogin())
+        packetHandler.register(PacketInCreateAccount())
     }
 
     override fun onOpen(connection: WebSocket, handshake: ClientHandshake) {

@@ -71,7 +71,7 @@
     }
 
     function requestLogin(username: string, password: string, checked: boolean) {
-        console.log("Try to create login session for user[" + username + "].");
+        console.log("Trying to create login session for user[" + username + "].");
         networkManager.update(value => {
             currentNode.update(nodeId => {
                 let node = value.nodeManager.getNodeById(nodeId);
@@ -89,6 +89,24 @@
         })
     }
 
+    function createAccount(username: string, password: string, token: string) {
+        console.log("Trying to create account with username[" + username + "]");
+        networkManager.update(value => {
+            currentNode.update(nodeId => {
+                let node = value.nodeManager.getNodeById(nodeId);
+                node.createAccount(username, password, token).then(result => {
+                    if(result == 1) {
+                        sideId = PageIds.login;
+                    } else if(result == 0) {
+                        currentError.set(new ApplicationError(ErrorIds.create_account, "The token is wrong or a user with the username[" + username + "] already exists"));
+                    }
+                });
+                return nodeId;
+            });
+            return value;
+        });
+    }
+
     function addNode(host: string, port: number) {
         console.log("Trying to connect to node[" + host + ":" + port + "]");
         networkManager.update(value => {
@@ -102,6 +120,7 @@
             return value;
         })
     }
+
 </script>
 
 <main class="flex">
@@ -111,9 +130,9 @@
     {:else if sideId === PageIds.loading}
         <LoadingContent />
     {:else if sideId === PageIds.login}
-        <LoginContent submitCallback={requestLogin} />
+        <LoginContent changeToRegisterCallback={function() {sideId = PageIds.register;}} submitCallback={requestLogin} />
     {:else if sideId === PageIds.register}
-        <RegisterContent />
+        <RegisterContent changeToLoginCallback={function() {sideId = PageIds.login;}} submitCallback={createAccount} />
     {:else if sideId === PageIds.addNode}
         <AddNodeContent submitCallback={addNode} />
     {/if}

@@ -16,6 +16,7 @@
     });
 
     export let submitCallback;
+    export let changeToRegisterCallback;
 
     let siteState = false;
 </script>
@@ -28,7 +29,9 @@
                 <div>
                     <img class="mx-auto h-24 w-24" src="/images/logo512.png" alt="Workflow"/>
                     <h2 class="text-center text-3xl font-extrabold text-gray-900 dark:text-gray-300">Login to your account</h2>
-                    <p class="mt-2 text-center text-sm text-gray-600 dark:text-gray-400">Or{' '}<span class="cursor-pointer font-medium dark:text-indigo-400 text-indigo-600 hover:text-indigo-500">create one</span></p>
+                    <p class="mt-2 text-center text-sm text-gray-600 dark:text-gray-400">Or{' '}<span class="cursor-pointer font-medium dark:text-indigo-400 text-indigo-600 hover:text-indigo-500" on:click={function() {
+                      changeToRegisterCallback();
+                    }}>create one</span></p>
                 </div>
                 <form class="mt-8 space-y-6" action="#" method="POST" on:submit={function(event) {
                     event.preventDefault();

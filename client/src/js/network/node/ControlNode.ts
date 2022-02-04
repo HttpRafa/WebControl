@@ -6,6 +6,8 @@ import {PacketOutRequestSession} from "../packet/out/PacketOutRequestSession";
 import {currentError, networkManager} from "../../Store";
 import {ApplicationError} from "../../ApplicationError";
 import {ErrorIds} from "../../ids/ErrorIds";
+import app from "../../../main";
+import {PacketOutCreateAccount} from "../packet/out/PacketOutCreateAccount";
 
 export class ControlNode {
 
@@ -38,10 +40,28 @@ export class ControlNode {
         this._nodeConnection = undefined;
     }
 
-    login(): Promise<number> {
+    createAccount(username: string, password: string, token: string): Promise<number> {
         return new Promise(resolve => {
-            this._nodeConnection.sendPacket(new PacketOutLogin(this._user.username, this._user.session));
-            resolve(1);
+            let handled = false;
+
+            let handlerId = this._nodeConnection.addHandler(packet => {
+                if(packet.id == 3) {
+                    // @ts-ignore
+                    let result: boolean = packet.document.data.result;
+
+                    this._nodeConnection.removeHandler(handlerId);
+                    handled = true;
+                    resolve(result ? 1 : 0);
+                }
+            });
+            this._nodeConnection.sendPacket(new PacketOutCreateAccount(username, password, token));
+            setTimeout(() => {
+                if(!handled) {
+                    this._nodeConnection.removeHandler(handlerId);
+                    currentError.set(new ApplicationError(ErrorIds.create_account, "Account creation took to long"));
+                    resolve(-1);
+                }
+            }, 5000);
         });
     }
 
@@ -58,7 +78,7 @@ export class ControlNode {
                     handled = true;
                     resolve(result ? 1 : 0);
                 }
-            })
+            });
             this._nodeConnection.sendPacket(new PacketOutLogin(this._user.username, this._user.session));
             setTimeout(() => {
                 if(!handled) {
