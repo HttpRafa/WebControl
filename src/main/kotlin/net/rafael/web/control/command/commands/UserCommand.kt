@@ -1,7 +1,10 @@
 package net.rafael.web.control.command.commands
 
 import net.rafael.web.control.WebControl
+import net.rafael.web.control.classes.MethodResult
 import net.rafael.web.control.command.AbstractCommand
+import net.rafael.web.control.console.input.task.InputHandler
+import net.rafael.web.control.console.input.task.InputHandlerCallback
 
 //------------------------------
 //
@@ -17,6 +20,13 @@ class UserCommand(name: String) : AbstractCommand(name) {
         if(args.size == 2) {
             if(args[0] == "add") {
                 val username: String = args[1]
+                WebControl.logger.info("Please enter the password for the user§8: ")
+                WebControl.logger.getConsole().getConsoleThread().registerTask(InputHandler(InputHandler.PRIORITY_VERY_HIGH, object : InputHandlerCallback {
+                    override fun run(line: String): MethodResult<Boolean> {
+                        WebControl.logger.info("User[$username] was added")
+                        return MethodResult<Boolean>().of(true, true)
+                    }
+                }))
                 return
             } else if(args[0] == "delete") {
                 val username: String = args[1]

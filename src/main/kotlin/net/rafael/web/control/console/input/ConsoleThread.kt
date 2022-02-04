@@ -4,6 +4,7 @@ import net.rafael.web.control.console.input.task.InputHandler
 import net.rafael.web.control.console.interfaces.IApplicationConsole
 import org.jline.reader.EndOfFileException
 import org.jline.reader.UserInterruptException
+import kotlin.system.exitProcess
 
 
 //------------------------------
@@ -56,7 +57,7 @@ class ConsoleThread(private val applicationLogger: IApplicationConsole) : Thread
             return applicationLogger.getLineReader().readLine(applicationLogger.getPrompt())
         } catch (ignored: EndOfFileException) {
         } catch (exception: UserInterruptException) {
-            System.exit(-1)
+            exitProcess(-1)
         }
         return null
     }
