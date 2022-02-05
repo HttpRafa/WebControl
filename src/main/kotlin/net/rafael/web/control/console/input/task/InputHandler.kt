@@ -11,12 +11,12 @@ package net.rafael.web.control.console.input.task
 class InputHandler(val priority: Int, val callback: InputHandlerCallback) {
 
     companion object {
-        val PRIORITY_VERY_HIGH = 7
-        val PRIORITY_HIGH = 6
-        val PRIORITY_NORMAL = 5
-        val PRIORITY_LOW = 4
-        val PRIORITY_VERY_LOW = 3
-        val PRIORITY_ZERO = 0
+        const val PRIORITY_VERY_HIGH = 0
+        const val PRIORITY_HIGH = 1
+        const val PRIORITY_NORMAL = 2
+        const val PRIORITY_LOW = 3
+        const val PRIORITY_VERY_LOW = 4
+        const val PRIORITY_ZERO = 5
     }
 
 }

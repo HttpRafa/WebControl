@@ -1,5 +1,6 @@
 package net.rafael.web.control.console.input
 
+import net.rafael.web.control.WebControl
 import net.rafael.web.control.console.input.task.InputHandler
 import net.rafael.web.control.console.interfaces.IApplicationConsole
 import org.jline.reader.EndOfFileException
@@ -18,6 +19,7 @@ import kotlin.system.exitProcess
 class ConsoleThread(private val applicationLogger: IApplicationConsole) : Thread() {
 
     private val currentHandlers: MutableList<InputHandler> = mutableListOf()
+    private val currentHandlersToAdd: MutableList<InputHandler> = mutableListOf()
 
     override fun run() {
         var line: String? = null
@@ -27,15 +29,17 @@ class ConsoleThread(private val applicationLogger: IApplicationConsole) : Thread
                 animation.addToCursor(1)
             }
 
-            currentHandlers.sortWith(nullsLast(compareBy { it.priority }))
+            for (inputHandler in currentHandlersToAdd) {
+                currentHandlers.add(inputHandler);
+            }
+            currentHandlersToAdd.clear();
+            currentHandlers.sortBy { it.priority }
 
             val iterator = currentHandlers.iterator()
             var cancelled = false
             while (iterator.hasNext()) {
                 val input = iterator.next()
-                if(cancelled) {
-                    iterator.remove()
-                } else {
+                if(!cancelled) {
                     val callbackResult = input.callback.run(line!!)
                     if (callbackResult.get()) {
                         iterator.remove()
@@ -49,7 +53,7 @@ class ConsoleThread(private val applicationLogger: IApplicationConsole) : Thread
     }
 
     fun registerTask(task: InputHandler) {
-        currentHandlers.add(task)
+        currentHandlersToAdd.add(task)
     }
 
     private fun readLine(): String? {

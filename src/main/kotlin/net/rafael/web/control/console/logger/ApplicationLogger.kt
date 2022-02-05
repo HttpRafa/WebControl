@@ -44,6 +44,8 @@ class ApplicationLogger : IApplicationLogger {
             for (stackTraceElement in obj.stackTrace) {
                 log(stackTraceElement.toString(), LoggingLevel.ERROR)
             }
+        } else {
+            log(obj.toString(), LoggingLevel.ERROR)
         }
     }
 
