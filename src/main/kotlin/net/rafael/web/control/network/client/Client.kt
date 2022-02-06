@@ -17,6 +17,11 @@ class Client(val webSocket: WebSocket) {
 
     var user: User? = null
 
+    fun login(user: User) {
+        this.user = user
+        WebControl.logger.info("Client§8[§b" + this.webSocket.remoteSocketAddress.hostName + "§8] §7is §alogged §7in as §7User§8[§b" + user.username + "§8]")
+    }
+
     fun sendPacket(packet: Packet) {
         WebControl.webControl.networkServer.sendPacket(this, packet)
     }

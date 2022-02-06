@@ -21,6 +21,15 @@ class User(val username: String, val password: String, val uuid: String, val ses
         return session
     }
 
+    fun hasSession(sessionStr: String): Boolean {
+        for (session in sessions) {
+            if(session.session == sessionStr) {
+                return true
+            }
+        }
+        return false
+    }
+
     companion object {
 
         fun create(username: String, password: String): User {

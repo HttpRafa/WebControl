@@ -53,7 +53,7 @@ class NetworkServer(address: InetSocketAddress?) : WebSocketServer(address) {
             val user: User? = client.get().user
             clientHandler.removeClient(client.get())
             if (user != null) {
-                WebControl.logger.info("Client §cdisconnected§8[§b" + user.username + "§8]")
+                WebControl.logger.info("Client§8[§b${user.username}§8] §cdisconnected§8.")
             }
         }
     }

@@ -1,5 +1,6 @@
 package net.rafael.web.control.network.packet.input
 
+import net.rafael.web.control.WebControl
 import net.rafael.web.control.network.client.Client
 import net.rafael.web.control.network.packet.IPacketHandler
 import net.rafael.web.control.network.packet.Packet
@@ -16,9 +17,19 @@ import net.rafael.web.control.network.packet.output.PacketOutLoginAnswer
 class PacketInLogin : IPacketHandler {
 
     override fun handle(client: Client, packet: Packet) {
-        var username: String = packet.document.getAsString("username")
-        var session: String = packet.document.getAsString("session")
-        client.sendPacket(PacketOutLoginAnswer(true))
+        val username: String = packet.document.getAsString("username")
+        val session: String = packet.document.getAsString("session")
+
+        val user = WebControl.webControl.userManager.get(username)
+        if(user.isPresent) {
+            if(user.get().hasSession(session)) {
+                client.login(user.get())
+                client.sendPacket(PacketOutLoginAnswer(true))
+            } else {
+                client.sendPacket(PacketOutLoginAnswer(false))
+            }
+        }
+        client.sendPacket(PacketOutLoginAnswer(false))
     }
 
     override val packetId: Int

@@ -12,6 +12,7 @@
     import {ErrorIds} from "./js/ids/ErrorIds";
 
     let sideId = PageIds.loading;
+    let hideSideBarIcon = [1, 2, 3, 4, 5, 6, 7, 8];
 
     networkManager.update(value => {
         value.prepareManager();
@@ -54,6 +55,7 @@
                 node.requestLogin().then(result => {
                     if(result == 1) {
                         sideId = PageIds.home;
+                        hideSideBarIcon = [];
 
                         // TODO: Load applications and currentApplication
                     } else if(result == 0) {
@@ -124,7 +126,7 @@
 </script>
 
 <main class="flex">
-    <SideBar />
+    <SideBar hideIcon={hideSideBarIcon} />
     {#if sideId === PageIds.home}
         <HomeContent />
     {:else if sideId === PageIds.loading}
