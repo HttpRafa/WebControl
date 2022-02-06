@@ -8,6 +8,7 @@ import {ApplicationError} from "../../ApplicationError";
 import {ErrorIds} from "../../ids/ErrorIds";
 import app from "../../../main";
 import {PacketOutCreateAccount} from "../packet/out/PacketOutCreateAccount";
+import {PacketOutRequestUserData} from "../packet/out/PacketOutRequestUserData";
 
 export class ControlNode {
 
@@ -62,6 +63,11 @@ export class ControlNode {
                     resolve(-1);
                 }
             }, 5000);
+        });
+    }
+
+    requestUserData(): Promise<any> {
+        return new Promise<any>(resolve => {
         });
     }
 

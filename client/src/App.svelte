@@ -10,6 +10,7 @@
     import {ApplicationError} from "./js/ApplicationError";
     import {currentError, currentNode, networkManager} from "./js/Store";
     import {ErrorIds} from "./js/ids/ErrorIds";
+    import {PacketOutRequestUserData} from "./js/network/packet/out/PacketOutRequestUserData";
 
     let sideId = PageIds.loading;
     let hideSideBarIcon = [1, 2, 3, 4, 5, 6, 7, 8];
@@ -58,6 +59,9 @@
                         hideSideBarIcon = [];
 
                         // TODO: Load applications and currentApplication
+                        node.requestUserData().then(result => {
+
+                        })
                     } else if(result == 0) {
                         node.user.delete();
                         currentError.set(new ApplicationError(ErrorIds.session_outdated, "Your session is out of date or has errors, please log in again."));
