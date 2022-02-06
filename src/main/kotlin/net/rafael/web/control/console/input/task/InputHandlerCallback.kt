@@ -1,7 +1,5 @@
 package net.rafael.web.control.console.input.task
 
-import net.rafael.web.control.classes.MethodResult
-
 //------------------------------
 //
 // This class was developed by Rafael K.
@@ -12,6 +10,6 @@ import net.rafael.web.control.classes.MethodResult
 
 interface InputHandlerCallback {
 
-    fun run(line: String): MethodResult<Boolean>
+    fun run(event: ConsoleInputEvent): ConsoleInputEvent
 
 }

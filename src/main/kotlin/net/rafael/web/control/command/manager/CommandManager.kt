@@ -3,6 +3,7 @@ package net.rafael.web.control.command.manager
 import net.rafael.web.control.WebControl
 import net.rafael.web.control.classes.MethodResult
 import net.rafael.web.control.command.AbstractCommand
+import net.rafael.web.control.console.input.task.ConsoleInputEvent
 import net.rafael.web.control.console.input.task.InputHandler
 import net.rafael.web.control.console.input.task.InputHandlerCallback
 import net.rafael.web.control.console.interfaces.IApplicationConsole
@@ -22,23 +23,24 @@ class CommandManager(service: IApplicationConsole) {
 
     init {
         service.getConsoleThread().registerTask(InputHandler(InputHandler.PRIORITY_ZERO, object : InputHandlerCallback {
-            override fun run(line: String): MethodResult<Boolean> {
-                if(line.isNotEmpty() && line.isNotBlank()) {
-                    val command = line.split(" ")[0]
-                    var args = line.split(" ").toList().toMutableList()
-                    args.removeFirst()
-                    args = args.filterNot { item -> item.isEmpty() || item.isBlank() } as MutableList<String>
+            override fun run(event: ConsoleInputEvent): ConsoleInputEvent {
+                if(!event.isCancelled) {
+                    if(event.line.isNotEmpty() && event.line.isNotBlank()) {
+                        val command = event.line.split(" ")[0]
+                        var args = event.line.split(" ").toList().toMutableList()
+                        args.removeFirst()
+                        args = args.filterNot { item -> item.isEmpty() || item.isBlank() } as MutableList<String>
 
-                    val abstractCommands = commandList.stream().filter {
-                        item -> item.name.equals(command, ignoreCase = true) || item.hasAlias(command)
-                    }.collect(Collectors.toList())
+                        val abstractCommands = commandList.stream().filter {
+                                item -> item.name.equals(command, ignoreCase = true) || item.hasAlias(command)
+                        }.collect(Collectors.toList())
 
-                    if(abstractCommands.size > 1) WebControl.logger.warning("§7The entered command§8[§c$command§8] §7has more than one meaning§8.")
-                    if(abstractCommands.size > 0) abstractCommands[0].execute(args.toTypedArray())
-                    if(abstractCommands.size == 0) WebControl.logger.error("§cCommand not found§8. §cUse the command §8\"§4help§8\"§c for further information§8!")
+                        if(abstractCommands.size > 1) WebControl.logger.warning("§7The entered command§8[§c$command§8] §7has more than one meaning§8.")
+                        if(abstractCommands.size > 0) abstractCommands[0].execute(args.toTypedArray())
+                        if(abstractCommands.size == 0) WebControl.logger.error("§cCommand not found§8. §cUse the command §8\"§4help§8\"§c for further information§8!")
+                    }
                 }
-
-                return MethodResult<Boolean>().of(false, false)
+                return event
             }
         }))
     }

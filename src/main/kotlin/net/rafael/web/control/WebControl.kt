@@ -3,15 +3,11 @@ package net.rafael.web.control
 import net.rafael.web.control.command.commands.*
 import net.rafael.web.control.command.manager.CommandManager
 import net.rafael.web.control.command.usage.CommandUsage
-import net.rafael.web.control.console.animation.progressbar.ProgressBarInputStream
 import net.rafael.web.control.console.interfaces.IApplicationLogger
 import net.rafael.web.control.console.logger.ApplicationLogger
 import net.rafael.web.control.network.NetworkServer
-import java.io.BufferedInputStream
-import java.io.FileOutputStream
-import java.io.IOException
+import net.rafael.web.control.user.UserManager
 import java.net.InetSocketAddress
-import java.net.URL
 import kotlin.system.exitProcess
 
 
@@ -27,6 +23,7 @@ class WebControl(args: Array<String>) {
 
     lateinit var commandManager: CommandManager
     lateinit var networkServer: NetworkServer
+    lateinit var userManager: UserManager
 
     init {
 
@@ -36,9 +33,22 @@ class WebControl(args: Array<String>) {
     }
 
     fun start() {
-        commandManager = CommandManager(logger.getConsole())
 
+        // Register Shutdown Hook
+        Runtime.getRuntime().addShutdownHook(Thread {
+            exit(false)
+        })
+
+        // Register UncaughtExceptionHandler
+        Thread.currentThread().setUncaughtExceptionHandler { thread, exception ->
+            run {
+                logger.error(exception)
+            }
+        }
+
+        commandManager = CommandManager(logger.getConsole())
         networkServer = NetworkServer(InetSocketAddress(3388))
+        userManager = UserManager()
 
         load()
 
@@ -56,11 +66,6 @@ class WebControl(args: Array<String>) {
 
         // Start NetworkServer
         networkServer.start()
-
-        // Register Shutdown Hook
-        Runtime.getRuntime().addShutdownHook(Thread {
-            exit(false)
-        })
 
     }
 
@@ -82,11 +87,11 @@ class WebControl(args: Array<String>) {
     }
 
     fun load() {
-
+        userManager.loadUsers()
     }
 
     fun save() {
-
+        userManager.saveUsers()
     }
 
     companion object {

@@ -16,6 +16,8 @@ import net.rafael.web.control.network.packet.output.PacketOutLoginAnswer
 class PacketInLogin : IPacketHandler {
 
     override fun handle(client: Client, packet: Packet) {
+        var username: String = packet.document.getAsString("username")
+        var session: String = packet.document.getAsString("session")
         client.sendPacket(PacketOutLoginAnswer(true))
     }
 

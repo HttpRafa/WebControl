@@ -1,6 +1,7 @@
 package net.rafael.web.control.console.input
 
 import net.rafael.web.control.WebControl
+import net.rafael.web.control.console.input.task.ConsoleInputEvent
 import net.rafael.web.control.console.input.task.InputHandler
 import net.rafael.web.control.console.interfaces.IApplicationConsole
 import org.jline.reader.EndOfFileException
@@ -23,7 +24,6 @@ class ConsoleThread(private val applicationLogger: IApplicationConsole) : Thread
 
     override fun run() {
         var line: String? = null
-        var first = true
         while (!interrupted() && this.readLine().also { line = it } != null) {
             for (animation in this.applicationLogger.getRunningAnimations()) {
                 animation.addToCursor(1)
@@ -36,18 +36,12 @@ class ConsoleThread(private val applicationLogger: IApplicationConsole) : Thread
             currentHandlers.sortBy { it.priority }
 
             val iterator = currentHandlers.iterator()
-            var cancelled = false
+            val event = line?.let { ConsoleInputEvent(it) }
             while (iterator.hasNext()) {
                 val input = iterator.next()
-                if(!cancelled) {
-                    val callbackResult = input.callback.run(line!!)
-                    if (callbackResult.get()) {
-                        iterator.remove()
-                    }
-                    if(callbackResult.get(1)) {
-                        cancelled = true
-                    }
-                }
+                event?.reset()
+                val callbackResult = event?.let { input.callback.run(it) }
+                if (callbackResult?.isRemove == true) iterator.remove()
             }
         }
     }

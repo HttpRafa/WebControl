@@ -11,6 +11,14 @@ import java.util.UUID
 //
 //------------------------------
 
-class User(val username: String, val password: String, val uuid: UUID, val session: MutableList<ClientSession>) {
+class User(val username: String, val password: String, val uuid: String, val session: MutableList<ClientSession>) {
+
+    companion object {
+
+        fun create(username: String, password: String): User {
+            return User(username, password, UUID.randomUUID().toString(), mutableListOf())
+        }
+
+    }
 
 }
