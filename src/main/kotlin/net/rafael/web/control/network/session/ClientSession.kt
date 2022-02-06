@@ -10,7 +10,7 @@ import java.util.UUID
 //
 //------------------------------
 
-class ClientSession(val token: String) {
+class ClientSession(val session: String) {
 
     companion object {
 

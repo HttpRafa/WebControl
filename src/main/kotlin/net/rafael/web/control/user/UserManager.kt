@@ -5,6 +5,7 @@ import com.google.gson.stream.JsonReader
 import com.google.gson.GsonBuilder
 import net.rafael.web.control.WebControl
 import java.io.*
+import java.util.*
 
 //------------------------------
 //
@@ -22,6 +23,10 @@ class UserManager {
         this.collection.users.add(user)
         WebControl.logger.info("User§8[§b${user.username}§8] §acreated§8.")
         saveUsers()
+    }
+
+    fun get(username: String): Optional<User> {
+        return collection.users.stream().filter { it.username == username }.findAny()
     }
 
     fun isUsernameFree(username: String): Boolean {

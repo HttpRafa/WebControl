@@ -1,5 +1,6 @@
 package net.rafael.web.control.network.packet.input
 
+import net.rafael.web.control.WebControl
 import net.rafael.web.control.network.client.Client
 import net.rafael.web.control.network.packet.IPacketHandler
 import net.rafael.web.control.network.packet.Packet
@@ -17,7 +18,20 @@ import java.util.*
 class PacketInRequestSession : IPacketHandler {
 
     override fun handle(client: Client, packet: Packet) {
-        client.sendPacket(PacketOutRequestSessionAnswer(UUID.randomUUID().toString()))
+        val username: String = packet.document.getAsString("username")
+        val password: String = packet.document.getAsString("password")
+
+        val user = WebControl.webControl.userManager.get(username)
+        if(user.isPresent) {
+            if(user.get().password == password) {
+                client.sendPacket(PacketOutRequestSessionAnswer(user.get().createSession().session))
+            } else {
+                client.sendPacket(PacketOutRequestSessionAnswer())
+            }
+        } else {
+            client.sendPacket(PacketOutRequestSessionAnswer())
+        }
+
     }
 
     override val packetId: Int

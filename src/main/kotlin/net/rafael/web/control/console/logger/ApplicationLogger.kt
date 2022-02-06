@@ -41,7 +41,7 @@ class ApplicationLogger : IApplicationLogger {
 
     override fun error(obj: Any) {
         if(obj is Throwable) {
-            log("An error occurred while running the program§8: ", LoggingLevel.ERROR)
+            log("An error occurred while running the program§8: §4" + obj.javaClass.simpleName, LoggingLevel.ERROR)
             for (stackTraceElement in obj.stackTrace) {
                 log("   $stackTraceElement", LoggingLevel.ERROR)
             }
