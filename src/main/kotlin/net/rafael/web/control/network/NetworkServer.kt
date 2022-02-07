@@ -13,6 +13,7 @@ import net.rafael.web.control.network.packet.PacketHandler
 import net.rafael.web.control.network.packet.input.PacketInCreateAccount
 import net.rafael.web.control.network.packet.input.PacketInLogin
 import net.rafael.web.control.network.packet.input.PacketInRequestSession
+import net.rafael.web.control.network.packet.input.PacketInRequestUserData
 import net.rafael.web.control.network.packet.output.PacketOutWelcome
 import net.rafael.web.control.user.User
 import org.java_websocket.WebSocket
@@ -37,6 +38,7 @@ class NetworkServer(address: InetSocketAddress?) : WebSocketServer(address) {
         packetHandler.register(PacketInRequestSession())
         packetHandler.register(PacketInLogin())
         packetHandler.register(PacketInCreateAccount())
+        packetHandler.register(PacketInRequestUserData())
     }
 
     override fun onOpen(connection: WebSocket, handshake: ClientHandshake) {

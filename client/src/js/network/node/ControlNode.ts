@@ -66,8 +66,28 @@ export class ControlNode {
         });
     }
 
-    requestUserData(): Promise<any> {
-        return new Promise<any>(resolve => {
+    requestUserData(): Promise<{ applicationIndex: number }> {
+        return new Promise<{ applicationIndex: number }>(resolve => {
+            let handled = false;
+
+            let handlerId = this._nodeConnection.addHandler(packet => {
+                if(packet.id == 4) {
+                    // @ts-ignore
+                    let result: { applicationIndex: number } = packet.document.data;
+
+                    this._nodeConnection.removeHandler(handlerId);
+                    handled = true;
+                    resolve(result);
+                }
+            });
+            this._nodeConnection.sendPacket(new PacketOutRequestUserData());
+            setTimeout(() => {
+                if(!handled) {
+                    this._nodeConnection.removeHandler(handlerId);
+                    currentError.set(new ApplicationError(ErrorIds.user_data_request, "User data request took to long"));
+                    resolve(undefined);
+                }
+            }, 5000);
         });
     }
 

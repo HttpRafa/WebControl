@@ -28,8 +28,9 @@ class PacketInLogin : IPacketHandler {
             } else {
                 client.sendPacket(PacketOutLoginAnswer(false))
             }
+        } else {
+            client.sendPacket(PacketOutLoginAnswer(false))
         }
-        client.sendPacket(PacketOutLoginAnswer(false))
     }
 
     override val packetId: Int

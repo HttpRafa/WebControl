@@ -9,6 +9,8 @@ export const currentNode = writable(window.localStorage.getItem("currentNode") ?
 export const currentError = writable<ApplicationError>(undefined)
 export const networkManager = writable(new NetworkManager());
 
+export const userData = writable({ applicationIndex: -1 })
+
 currentError.subscribe(value => {
     if(value != undefined) {
         console.log("Error[id: " + value.id + "] " + value.message);

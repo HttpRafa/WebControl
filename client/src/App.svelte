@@ -8,12 +8,25 @@
 
     import {PageIds} from "./js/ids/PageIds";
     import {ApplicationError} from "./js/ApplicationError";
-    import {currentError, currentNode, networkManager} from "./js/Store";
+    import {currentError, currentNode, networkManager, userData} from "./js/Store";
     import {ErrorIds} from "./js/ids/ErrorIds";
     import {PacketOutRequestUserData} from "./js/network/packet/out/PacketOutRequestUserData";
+    import {onMount} from "svelte";
 
     let sideId = PageIds.loading;
     let hideSideBarIcon = [1, 2, 3, 4, 5, 6, 7, 8];
+
+    onMount(() => {
+        userData.subscribe(value => {
+            if(value.applicationIndex > -1) {
+                requestApplicationData(() => {
+                    hideSideBarIcon = [];
+                });
+            } else {
+                hideSideBarIcon = [1, 2, 3, 4, 5];
+            }
+        });
+    });
 
     networkManager.update(value => {
         value.prepareManager();
@@ -56,12 +69,9 @@
                 node.requestLogin().then(result => {
                     if(result == 1) {
                         sideId = PageIds.home;
-                        hideSideBarIcon = [];
 
                         // TODO: Load applications and currentApplication
-                        node.requestUserData().then(result => {
-
-                        })
+                        updateUserData();
                     } else if(result == 0) {
                         node.user.delete();
                         currentError.set(new ApplicationError(ErrorIds.session_outdated, "Your session is out of date or has errors, please log in again."));
@@ -125,6 +135,23 @@
             });
             return value;
         })
+    }
+
+    function updateUserData() {
+        networkManager.update(value => {
+            currentNode.update(nodeId => {
+                let node = value.nodeManager.getNodeById(nodeId);
+                node.requestUserData().then(result => {
+                    userData.set(result);
+                })
+                return nodeId;
+            })
+            return value;
+        })
+    }
+
+    function requestApplicationData(callback: () => void) {
+
     }
 
 </script>

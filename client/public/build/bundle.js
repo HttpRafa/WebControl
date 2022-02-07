@@ -2409,12 +2409,19 @@ var app = (function () {
         node_connect: -1,
         create_session: -2,
         session_outdated: -3,
-        create_account: -4
+        create_account: -4,
+        user_data_request: -5,
     };
 
     class PacketOutCreateAccount extends Packet {
         constructor(username, password, token) {
             super(3, { username: username, password: password, token: token });
+        }
+    }
+
+    class PacketOutRequestUserData extends Packet {
+        constructor() {
+            super(4, {});
         }
     }
 
@@ -2461,6 +2468,24 @@ var app = (function () {
         }
         requestUserData() {
             return new Promise(resolve => {
+                let handled = false;
+                let handlerId = this._nodeConnection.addHandler(packet => {
+                    if (packet.id == 4) {
+                        // @ts-ignore
+                        let result = packet.document.data;
+                        this._nodeConnection.removeHandler(handlerId);
+                        handled = true;
+                        resolve(result);
+                    }
+                });
+                this._nodeConnection.sendPacket(new PacketOutRequestUserData());
+                setTimeout(() => {
+                    if (!handled) {
+                        this._nodeConnection.removeHandler(handlerId);
+                        currentError.set(new ApplicationError(ErrorIds.user_data_request, "User data request took to long"));
+                        resolve(undefined);
+                    }
+                }, 5000);
             });
         }
         requestLogin() {
@@ -2675,6 +2700,7 @@ var app = (function () {
     const currentNode = writable(window.localStorage.getItem("currentNode") ? Number(JSON.parse(window.localStorage.getItem("currentNode"))) : 0);
     const currentError = writable(undefined);
     const networkManager = writable(new NetworkManager());
+    const userData = writable({ applicationIndex: -1 });
     currentError.subscribe(value => {
         if (value != undefined) {
             console.log("Error[id: " + value.id + "] " + value.message);
@@ -4715,7 +4741,7 @@ var app = (function () {
     const { console: console_1 } = globals;
     const file = "src\\App.svelte";
 
-    // (132:41) 
+    // (157:41) 
     function create_if_block_4(ctx) {
     	let addnodecontent;
     	let current;
@@ -4752,14 +4778,14 @@ var app = (function () {
     		block,
     		id: create_if_block_4.name,
     		type: "if",
-    		source: "(132:41) ",
+    		source: "(157:41) ",
     		ctx
     	});
 
     	return block;
     }
 
-    // (130:42) 
+    // (155:42) 
     function create_if_block_3(ctx) {
     	let registercontent;
     	let current;
@@ -4803,14 +4829,14 @@ var app = (function () {
     		block,
     		id: create_if_block_3.name,
     		type: "if",
-    		source: "(130:42) ",
+    		source: "(155:42) ",
     		ctx
     	});
 
     	return block;
     }
 
-    // (128:39) 
+    // (153:39) 
     function create_if_block_2(ctx) {
     	let logincontent;
     	let current;
@@ -4854,14 +4880,14 @@ var app = (function () {
     		block,
     		id: create_if_block_2.name,
     		type: "if",
-    		source: "(128:39) ",
+    		source: "(153:39) ",
     		ctx
     	});
 
     	return block;
     }
 
-    // (126:41) 
+    // (151:41) 
     function create_if_block_1(ctx) {
     	let loadingcontent;
     	let current;
@@ -4894,14 +4920,14 @@ var app = (function () {
     		block,
     		id: create_if_block_1.name,
     		type: "if",
-    		source: "(126:41) ",
+    		source: "(151:41) ",
     		ctx
     	});
 
     	return block;
     }
 
-    // (124:4) {#if sideId === PageIds.home}
+    // (149:4) {#if sideId === PageIds.home}
     function create_if_block(ctx) {
     	let homecontent;
     	let current;
@@ -4934,7 +4960,7 @@ var app = (function () {
     		block,
     		id: create_if_block.name,
     		type: "if",
-    		source: "(124:4) {#if sideId === PageIds.home}",
+    		source: "(149:4) {#if sideId === PageIds.home}",
     		ctx
     	});
 
@@ -4984,7 +5010,7 @@ var app = (function () {
     			t = space();
     			if (if_block) if_block.c();
     			attr_dev(main, "class", "flex");
-    			add_location(main, file, 121, 0, 4652);
+    			add_location(main, file, 146, 0, 5306);
     		},
     		l: function claim(nodes) {
     			throw new Error("options.hydrate only works if the component was compiled with the `hydratable: true` option");
@@ -5071,11 +5097,23 @@ var app = (function () {
     	return block;
     }
 
+    function requestApplicationData(callback) {
+    	
+    }
+
     function instance($$self, $$props, $$invalidate) {
     	let { $$slots: slots = {}, $$scope } = $$props;
     	validate_slots('App', slots, []);
     	let sideId = PageIds.loading;
     	let hideSideBarIcon = [1, 2, 3, 4, 5, 6, 7, 8];
+
+    	onMount(() => {
+    		userData.subscribe(value => {
+    			if (value.applicationIndex > -1) ; else {
+    				$$invalidate(1, hideSideBarIcon = [1, 2, 3, 4, 5]);
+    			}
+    		});
+    	});
 
     	networkManager.update(value => {
     		value.prepareManager();
@@ -5120,12 +5158,9 @@ var app = (function () {
     				node.requestLogin().then(result => {
     					if (result == 1) {
     						$$invalidate(0, sideId = PageIds.home);
-    						$$invalidate(1, hideSideBarIcon = []);
 
     						// TODO: Load applications and currentApplication
-    						node.requestUserData().then(result => {
-    							
-    						});
+    						updateUserData();
     					} else if (result == 0) {
     						node.user.delete();
     						currentError.set(new ApplicationError(ErrorIds.session_outdated, "Your session is out of date or has errors, please log in again."));
@@ -5208,6 +5243,22 @@ var app = (function () {
     		});
     	}
 
+    	function updateUserData() {
+    		networkManager.update(value => {
+    			currentNode.update(nodeId => {
+    				let node = value.nodeManager.getNodeById(nodeId);
+
+    				node.requestUserData().then(result => {
+    					userData.set(result);
+    				});
+
+    				return nodeId;
+    			});
+
+    			return value;
+    		});
+    	}
+
     	const writable_props = [];
 
     	Object.keys($$props).forEach(key => {
@@ -5234,14 +5285,18 @@ var app = (function () {
     		currentError,
     		currentNode,
     		networkManager,
+    		userData,
     		ErrorIds,
+    		onMount,
     		sideId,
     		hideSideBarIcon,
     		connectToNode,
     		sendClientLoginRequest,
     		requestLogin,
     		createAccount,
-    		addNode
+    		addNode,
+    		updateUserData,
+    		requestApplicationData
     	});
 
     	$$self.$inject_state = $$props => {
