@@ -22,8 +22,10 @@
                 requestApplicationData(() => {
                     hideSideBarIcon = [];
                 });
-            } else {
+            } else if(value.applicationIndex == -1) {
                 hideSideBarIcon = [1, 2, 3, 4, 5];
+            } else {
+                hideSideBarIcon = [1, 2, 3, 4, 5, 6, 7, 8];
             }
         });
     });

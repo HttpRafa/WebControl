@@ -2700,7 +2700,7 @@ var app = (function () {
     const currentNode = writable(window.localStorage.getItem("currentNode") ? Number(JSON.parse(window.localStorage.getItem("currentNode"))) : 0);
     const currentError = writable(undefined);
     const networkManager = writable(new NetworkManager());
-    const userData = writable({ applicationIndex: -1 });
+    const userData = writable({ applicationIndex: undefined });
     currentError.subscribe(value => {
         if (value != undefined) {
             console.log("Error[id: " + value.id + "] " + value.message);
@@ -4741,7 +4741,7 @@ var app = (function () {
     const { console: console_1 } = globals;
     const file = "src\\App.svelte";
 
-    // (157:41) 
+    // (160:41) 
     function create_if_block_4(ctx) {
     	let addnodecontent;
     	let current;
@@ -4778,14 +4778,14 @@ var app = (function () {
     		block,
     		id: create_if_block_4.name,
     		type: "if",
-    		source: "(157:41) ",
+    		source: "(160:41) ",
     		ctx
     	});
 
     	return block;
     }
 
-    // (155:42) 
+    // (158:42) 
     function create_if_block_3(ctx) {
     	let registercontent;
     	let current;
@@ -4829,14 +4829,14 @@ var app = (function () {
     		block,
     		id: create_if_block_3.name,
     		type: "if",
-    		source: "(155:42) ",
+    		source: "(158:42) ",
     		ctx
     	});
 
     	return block;
     }
 
-    // (153:39) 
+    // (156:39) 
     function create_if_block_2(ctx) {
     	let logincontent;
     	let current;
@@ -4880,14 +4880,14 @@ var app = (function () {
     		block,
     		id: create_if_block_2.name,
     		type: "if",
-    		source: "(153:39) ",
+    		source: "(156:39) ",
     		ctx
     	});
 
     	return block;
     }
 
-    // (151:41) 
+    // (154:41) 
     function create_if_block_1(ctx) {
     	let loadingcontent;
     	let current;
@@ -4920,14 +4920,14 @@ var app = (function () {
     		block,
     		id: create_if_block_1.name,
     		type: "if",
-    		source: "(151:41) ",
+    		source: "(154:41) ",
     		ctx
     	});
 
     	return block;
     }
 
-    // (149:4) {#if sideId === PageIds.home}
+    // (152:4) {#if sideId === PageIds.home}
     function create_if_block(ctx) {
     	let homecontent;
     	let current;
@@ -4960,7 +4960,7 @@ var app = (function () {
     		block,
     		id: create_if_block.name,
     		type: "if",
-    		source: "(149:4) {#if sideId === PageIds.home}",
+    		source: "(152:4) {#if sideId === PageIds.home}",
     		ctx
     	});
 
@@ -5010,7 +5010,7 @@ var app = (function () {
     			t = space();
     			if (if_block) if_block.c();
     			attr_dev(main, "class", "flex");
-    			add_location(main, file, 146, 0, 5306);
+    			add_location(main, file, 149, 0, 5424);
     		},
     		l: function claim(nodes) {
     			throw new Error("options.hydrate only works if the component was compiled with the `hydratable: true` option");
@@ -5109,8 +5109,10 @@ var app = (function () {
 
     	onMount(() => {
     		userData.subscribe(value => {
-    			if (value.applicationIndex > -1) ; else {
+    			if (value.applicationIndex > -1) ; else if (value.applicationIndex == -1) {
     				$$invalidate(1, hideSideBarIcon = [1, 2, 3, 4, 5]);
+    			} else {
+    				$$invalidate(1, hideSideBarIcon = [1, 2, 3, 4, 5, 6, 7, 8]);
     			}
     		});
     	});
