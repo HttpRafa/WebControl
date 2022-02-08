@@ -19,7 +19,7 @@ class Client(val webSocket: WebSocket) {
 
     fun login(user: User) {
         this.user = user
-        WebControl.logger.info("Client§8[§b" + this.webSocket.remoteSocketAddress.hostName + "§8] §7is §alogged §7in as §7User§8[§b" + user.username + "§8]")
+        WebControl.logger.info("Client§8[§b" + webSocket.remoteSocketAddress.address + "§8:§3" + webSocket.remoteSocketAddress.port + "§8] §7is §alogged §7in as §7User§8[§b" + user.username + "§8]")
     }
 
     fun sendPacket(packet: Packet) {

@@ -8,7 +8,7 @@ import net.rafael.web.control.network.packet.output.PacketOutRequestUserData
 //------------------------------
 //
 // This class was developed by Rafael K.
-// On 2/2/2022 at 4:49 PM
+// On 2/8/2022 at 3:09 PM
 // In the project WebControl
 //
 //------------------------------
@@ -16,7 +16,7 @@ import net.rafael.web.control.network.packet.output.PacketOutRequestUserData
 class PacketInRequestUserData : IPacketHandler {
 
     override fun handle(client: Client, packet: Packet) {
-        client.user?.let { PacketOutRequestUserData(it) }?.let { client.sendPacket(it) }
+        client.user?.let { PacketOutRequestUserData.create(client.user!!) }?.let { client.sendPacket(it) }
     }
 
     override val packetId: Int

@@ -5,10 +5,10 @@ import type {ControlUser} from "../user/ControlUser";
 import {PacketOutRequestSession} from "../packet/out/PacketOutRequestSession";
 import {currentError, networkManager} from "../../Store";
 import {ApplicationError} from "../../ApplicationError";
-import {ErrorIds} from "../../ids/ErrorIds";
-import app from "../../../main";
+import {ErrorIds} from "../../enums/ErrorIds";
 import {PacketOutCreateAccount} from "../packet/out/PacketOutCreateAccount";
 import {PacketOutRequestUserData} from "../packet/out/PacketOutRequestUserData";
+import type {UserData} from "../../data/UserData";
 
 export class ControlNode {
 
@@ -66,14 +66,14 @@ export class ControlNode {
         });
     }
 
-    requestUserData(): Promise<{ applicationIndex: number }> {
-        return new Promise<{ applicationIndex: number }>(resolve => {
+    requestUserData(): Promise<UserData> {
+        return new Promise<UserData>(resolve => {
             let handled = false;
 
             let handlerId = this._nodeConnection.addHandler(packet => {
                 if(packet.id == 4) {
                     // @ts-ignore
-                    let result: { applicationIndex: number } = packet.document.data;
+                    let result: UserData = packet.document.data;
 
                     this._nodeConnection.removeHandler(handlerId);
                     handled = true;

@@ -44,7 +44,7 @@ class NetworkServer(address: InetSocketAddress?) : WebSocketServer(address) {
     override fun onOpen(connection: WebSocket, handshake: ClientHandshake) {
         val client = Client(connection)
         clientHandler.newClient(client)
-        WebControl.logger.info("Client §aconnected§8[§b" + connection.remoteSocketAddress.hostName + "§8:§3" + connection.remoteSocketAddress.port + "§8]. §7Waiting for login request§8.")
+        WebControl.logger.info("Client §aconnected§8[§b" + connection.remoteSocketAddress.address + "§8:§3" + connection.remoteSocketAddress.port + "§8]. §7Waiting for login request§8.")
 
         client.sendPacket(PacketOutWelcome())
     }

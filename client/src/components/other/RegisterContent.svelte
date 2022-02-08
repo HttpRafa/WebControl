@@ -1,9 +1,9 @@
 <script lang="ts">
-    import TopNavigation from "./top/TopNavigation.svelte";
+    import TopNavigation from "../top/TopNavigation.svelte";
     import {Icon, LockClosed, Refresh} from "svelte-hero-icons";
-    import {currentError} from "../js/Store";
-    import {ApplicationError} from "../js/ApplicationError";
-    import {ErrorIds} from "../js/ids/ErrorIds";
+    import {currentError} from "../../js/Store";
+    import {ApplicationError} from "../../js/ApplicationError";
+    import {ErrorIds} from "../../js/enums/ErrorIds";
     import {onMount} from "svelte";
 
     onMount(() => {

@@ -1,16 +1,20 @@
 <script lang="ts">
     import SideBar from "./components/sidebar/SideBar.svelte";
-    import HomeContent from "./components/HomeContent.svelte";
-    import LoadingContent from "./components/LoadingContent.svelte";
-    import LoginContent from "./components/LoginContent.svelte";
-    import AddNodeContent from "./components/AddNodeContent.svelte";
-    import RegisterContent from "./components/RegisterContent.svelte";
+    import HomeContent from "./components/other/HomeContent.svelte";
+    import LoadingContent from "./components/other/LoadingContent.svelte";
+    import LoginContent from "./components/other/LoginContent.svelte";
+    import AddNodeContent from "./components/other/AddNodeContent.svelte";
+    import RegisterContent from "./components/other/RegisterContent.svelte";
+    import ApplicationContent from "./components/application/status/ApplicationContent.svelte";
+    import ConsoleContent from "./components/application/console/ConsoleContent.svelte";
+    import OptionsContent from "./components/application/options/OptionsContent.svelte";
+    import AccessContent from "./components/application/access/AccessContent.svelte";
+    import FilesContent from "./components/application/files/FilesContent.svelte";
 
-    import {PageIds} from "./js/ids/PageIds";
+    import {PageIds} from "./js/enums/PageIds";
     import {ApplicationError} from "./js/ApplicationError";
     import {currentError, currentNode, networkManager, userData} from "./js/Store";
-    import {ErrorIds} from "./js/ids/ErrorIds";
-    import {PacketOutRequestUserData} from "./js/network/packet/out/PacketOutRequestUserData";
+    import {ErrorIds} from "./js/enums/ErrorIds";
     import {onMount} from "svelte";
 
     let sideId = PageIds.loading;
@@ -18,11 +22,11 @@
 
     onMount(() => {
         userData.subscribe(value => {
-            if(value.applicationIndex > -1) {
+            if(value.applicationId > -1) {
                 requestApplicationData(() => {
                     hideSideBarIcon = [];
                 });
-            } else if(value.applicationIndex == -1) {
+            } else if(value.applicationId == -1) {
                 hideSideBarIcon = [1, 2, 3, 4, 5];
             } else {
                 hideSideBarIcon = [1, 2, 3, 4, 5, 6, 7, 8];
@@ -170,6 +174,16 @@
         <RegisterContent changeToLoginCallback={function() {sideId = PageIds.login;}} submitCallback={createAccount} />
     {:else if sideId === PageIds.addNode}
         <AddNodeContent submitCallback={addNode} />
+    {:else if sideId === PageIds.application}
+        <ApplicationContent />
+    {:else if sideId === PageIds.options}
+        <OptionsContent />
+    {:else if sideId === PageIds.console}
+        <ConsoleContent />
+    {:else if sideId === PageIds.files}
+        <FilesContent />
+    {:else if sideId === PageIds.access}
+        <AccessContent />
     {/if}
 </main>
 
