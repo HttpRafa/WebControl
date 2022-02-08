@@ -1,7 +1,6 @@
 package net.rafael.web.control.network.packet.output
 
 import com.google.gson.JsonArray
-import net.rafael.web.control.network.client.Client
 import net.rafael.web.control.network.document.Document
 import net.rafael.web.control.network.packet.Packet
 import net.rafael.web.control.user.User
@@ -17,6 +16,7 @@ import net.rafael.web.control.user.User
 class PacketOutRequestUserData(document: Document) : Packet(4, document) {
 
     companion object {
+
         fun create(user: User): PacketOutRequestUserData {
             val document = Document().append("applicationId", -1)
             val applicationList = JsonArray()
@@ -24,6 +24,7 @@ class PacketOutRequestUserData(document: Document) : Packet(4, document) {
             document.append("applications", applicationList)
             return PacketOutRequestUserData(document)
         }
+
     }
 
 }

@@ -2,7 +2,7 @@ import {ControlNode, StoredControlNode} from "./ControlNode";
 import {currentError, currentNode} from "../../Store";
 import {ApplicationError} from "../../ApplicationError";
 import {ControlUser} from "../user/ControlUser";
-import {ErrorIds} from "../../ids/ErrorIds";
+import {ErrorIds} from "../../enums/ErrorIds";
 
 export class NodeManager {
 

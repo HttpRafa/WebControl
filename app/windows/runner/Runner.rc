@@ -90,12 +90,12 @@ BEGIN
         BLOCK "040904e4"
         BEGIN
             VALUE "CompanyName", "net.rafael" "\0"
-            VALUE "FileDescription", "webcontrol" "\0"
+            VALUE "FileDescription", "webcontrol_app" "\0"
             VALUE "FileVersion", VERSION_AS_STRING "\0"
-            VALUE "InternalName", "webcontrol" "\0"
+            VALUE "InternalName", "webcontrol_app" "\0"
             VALUE "LegalCopyright", "Copyright (C) 2022 net.rafael. All rights reserved." "\0"
-            VALUE "OriginalFilename", "webcontrol.exe" "\0"
-            VALUE "ProductName", "webcontrol" "\0"
+            VALUE "OriginalFilename", "webcontrol_app.exe" "\0"
+            VALUE "ProductName", "webcontrol_app" "\0"
             VALUE "ProductVersion", VERSION_AS_STRING "\0"
         END
     END

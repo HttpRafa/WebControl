@@ -4,10 +4,12 @@ export const PageIds = {
     addNode: -2,
     loading: -1,
     home: 0,
+
     application: 1,
     options: 2,
     console: 3,
     files: 4,
     access: 5,
+
     settings: 6
 }
