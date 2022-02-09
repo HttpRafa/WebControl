@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.14)
-project(webcontrol_app LANGUAGES CXX)
+project(webcontrol LANGUAGES CXX)
 
-set(BINARY_NAME "webcontrol_app")
+set(BINARY_NAME "webcontrol")
 
 cmake_policy(SET CMP0063 NEW)
 

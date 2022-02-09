@@ -1,4 +1,4 @@
-# webcontrol_app
+# webcontrol
 
 App for the project WebControl
 

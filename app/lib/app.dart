@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:webcontrol_app/screens/location_detail/location_detail.dart';
+import 'package:webcontrol/screens/location_detail.dart';
 
 class App extends StatelessWidget {
 
