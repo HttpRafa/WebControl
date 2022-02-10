@@ -16,16 +16,16 @@
     import {currentError, currentNode, networkManager, userData} from "./js/Store";
     import {ErrorIds} from "./js/enums/ErrorIds";
     import {onMount} from "svelte";
+    import {UserData} from "./js/data/UserData";
 
-    let sideId = PageIds.loading;
+    let pageId = PageIds.loading;
     let hideSideBarIcon = [1, 2, 3, 4, 5, 6, 7, 8];
 
     onMount(() => {
         userData.subscribe(value => {
             if(value.applicationId > -1) {
-                requestApplicationData(() => {
-                    hideSideBarIcon = [];
-                });
+                hideSideBarIcon = [];
+                pageId = PageIds.application;
             } else if(value.applicationId == -1) {
                 hideSideBarIcon = [1, 2, 3, 4, 5];
             } else {
@@ -38,7 +38,7 @@
         value.prepareManager();
 
         if(value.nodeManager.nodes.length <= 0) {
-            sideId = PageIds.addNode;
+            pageId = PageIds.addNode;
         } else {
             currentNode.update(nodeId => {
                 connectToNode();
@@ -50,7 +50,7 @@
     })
 
     function connectToNode() {
-        sideId = PageIds.loading;
+        pageId = PageIds.loading;
 
         networkManager.update(manager => {
             manager.nodeManager.connect((result, node) => {
@@ -58,7 +58,7 @@
                     if(node.hasUser()) {
                         sendClientLoginRequest();
                     } else {
-                        sideId = PageIds.login;
+                        pageId = PageIds.login;
                     }
                 }
             });
@@ -67,23 +67,23 @@
     }
 
     function sendClientLoginRequest() {
-        sideId = PageIds.loading;
+        pageId = PageIds.loading;
 
         networkManager.update(value => {
             currentNode.update(nodeId => {
                 let node = value.nodeManager.getNodeById(nodeId);
                 node.requestLogin().then(result => {
                     if(result == 1) {
-                        sideId = PageIds.home;
+                        pageId = PageIds.home;
 
                         // TODO: Load applications and currentApplication
-                        updateUserData();
+                        updateUserData().then(userData => {});
                     } else if(result == 0) {
                         node.user.delete();
                         currentError.set(new ApplicationError(ErrorIds.session_outdated, "Your session is out of date or has errors, please log in again."));
-                        sideId = PageIds.login;
+                        pageId = PageIds.login;
                     } else {
-                        sideId = PageIds.login;
+                        pageId = PageIds.login;
                     }
                 })
                 return nodeId;
@@ -118,7 +118,7 @@
                 let node = value.nodeManager.getNodeById(nodeId);
                 node.createAccount(username, password, token).then(result => {
                     if(result == 1) {
-                        sideId = PageIds.login;
+                        pageId = PageIds.login;
                     } else if(result == 0) {
                         currentError.set(new ApplicationError(ErrorIds.create_account, "The token is wrong or a user with the username[" + username + "] already exists"));
                     }
@@ -143,46 +143,50 @@
         })
     }
 
-    function updateUserData() {
-        networkManager.update(value => {
-            currentNode.update(nodeId => {
-                let node = value.nodeManager.getNodeById(nodeId);
-                node.requestUserData().then(result => {
-                    userData.set(result);
+    function updateUserData(): Promise<UserData> {
+        return new Promise<UserData>(resolve => {
+            networkManager.update(value => {
+                currentNode.update(nodeId => {
+                    let node = value.nodeManager.getNodeById(nodeId);
+                    node.requestUserData().then(result => {
+                        userData.set(result);
+                        resolve(result);
+                    })
+                    return nodeId;
                 })
-                return nodeId;
+                return value;
             })
-            return value;
-        })
+        });
     }
 
-    function requestApplicationData(callback: () => void) {
+    function changePage(page: number) {
 
+        pageId = page;
     }
 
 </script>
 
 <main class="flex">
     <SideBar hideIcon={hideSideBarIcon} />
-    {#if sideId === PageIds.home}
+    {#if pageId === PageIds.home}
         <HomeContent />
-    {:else if sideId === PageIds.loading}
+    {:else if pageId === PageIds.loading}
         <LoadingContent />
-    {:else if sideId === PageIds.login}
-        <LoginContent changeToRegisterCallback={function() {sideId = PageIds.register;}} submitCallback={requestLogin} />
-    {:else if sideId === PageIds.register}
-        <RegisterContent changeToLoginCallback={function() {sideId = PageIds.login;}} submitCallback={createAccount} />
-    {:else if sideId === PageIds.addNode}
+    {:else if pageId === PageIds.login}
+        <LoginContent changeToRegisterCallback={function() {pageId = PageIds.register;}} submitCallback={requestLogin} />
+    {:else if pageId === PageIds.register}
+        <RegisterContent changeToLoginCallback={function() {pageId = PageIds.login;}} submitCallback={createAccount} />
+    {:else if pageId === PageIds.addNode}
         <AddNodeContent submitCallback={addNode} />
-    {:else if sideId === PageIds.application}
+    {:else if pageId === PageIds.application}
         <ApplicationContent />
-    {:else if sideId === PageIds.options}
+    {:else if pageId === PageIds.options}
         <OptionsContent />
-    {:else if sideId === PageIds.console}
+    {:else if pageId === PageIds.console}
         <ConsoleContent />
-    {:else if sideId === PageIds.files}
+    {:else if pageId === PageIds.files}
         <FilesContent />
-    {:else if sideId === PageIds.access}
+    {:else if pageId === PageIds.access}
         <AccessContent />
     {/if}
 </main>

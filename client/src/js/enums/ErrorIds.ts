@@ -4,4 +4,5 @@ export const ErrorIds = {
     session_outdated: -3,
     create_account: -4,
     user_data_request: -5,
+    request: -6,
 }

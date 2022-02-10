@@ -4,7 +4,7 @@ import {NetworkManager} from "./network/NetworkManager";
 import {UserData} from "./data/UserData";
 
 import type {ApplicationError} from "./ApplicationError";
-import type {Application} from "./application/Application";
+import {ApplicationStates} from "./enums/ApplicationStates";
 
 export const darkMode = writable(window.localStorage.getItem("darkMode") ? Boolean(JSON.parse(window.localStorage.getItem("darkMode"))) : false);
 export const currentNode = writable(window.localStorage.getItem("currentNode") ? Number(JSON.parse(window.localStorage.getItem("currentNode"))) : 0);
@@ -13,7 +13,8 @@ export const currentError = writable<ApplicationError>(undefined);
 export const networkManager = writable(new NetworkManager());
 
 export const userData = writable<UserData>(new UserData(undefined, []));
-export const application = writable<Application>(undefined);
+
+export const applicationState = writable(ApplicationStates.stopped);
 
 currentError.subscribe(value => {
     if(value != undefined) {

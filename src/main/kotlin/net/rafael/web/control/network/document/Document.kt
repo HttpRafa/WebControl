@@ -91,8 +91,16 @@ class Document {
         return data[key].asNumber
     }
 
+    fun getAsInteger(key: String): Int {
+        return data[key].asInt
+    }
+
     fun getAsDocument(key: String): Document {
         return Document(data[key].asJsonObject)
+    }
+
+    fun getAsElement(key: String): JsonElement {
+        return data[key]
     }
 
     operator fun get(key: String): JsonElement {

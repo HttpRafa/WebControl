@@ -18,7 +18,7 @@ class PacketOutRequestUserData(document: Document) : Packet(4, document) {
     companion object {
 
         fun create(user: User): PacketOutRequestUserData {
-            val document = Document().append("applicationId", -1)
+            val document = Document().append("applicationId", 0)
             val applicationList = JsonArray()
             applicationList.add(Document().append("name", "Example").append("id", 0).append("icon", 0).data)
             document.append("applications", applicationList)
