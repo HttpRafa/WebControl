@@ -13,6 +13,6 @@ import java.util.UUID
 
 open class Packet(val id: Int, val document: Document) {
 
-    val uuid: String = UUID.randomUUID().toString()
+    var uuid: String = UUID.randomUUID().toString()
 
 }

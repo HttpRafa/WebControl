@@ -76,7 +76,7 @@ class Document {
     }
 
     fun getList(key: String, to: Class<*>): List<Class<*>> {
-        val list: MutableList<Class<*>> = LinkedList()
+        val list: MutableList<Class<*>> = mutableListOf()
         for (element in data[key].asJsonArray) {
             list.add(Gson().fromJson(element, to as Type))
         }

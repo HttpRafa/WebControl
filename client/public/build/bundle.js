@@ -182,7 +182,7 @@ var app = (function () {
                 const component = dirty_components[flushidx];
                 flushidx++;
                 set_current_component(component);
-                update$1(component.$$);
+                update$2(component.$$);
             }
             set_current_component(null);
             dirty_components.length = 0;
@@ -209,7 +209,7 @@ var app = (function () {
         seen_callbacks.clear();
         set_current_component(saved_component);
     }
-    function update$1($$) {
+    function update$2($$) {
         if ($$.fragment !== null) {
             $$.update();
             run_all($$.before_update);
@@ -1442,8 +1442,42 @@ var app = (function () {
         handleMessage(event) {
             let data = JSON.parse(event.data);
             console.table(data);
-            for (let i = 0; i < this._packetHandler.length; i++) {
-                this._packetHandler[i](data);
+            if (data.id === 5) {
+                // @ts-ignore
+                if (data.document.data.applicationState != undefined) {
+                    // @ts-ignore
+                    applicationState.set(data.document.data.applicationState);
+                }
+                // @ts-ignore
+                if (data.document.data.applicationType != undefined) {
+                    // @ts-ignore
+                    applicationType.set(data.document.data.applicationType);
+                }
+                // @ts-ignore
+                if (data.document.data.applicationUptime != undefined) {
+                    // @ts-ignore
+                    applicationUptime.set(data.document.data.applicationUptime);
+                }
+                // @ts-ignore
+                if (data.document.data.applicationCpuLoad != undefined) {
+                    // @ts-ignore
+                    applicationCpuLoad.set(data.document.data.applicationCpuLoad);
+                }
+                // @ts-ignore
+                if (data.document.data.applicationMemoryUsage != undefined) {
+                    // @ts-ignore
+                    applicationMemoryUsage.set(data.document.data.applicationMemoryUsage);
+                }
+                // @ts-ignore
+                if (data.document.data.applicationDescription != undefined) {
+                    // @ts-ignore
+                    applicationDescription.set(data.document.data.applicationDescription);
+                }
+            }
+            else {
+                for (let i = 0; i < this._packetHandler.length; i++) {
+                    this._packetHandler[i](data);
+                }
             }
         }
         addHandler(handler) {
@@ -1697,25 +1731,8 @@ var app = (function () {
                 }, 5000);
             });
         }
-        request(name, sendPacket) {
-            return new Promise(resolve => {
-                let handled = false;
-                let handlerId = this._nodeConnection.addHandler(packet => {
-                    if (packet.id == sendPacket.id) {
-                        this._nodeConnection.removeHandler(handlerId);
-                        handled = true;
-                        resolve(packet);
-                    }
-                });
-                this._nodeConnection.sendPacket(sendPacket);
-                setTimeout(() => {
-                    if (!handled) {
-                        this._nodeConnection.removeHandler(handlerId);
-                        currentError.set(new ApplicationError(ErrorIds.request, "Request of " + name + " took too long"));
-                        resolve(undefined);
-                    }
-                }, 5000);
-            });
+        request(sendPacket) {
+            this._nodeConnection.sendPacket(sendPacket);
         }
         hasUser() {
             return this._user.exists();
@@ -1866,10 +1883,122 @@ var app = (function () {
         }
     }
 
+    class PacketOutRequestApplicationData extends Packet {
+        constructor(dataIds) {
+            super(5, { dataIds: dataIds });
+        }
+    }
+
+    const ApplicationDataIds = {
+        applicationState: 0,
+        applicationType: 1,
+        applicationUptime: 2,
+        applicationCpuLoad: 3,
+        applicationMemoryUsage: 4,
+        applicationDescription: 5
+    };
+
+    const PageIds = {
+        register: -4,
+        login: -3,
+        addNode: -2,
+        loading: -1,
+        home: 0,
+        application: 1,
+        options: 2,
+        console: 3,
+        files: 4,
+        access: 5,
+        settings: 6
+    };
+
+    function update$1(pageId) {
+        if (pageId == PageIds.application) {
+            updateApplicationState();
+            updateApplicationType();
+            updateApplicationUptime();
+            updateApplicationCpuLoad();
+            updateApplicationDescription();
+            updateApplicationMemoryUsage();
+        }
+    }
+    function updateApplicationState() {
+        networkManager.update(value => {
+            currentNode.update(nodeId => {
+                let node = value.nodeManager.getNodeById(nodeId);
+                node.request(new PacketOutRequestApplicationData([ApplicationDataIds.applicationState]));
+                return nodeId;
+            });
+            return value;
+        });
+    }
+    function updateApplicationType() {
+        networkManager.update(value => {
+            currentNode.update(nodeId => {
+                let node = value.nodeManager.getNodeById(nodeId);
+                node.request(new PacketOutRequestApplicationData([ApplicationDataIds.applicationType]));
+                return nodeId;
+            });
+            return value;
+        });
+    }
+    function updateApplicationUptime() {
+        networkManager.update(value => {
+            currentNode.update(nodeId => {
+                let node = value.nodeManager.getNodeById(nodeId);
+                node.request(new PacketOutRequestApplicationData([ApplicationDataIds.applicationUptime]));
+                return nodeId;
+            });
+            return value;
+        });
+    }
+    function updateApplicationCpuLoad() {
+        networkManager.update(value => {
+            currentNode.update(nodeId => {
+                let node = value.nodeManager.getNodeById(nodeId);
+                node.request(new PacketOutRequestApplicationData([ApplicationDataIds.applicationCpuLoad]));
+                return nodeId;
+            });
+            return value;
+        });
+    }
+    function updateApplicationMemoryUsage() {
+        networkManager.update(value => {
+            currentNode.update(nodeId => {
+                let node = value.nodeManager.getNodeById(nodeId);
+                node.request(new PacketOutRequestApplicationData([ApplicationDataIds.applicationMemoryUsage]));
+                return nodeId;
+            });
+            return value;
+        });
+    }
+    function updateApplicationDescription() {
+        networkManager.update(value => {
+            currentNode.update(nodeId => {
+                let node = value.nodeManager.getNodeById(nodeId);
+                node.request(new PacketOutRequestApplicationData([ApplicationDataIds.applicationDescription]));
+                return nodeId;
+            });
+            return value;
+        });
+    }
+
     class NetworkManager {
         constructor() {
             this._nodeManager = new NodeManager();
             console.log("Initializing the networkManager...");
+            setInterval(() => {
+                currentNode.update(value => {
+                    let node = this._nodeManager.getNodeById(value);
+                    if (node != undefined) {
+                        pageId.update(value1 => {
+                            update$1(value1);
+                            return value1;
+                        });
+                    }
+                    return value;
+                });
+            }, 1000);
         }
         prepareManager() {
             this._nodeManager.loadNodes();
@@ -1898,8 +2027,14 @@ var app = (function () {
     const currentNode = writable(window.localStorage.getItem("currentNode") ? Number(JSON.parse(window.localStorage.getItem("currentNode"))) : 0);
     const currentError = writable(undefined);
     const networkManager = writable(new NetworkManager());
+    const pageId = writable(PageIds.loading);
     const userData = writable(new UserData(undefined, []));
     const applicationState = writable(ApplicationStates.stopped);
+    const applicationType = writable(undefined);
+    const applicationUptime = writable(undefined);
+    const applicationCpuLoad = writable(undefined);
+    const applicationMemoryUsage = writable(undefined);
+    const applicationDescription = writable(undefined);
     currentError.subscribe(value => {
         if (value != undefined) {
             console.log("Error[id: " + value.id + "] " + value.message);
@@ -1911,17 +2046,20 @@ var app = (function () {
     darkMode.subscribe(value => {
         localStorage.setItem("darkMode", JSON.stringify(value));
     });
+    pageId.subscribe(value => {
+        update$1(value);
+    });
 
     /* src\components\sidebar\SideBar.svelte generated by Svelte v3.46.3 */
     const file$d = "src\\components\\sidebar\\SideBar.svelte";
 
     function get_each_context$3(ctx, list, i) {
     	const child_ctx = ctx.slice();
-    	child_ctx[2] = list[i];
+    	child_ctx[11] = list[i];
     	return child_ctx;
     }
 
-    // (10:4) {#if !hideIcon.includes(SideBarIconIds.home) }
+    // (11:4) {#if !hideIcon.includes(SideBarIconIds.home) }
     function create_if_block_13(ctx) {
     	let sidebaricon;
     	let current;
@@ -1930,6 +2068,8 @@ var app = (function () {
     			props: { icon: Home, text: "Home" },
     			$$inline: true
     		});
+
+    	sidebaricon.$on("click", /*click_handler*/ ctx[3]);
 
     	const block = {
     		c: function create() {
@@ -1958,15 +2098,15 @@ var app = (function () {
     		block,
     		id: create_if_block_13.name,
     		type: "if",
-    		source: "(10:4) {#if !hideIcon.includes(SideBarIconIds.home) }",
+    		source: "(11:4) {#if !hideIcon.includes(SideBarIconIds.home) }",
     		ctx
     	});
 
     	return block;
     }
 
-    // (13:4) {#if !hideIcon.includes(SideBarIconIds.application) }
-    function create_if_block_12(ctx) {
+    // (16:4) {#if !hideIcon.includes(SideBarIconIds.application) }
+    function create_if_block_12$1(ctx) {
     	let sidebardivider;
     	let t;
     	let sidebaricon;
@@ -1977,6 +2117,8 @@ var app = (function () {
     			props: { icon: Chip, text: "Application" },
     			$$inline: true
     		});
+
+    	sidebaricon.$on("click", /*click_handler_1*/ ctx[4]);
 
     	const block = {
     		c: function create() {
@@ -2011,17 +2153,17 @@ var app = (function () {
 
     	dispatch_dev("SvelteRegisterBlock", {
     		block,
-    		id: create_if_block_12.name,
+    		id: create_if_block_12$1.name,
     		type: "if",
-    		source: "(13:4) {#if !hideIcon.includes(SideBarIconIds.application) }",
+    		source: "(16:4) {#if !hideIcon.includes(SideBarIconIds.application) }",
     		ctx
     	});
 
     	return block;
     }
 
-    // (17:4) {#if !hideIcon.includes(SideBarIconIds.options) }
-    function create_if_block_11(ctx) {
+    // (22:4) {#if !hideIcon.includes(SideBarIconIds.options) }
+    function create_if_block_11$1(ctx) {
     	let sidebaricon;
     	let current;
 
@@ -2030,6 +2172,8 @@ var app = (function () {
     			$$inline: true
     		});
 
+    	sidebaricon.$on("click", /*click_handler_2*/ ctx[5]);
+
     	const block = {
     		c: function create() {
     			create_component(sidebaricon.$$.fragment);
@@ -2055,17 +2199,17 @@ var app = (function () {
 
     	dispatch_dev("SvelteRegisterBlock", {
     		block,
-    		id: create_if_block_11.name,
+    		id: create_if_block_11$1.name,
     		type: "if",
-    		source: "(17:4) {#if !hideIcon.includes(SideBarIconIds.options) }",
+    		source: "(22:4) {#if !hideIcon.includes(SideBarIconIds.options) }",
     		ctx
     	});
 
     	return block;
     }
 
-    // (20:4) {#if !hideIcon.includes(SideBarIconIds.console) }
-    function create_if_block_10(ctx) {
+    // (27:4) {#if !hideIcon.includes(SideBarIconIds.console) }
+    function create_if_block_10$1(ctx) {
     	let sidebaricon;
     	let current;
 
@@ -2074,6 +2218,8 @@ var app = (function () {
     			$$inline: true
     		});
 
+    	sidebaricon.$on("click", /*click_handler_3*/ ctx[6]);
+
     	const block = {
     		c: function create() {
     			create_component(sidebaricon.$$.fragment);
@@ -2099,17 +2245,17 @@ var app = (function () {
 
     	dispatch_dev("SvelteRegisterBlock", {
     		block,
-    		id: create_if_block_10.name,
+    		id: create_if_block_10$1.name,
     		type: "if",
-    		source: "(20:4) {#if !hideIcon.includes(SideBarIconIds.console) }",
+    		source: "(27:4) {#if !hideIcon.includes(SideBarIconIds.console) }",
     		ctx
     	});
 
     	return block;
     }
 
-    // (23:4) {#if !hideIcon.includes(SideBarIconIds.files) }
-    function create_if_block_9$1(ctx) {
+    // (32:4) {#if !hideIcon.includes(SideBarIconIds.files) }
+    function create_if_block_9$2(ctx) {
     	let sidebaricon;
     	let current;
 
@@ -2118,6 +2264,8 @@ var app = (function () {
     			$$inline: true
     		});
 
+    	sidebaricon.$on("click", /*click_handler_4*/ ctx[7]);
+
     	const block = {
     		c: function create() {
     			create_component(sidebaricon.$$.fragment);
@@ -2143,17 +2291,17 @@ var app = (function () {
 
     	dispatch_dev("SvelteRegisterBlock", {
     		block,
-    		id: create_if_block_9$1.name,
+    		id: create_if_block_9$2.name,
     		type: "if",
-    		source: "(23:4) {#if !hideIcon.includes(SideBarIconIds.files) }",
+    		source: "(32:4) {#if !hideIcon.includes(SideBarIconIds.files) }",
     		ctx
     	});
 
     	return block;
     }
 
-    // (26:4) {#if !hideIcon.includes(SideBarIconIds.access) }
-    function create_if_block_8$1(ctx) {
+    // (37:4) {#if !hideIcon.includes(SideBarIconIds.access) }
+    function create_if_block_8$2(ctx) {
     	let sidebaricon;
     	let current;
 
@@ -2162,6 +2310,8 @@ var app = (function () {
     			$$inline: true
     		});
 
+    	sidebaricon.$on("click", /*click_handler_5*/ ctx[8]);
+
     	const block = {
     		c: function create() {
     			create_component(sidebaricon.$$.fragment);
@@ -2187,16 +2337,16 @@ var app = (function () {
 
     	dispatch_dev("SvelteRegisterBlock", {
     		block,
-    		id: create_if_block_8$1.name,
+    		id: create_if_block_8$2.name,
     		type: "if",
-    		source: "(26:4) {#if !hideIcon.includes(SideBarIconIds.access) }",
+    		source: "(37:4) {#if !hideIcon.includes(SideBarIconIds.access) }",
     		ctx
     	});
 
     	return block;
     }
 
-    // (29:4) {#if !hideIcon.includes(SideBarIconIds.create_application) }
+    // (42:4) {#if !hideIcon.includes(SideBarIconIds.create_application) }
     function create_if_block_7$2(ctx) {
     	let sidebardivider;
     	let t;
@@ -2208,6 +2358,8 @@ var app = (function () {
     			props: { icon: Plus, text: "Create Application" },
     			$$inline: true
     		});
+
+    	sidebaricon.$on("click", /*click_handler_6*/ ctx[9]);
 
     	const block = {
     		c: function create() {
@@ -2244,18 +2396,18 @@ var app = (function () {
     		block,
     		id: create_if_block_7$2.name,
     		type: "if",
-    		source: "(29:4) {#if !hideIcon.includes(SideBarIconIds.create_application) }",
+    		source: "(42:4) {#if !hideIcon.includes(SideBarIconIds.create_application) }",
     		ctx
     	});
 
     	return block;
     }
 
-    // (33:4) {#if !hideIcon.includes(SideBarIconIds.applications) }
+    // (48:4) {#if !hideIcon.includes(SideBarIconIds.applications) }
     function create_if_block_1$3(ctx) {
     	let each_1_anchor;
     	let current;
-    	let each_value = /*$userData*/ ctx[1].applications;
+    	let each_value = /*$userData*/ ctx[2].applications;
     	validate_each_argument(each_value);
     	let each_blocks = [];
 
@@ -2284,8 +2436,8 @@ var app = (function () {
     			current = true;
     		},
     		p: function update(ctx, dirty) {
-    			if (dirty & /*Server, $userData, Chip, Cloud, DesktopComputer, DocumentDuplicate*/ 2) {
-    				each_value = /*$userData*/ ctx[1].applications;
+    			if (dirty & /*Server, $userData, Chip, Cloud, DesktopComputer, DocumentDuplicate*/ 4) {
+    				each_value = /*$userData*/ ctx[2].applications;
     				validate_each_argument(each_value);
     				let i;
 
@@ -2340,14 +2492,14 @@ var app = (function () {
     		block,
     		id: create_if_block_1$3.name,
     		type: "if",
-    		source: "(33:4) {#if !hideIcon.includes(SideBarIconIds.applications) }",
+    		source: "(48:4) {#if !hideIcon.includes(SideBarIconIds.applications) }",
     		ctx
     	});
 
     	return block;
     }
 
-    // (43:45) 
+    // (58:45) 
     function create_if_block_6$2(ctx) {
     	let sidebaricon;
     	let current;
@@ -2355,7 +2507,7 @@ var app = (function () {
     	sidebaricon = new SideBarIcon({
     			props: {
     				icon: DocumentDuplicate,
-    				text: /*application*/ ctx[2].name
+    				text: /*application*/ ctx[11].name
     			},
     			$$inline: true
     		});
@@ -2370,7 +2522,7 @@ var app = (function () {
     		},
     		p: function update(ctx, dirty) {
     			const sidebaricon_changes = {};
-    			if (dirty & /*$userData*/ 2) sidebaricon_changes.text = /*application*/ ctx[2].name;
+    			if (dirty & /*$userData*/ 4) sidebaricon_changes.text = /*application*/ ctx[11].name;
     			sidebaricon.$set(sidebaricon_changes);
     		},
     		i: function intro(local) {
@@ -2391,14 +2543,14 @@ var app = (function () {
     		block,
     		id: create_if_block_6$2.name,
     		type: "if",
-    		source: "(43:45) ",
+    		source: "(58:45) ",
     		ctx
     	});
 
     	return block;
     }
 
-    // (41:45) 
+    // (56:45) 
     function create_if_block_5$2(ctx) {
     	let sidebaricon;
     	let current;
@@ -2406,7 +2558,7 @@ var app = (function () {
     	sidebaricon = new SideBarIcon({
     			props: {
     				icon: DesktopComputer,
-    				text: /*application*/ ctx[2].name
+    				text: /*application*/ ctx[11].name
     			},
     			$$inline: true
     		});
@@ -2421,7 +2573,7 @@ var app = (function () {
     		},
     		p: function update(ctx, dirty) {
     			const sidebaricon_changes = {};
-    			if (dirty & /*$userData*/ 2) sidebaricon_changes.text = /*application*/ ctx[2].name;
+    			if (dirty & /*$userData*/ 4) sidebaricon_changes.text = /*application*/ ctx[11].name;
     			sidebaricon.$set(sidebaricon_changes);
     		},
     		i: function intro(local) {
@@ -2442,14 +2594,14 @@ var app = (function () {
     		block,
     		id: create_if_block_5$2.name,
     		type: "if",
-    		source: "(41:45) ",
+    		source: "(56:45) ",
     		ctx
     	});
 
     	return block;
     }
 
-    // (39:45) 
+    // (54:45) 
     function create_if_block_4$3(ctx) {
     	let sidebaricon;
     	let current;
@@ -2457,7 +2609,7 @@ var app = (function () {
     	sidebaricon = new SideBarIcon({
     			props: {
     				icon: Cloud,
-    				text: /*application*/ ctx[2].name
+    				text: /*application*/ ctx[11].name
     			},
     			$$inline: true
     		});
@@ -2472,7 +2624,7 @@ var app = (function () {
     		},
     		p: function update(ctx, dirty) {
     			const sidebaricon_changes = {};
-    			if (dirty & /*$userData*/ 2) sidebaricon_changes.text = /*application*/ ctx[2].name;
+    			if (dirty & /*$userData*/ 4) sidebaricon_changes.text = /*application*/ ctx[11].name;
     			sidebaricon.$set(sidebaricon_changes);
     		},
     		i: function intro(local) {
@@ -2493,14 +2645,14 @@ var app = (function () {
     		block,
     		id: create_if_block_4$3.name,
     		type: "if",
-    		source: "(39:45) ",
+    		source: "(54:45) ",
     		ctx
     	});
 
     	return block;
     }
 
-    // (37:45) 
+    // (52:45) 
     function create_if_block_3$3(ctx) {
     	let sidebaricon;
     	let current;
@@ -2508,7 +2660,7 @@ var app = (function () {
     	sidebaricon = new SideBarIcon({
     			props: {
     				icon: Chip,
-    				text: /*application*/ ctx[2].name
+    				text: /*application*/ ctx[11].name
     			},
     			$$inline: true
     		});
@@ -2523,7 +2675,7 @@ var app = (function () {
     		},
     		p: function update(ctx, dirty) {
     			const sidebaricon_changes = {};
-    			if (dirty & /*$userData*/ 2) sidebaricon_changes.text = /*application*/ ctx[2].name;
+    			if (dirty & /*$userData*/ 4) sidebaricon_changes.text = /*application*/ ctx[11].name;
     			sidebaricon.$set(sidebaricon_changes);
     		},
     		i: function intro(local) {
@@ -2544,14 +2696,14 @@ var app = (function () {
     		block,
     		id: create_if_block_3$3.name,
     		type: "if",
-    		source: "(37:45) ",
+    		source: "(52:45) ",
     		ctx
     	});
 
     	return block;
     }
 
-    // (35:12) {#if application.icon === 0}
+    // (50:12) {#if application.icon === 0}
     function create_if_block_2$3(ctx) {
     	let sidebaricon;
     	let current;
@@ -2559,7 +2711,7 @@ var app = (function () {
     	sidebaricon = new SideBarIcon({
     			props: {
     				icon: Server,
-    				text: /*application*/ ctx[2].name
+    				text: /*application*/ ctx[11].name
     			},
     			$$inline: true
     		});
@@ -2574,7 +2726,7 @@ var app = (function () {
     		},
     		p: function update(ctx, dirty) {
     			const sidebaricon_changes = {};
-    			if (dirty & /*$userData*/ 2) sidebaricon_changes.text = /*application*/ ctx[2].name;
+    			if (dirty & /*$userData*/ 4) sidebaricon_changes.text = /*application*/ ctx[11].name;
     			sidebaricon.$set(sidebaricon_changes);
     		},
     		i: function intro(local) {
@@ -2595,14 +2747,14 @@ var app = (function () {
     		block,
     		id: create_if_block_2$3.name,
     		type: "if",
-    		source: "(35:12) {#if application.icon === 0}",
+    		source: "(50:12) {#if application.icon === 0}",
     		ctx
     	});
 
     	return block;
     }
 
-    // (34:8) {#each $userData.applications as application}
+    // (49:8) {#each $userData.applications as application}
     function create_each_block$3(ctx) {
     	let current_block_type_index;
     	let if_block;
@@ -2620,11 +2772,11 @@ var app = (function () {
     	const if_blocks = [];
 
     	function select_block_type(ctx, dirty) {
-    		if (/*application*/ ctx[2].icon === 0) return 0;
-    		if (/*application*/ ctx[2].icon === 1) return 1;
-    		if (/*application*/ ctx[2].icon === 2) return 2;
-    		if (/*application*/ ctx[2].icon === 3) return 3;
-    		if (/*application*/ ctx[2].icon === 4) return 4;
+    		if (/*application*/ ctx[11].icon === 0) return 0;
+    		if (/*application*/ ctx[11].icon === 1) return 1;
+    		if (/*application*/ ctx[11].icon === 2) return 2;
+    		if (/*application*/ ctx[11].icon === 3) return 3;
+    		if (/*application*/ ctx[11].icon === 4) return 4;
     		return -1;
     	}
 
@@ -2703,14 +2855,14 @@ var app = (function () {
     		block,
     		id: create_each_block$3.name,
     		type: "each",
-    		source: "(34:8) {#each $userData.applications as application}",
+    		source: "(49:8) {#each $userData.applications as application}",
     		ctx
     	});
 
     	return block;
     }
 
-    // (48:4) {#if !hideIcon.includes(SideBarIconIds.settings) }
+    // (63:4) {#if !hideIcon.includes(SideBarIconIds.settings) }
     function create_if_block$8(ctx) {
     	let sidebardivider;
     	let t;
@@ -2722,6 +2874,8 @@ var app = (function () {
     			props: { icon: FingerPrint, text: "Settings" },
     			$$inline: true
     		});
+
+    	sidebaricon.$on("click", /*click_handler_7*/ ctx[10]);
 
     	const block = {
     		c: function create() {
@@ -2758,7 +2912,7 @@ var app = (function () {
     		block,
     		id: create_if_block$8.name,
     		type: "if",
-    		source: "(48:4) {#if !hideIcon.includes(SideBarIconIds.settings) }",
+    		source: "(63:4) {#if !hideIcon.includes(SideBarIconIds.settings) }",
     		ctx
     	});
 
@@ -2786,11 +2940,11 @@ var app = (function () {
     	let show_if = !/*hideIcon*/ ctx[0].includes(SideBarIconIds.settings);
     	let current;
     	let if_block0 = show_if_8 && create_if_block_13(ctx);
-    	let if_block1 = show_if_7 && create_if_block_12(ctx);
-    	let if_block2 = show_if_6 && create_if_block_11(ctx);
-    	let if_block3 = show_if_5 && create_if_block_10(ctx);
-    	let if_block4 = show_if_4 && create_if_block_9$1(ctx);
-    	let if_block5 = show_if_3 && create_if_block_8$1(ctx);
+    	let if_block1 = show_if_7 && create_if_block_12$1(ctx);
+    	let if_block2 = show_if_6 && create_if_block_11$1(ctx);
+    	let if_block3 = show_if_5 && create_if_block_10$1(ctx);
+    	let if_block4 = show_if_4 && create_if_block_9$2(ctx);
+    	let if_block5 = show_if_3 && create_if_block_8$2(ctx);
     	let if_block6 = show_if_2 && create_if_block_7$2(ctx);
     	let if_block7 = show_if_1 && create_if_block_1$3(ctx);
     	let if_block8 = show_if && create_if_block$8(ctx);
@@ -2816,7 +2970,7 @@ var app = (function () {
     			t7 = space();
     			if (if_block8) if_block8.c();
     			attr_dev(div, "class", "fixed top-0 left-0 h-screen w-16 pt-1 flex flex-col bg-white dark:bg-gray-900 shadow-lg");
-    			add_location(div, file$d, 8, 0, 421);
+    			add_location(div, file$d, 9, 0, 446);
     		},
     		l: function claim(nodes) {
     			throw new Error("options.hydrate only works if the component was compiled with the `hydratable: true` option");
@@ -2878,7 +3032,7 @@ var app = (function () {
     						transition_in(if_block1, 1);
     					}
     				} else {
-    					if_block1 = create_if_block_12(ctx);
+    					if_block1 = create_if_block_12$1(ctx);
     					if_block1.c();
     					transition_in(if_block1, 1);
     					if_block1.m(div, t1);
@@ -2903,7 +3057,7 @@ var app = (function () {
     						transition_in(if_block2, 1);
     					}
     				} else {
-    					if_block2 = create_if_block_11(ctx);
+    					if_block2 = create_if_block_11$1(ctx);
     					if_block2.c();
     					transition_in(if_block2, 1);
     					if_block2.m(div, t2);
@@ -2928,7 +3082,7 @@ var app = (function () {
     						transition_in(if_block3, 1);
     					}
     				} else {
-    					if_block3 = create_if_block_10(ctx);
+    					if_block3 = create_if_block_10$1(ctx);
     					if_block3.c();
     					transition_in(if_block3, 1);
     					if_block3.m(div, t3);
@@ -2953,7 +3107,7 @@ var app = (function () {
     						transition_in(if_block4, 1);
     					}
     				} else {
-    					if_block4 = create_if_block_9$1(ctx);
+    					if_block4 = create_if_block_9$2(ctx);
     					if_block4.c();
     					transition_in(if_block4, 1);
     					if_block4.m(div, t4);
@@ -2978,7 +3132,7 @@ var app = (function () {
     						transition_in(if_block5, 1);
     					}
     				} else {
-    					if_block5 = create_if_block_8$1(ctx);
+    					if_block5 = create_if_block_8$2(ctx);
     					if_block5.c();
     					transition_in(if_block5, 1);
     					if_block5.m(div, t5);
@@ -3121,18 +3275,52 @@ var app = (function () {
     function instance$d($$self, $$props, $$invalidate) {
     	let $userData;
     	validate_store(userData, 'userData');
-    	component_subscribe($$self, userData, $$value => $$invalidate(1, $userData = $$value));
+    	component_subscribe($$self, userData, $$value => $$invalidate(2, $userData = $$value));
     	let { $$slots: slots = {}, $$scope } = $$props;
     	validate_slots('SideBar', slots, []);
     	let { hideIcon } = $$props;
-    	const writable_props = ['hideIcon'];
+    	let { iconPressed } = $$props;
+    	const writable_props = ['hideIcon', 'iconPressed'];
 
     	Object.keys($$props).forEach(key => {
     		if (!~writable_props.indexOf(key) && key.slice(0, 2) !== '$$' && key !== 'slot') console.warn(`<SideBar> was created with unknown prop '${key}'`);
     	});
 
+    	const click_handler = function () {
+    		iconPressed(SideBarIconIds.home);
+    	};
+
+    	const click_handler_1 = function () {
+    		iconPressed(SideBarIconIds.application);
+    	};
+
+    	const click_handler_2 = function () {
+    		iconPressed(SideBarIconIds.options);
+    	};
+
+    	const click_handler_3 = function () {
+    		iconPressed(SideBarIconIds.console);
+    	};
+
+    	const click_handler_4 = function () {
+    		iconPressed(SideBarIconIds.files);
+    	};
+
+    	const click_handler_5 = function () {
+    		iconPressed(SideBarIconIds.access);
+    	};
+
+    	const click_handler_6 = function () {
+    		iconPressed(SideBarIconIds.create_application);
+    	};
+
+    	const click_handler_7 = function () {
+    		iconPressed(SideBarIconIds.settings);
+    	};
+
     	$$self.$$set = $$props => {
     		if ('hideIcon' in $$props) $$invalidate(0, hideIcon = $$props.hideIcon);
+    		if ('iconPressed' in $$props) $$invalidate(1, iconPressed = $$props.iconPressed);
     	};
 
     	$$self.$capture_state = () => ({
@@ -3153,24 +3341,38 @@ var app = (function () {
     		SideBarIconIds,
     		userData,
     		hideIcon,
+    		iconPressed,
     		$userData
     	});
 
     	$$self.$inject_state = $$props => {
     		if ('hideIcon' in $$props) $$invalidate(0, hideIcon = $$props.hideIcon);
+    		if ('iconPressed' in $$props) $$invalidate(1, iconPressed = $$props.iconPressed);
     	};
 
     	if ($$props && "$$inject" in $$props) {
     		$$self.$inject_state($$props.$$inject);
     	}
 
-    	return [hideIcon, $userData];
+    	return [
+    		hideIcon,
+    		iconPressed,
+    		$userData,
+    		click_handler,
+    		click_handler_1,
+    		click_handler_2,
+    		click_handler_3,
+    		click_handler_4,
+    		click_handler_5,
+    		click_handler_6,
+    		click_handler_7
+    	];
     }
 
     class SideBar extends SvelteComponentDev {
     	constructor(options) {
     		super(options);
-    		init(this, options, instance$d, create_fragment$d, safe_not_equal, { hideIcon: 0 });
+    		init(this, options, instance$d, create_fragment$d, safe_not_equal, { hideIcon: 0, iconPressed: 1 });
 
     		dispatch_dev("SvelteRegisterComponent", {
     			component: this,
@@ -3185,6 +3387,10 @@ var app = (function () {
     		if (/*hideIcon*/ ctx[0] === undefined && !('hideIcon' in props)) {
     			console.warn("<SideBar> was created without expected prop 'hideIcon'");
     		}
+
+    		if (/*iconPressed*/ ctx[1] === undefined && !('iconPressed' in props)) {
+    			console.warn("<SideBar> was created without expected prop 'iconPressed'");
+    		}
     	}
 
     	get hideIcon() {
@@ -3192,6 +3398,14 @@ var app = (function () {
     	}
 
     	set hideIcon(value) {
+    		throw new Error("<SideBar>: Props cannot be set directly on the component instance unless compiling with 'accessors: true' or '<svelte:options accessors/>'");
+    	}
+
+    	get iconPressed() {
+    		throw new Error("<SideBar>: Props cannot be read directly from the component instance unless compiling with 'accessors: true' or '<svelte:options accessors/>'");
+    	}
+
+    	set iconPressed(value) {
     		throw new Error("<SideBar>: Props cannot be set directly on the component instance unless compiling with 'accessors: true' or '<svelte:options accessors/>'");
     	}
     }
@@ -5205,37 +5419,12 @@ var app = (function () {
     	}
     }
 
-    class PacketOutRequestApplicationData extends Packet {
-        constructor(dataIds) {
-            super(5, { dataIds: dataIds });
-        }
-    }
-
-    const ApplicationDataIds = {
-        applicationState: -1
-    };
-
-    function updateWorkerState() {
-        networkManager.update(value => {
-            currentNode.update(nodeId => {
-                let node = value.nodeManager.getNodeById(nodeId);
-                node.request("applicationState", new PacketOutRequestApplicationData([ApplicationDataIds.applicationState])).then(value1 => {
-                    if (value1 != undefined) {
-                        // @ts-ignore
-                        applicationState.set(value1.document.data.applicationState);
-                    }
-                });
-                return nodeId;
-            });
-            return value;
-        });
-    }
-
     /* src\components\application\status\ApplicationStatus.svelte generated by Svelte v3.46.3 */
+
     const file$6 = "src\\components\\application\\status\\ApplicationStatus.svelte";
 
-    // (15:12) {:else}
-    function create_else_block_2(ctx) {
+    // (13:12) {:else}
+    function create_else_block_7(ctx) {
     	let button;
     	let icon;
     	let t;
@@ -5253,7 +5442,7 @@ var app = (function () {
     			t = text("Start");
     			attr_dev(button, "type", "button");
     			attr_dev(button, "class", "transition inline-flex items-center mt-2 mr-2 px-3 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-green-600 hover:bg-green-700 focus:bg-green-700");
-    			add_location(button, file$6, 15, 16, 1127);
+    			add_location(button, file$6, 13, 16, 1111);
     		},
     		m: function mount(target, anchor) {
     			insert_dev(target, button, anchor);
@@ -5279,17 +5468,17 @@ var app = (function () {
 
     	dispatch_dev("SvelteRegisterBlock", {
     		block,
-    		id: create_else_block_2.name,
+    		id: create_else_block_7.name,
     		type: "else",
-    		source: "(15:12) {:else}",
+    		source: "(13:12) {:else}",
     		ctx
     	});
 
     	return block;
     }
 
-    // (13:12) {#if $applicationState === ApplicationStates.starting}
-    function create_if_block_7$1(ctx) {
+    // (11:12) {#if $applicationState === ApplicationStates.starting}
+    function create_if_block_12(ctx) {
     	let button;
     	let icon;
     	let t;
@@ -5310,7 +5499,7 @@ var app = (function () {
     			t = text("Start");
     			attr_dev(button, "type", "button");
     			attr_dev(button, "class", "transition inline-flex items-center mt-2 mr-2 px-3 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-green-600 hover:bg-green-700 focus:bg-green-700");
-    			add_location(button, file$6, 13, 16, 786);
+    			add_location(button, file$6, 11, 16, 770);
     		},
     		m: function mount(target, anchor) {
     			insert_dev(target, button, anchor);
@@ -5336,17 +5525,17 @@ var app = (function () {
 
     	dispatch_dev("SvelteRegisterBlock", {
     		block,
-    		id: create_if_block_7$1.name,
+    		id: create_if_block_12.name,
     		type: "if",
-    		source: "(13:12) {#if $applicationState === ApplicationStates.starting}",
+    		source: "(11:12) {#if $applicationState === ApplicationStates.starting}",
     		ctx
     	});
 
     	return block;
     }
 
-    // (20:12) {:else}
-    function create_else_block_1(ctx) {
+    // (18:12) {:else}
+    function create_else_block_6(ctx) {
     	let button;
     	let icon;
     	let t;
@@ -5367,7 +5556,7 @@ var app = (function () {
     			t = text("Restart");
     			attr_dev(button, "type", "button");
     			attr_dev(button, "class", "transition inline-flex items-center mt-2 mr-2 px-3 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-orange-450 hover:bg-yellow-500");
-    			add_location(button, file$6, 20, 16, 1836);
+    			add_location(button, file$6, 18, 16, 1820);
     		},
     		m: function mount(target, anchor) {
     			insert_dev(target, button, anchor);
@@ -5393,17 +5582,17 @@ var app = (function () {
 
     	dispatch_dev("SvelteRegisterBlock", {
     		block,
-    		id: create_else_block_1.name,
+    		id: create_else_block_6.name,
     		type: "else",
-    		source: "(20:12) {:else}",
+    		source: "(18:12) {:else}",
     		ctx
     	});
 
     	return block;
     }
 
-    // (18:12) {#if $applicationState === ApplicationStates.restarting}
-    function create_if_block_6$1(ctx) {
+    // (16:12) {#if $applicationState === ApplicationStates.restarting}
+    function create_if_block_11(ctx) {
     	let button;
     	let icon;
     	let t;
@@ -5424,7 +5613,7 @@ var app = (function () {
     			t = text("Restart");
     			attr_dev(button, "type", "button");
     			attr_dev(button, "class", "transition inline-flex items-center mt-2 mr-2 px-3 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-orange-450 hover:bg-yellow-500");
-    			add_location(button, file$6, 18, 16, 1510);
+    			add_location(button, file$6, 16, 16, 1494);
     		},
     		m: function mount(target, anchor) {
     			insert_dev(target, button, anchor);
@@ -5450,17 +5639,17 @@ var app = (function () {
 
     	dispatch_dev("SvelteRegisterBlock", {
     		block,
-    		id: create_if_block_6$1.name,
+    		id: create_if_block_11.name,
     		type: "if",
-    		source: "(18:12) {#if $applicationState === ApplicationStates.restarting}",
+    		source: "(16:12) {#if $applicationState === ApplicationStates.restarting}",
     		ctx
     	});
 
     	return block;
     }
 
-    // (25:12) {:else}
-    function create_else_block$2(ctx) {
+    // (23:12) {:else}
+    function create_else_block_5(ctx) {
     	let button;
     	let icon;
     	let t;
@@ -5478,7 +5667,7 @@ var app = (function () {
     			t = text("Stop");
     			attr_dev(button, "type", "button");
     			attr_dev(button, "class", "transition inline-flex items-center mt-2 mr-2 px-3 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-red-500 hover:bg-red-700 focus:bg-red-700");
-    			add_location(button, file$6, 25, 16, 2539);
+    			add_location(button, file$6, 23, 16, 2523);
     		},
     		m: function mount(target, anchor) {
     			insert_dev(target, button, anchor);
@@ -5504,17 +5693,17 @@ var app = (function () {
 
     	dispatch_dev("SvelteRegisterBlock", {
     		block,
-    		id: create_else_block$2.name,
+    		id: create_else_block_5.name,
     		type: "else",
-    		source: "(25:12) {:else}",
+    		source: "(23:12) {:else}",
     		ctx
     	});
 
     	return block;
     }
 
-    // (23:12) {#if $applicationState === ApplicationStates.stopping}
-    function create_if_block_5$1(ctx) {
+    // (21:12) {#if $applicationState === ApplicationStates.stopping}
+    function create_if_block_10(ctx) {
     	let button;
     	let icon;
     	let t;
@@ -5535,7 +5724,7 @@ var app = (function () {
     			t = text("Stop");
     			attr_dev(button, "type", "button");
     			attr_dev(button, "class", "transition inline-flex items-center mt-2 mr-2 px-3 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-red-500 hover:bg-red-700 focus:bg-red-700");
-    			add_location(button, file$6, 23, 16, 2205);
+    			add_location(button, file$6, 21, 16, 2189);
     		},
     		m: function mount(target, anchor) {
     			insert_dev(target, button, anchor);
@@ -5561,17 +5750,17 @@ var app = (function () {
 
     	dispatch_dev("SvelteRegisterBlock", {
     		block,
-    		id: create_if_block_5$1.name,
+    		id: create_if_block_10.name,
     		type: "if",
-    		source: "(23:12) {#if $applicationState === ApplicationStates.stopping}",
+    		source: "(21:12) {#if $applicationState === ApplicationStates.stopping}",
     		ctx
     	});
 
     	return block;
     }
 
-    // (42:74) 
-    function create_if_block_4$2(ctx) {
+    // (40:74) 
+    function create_if_block_9$1(ctx) {
     	let dd;
 
     	const block = {
@@ -5579,7 +5768,7 @@ var app = (function () {
     			dd = element("dd");
     			dd.textContent = "Offline";
     			attr_dev(dd, "class", "mt-1 text-sm text-red-600 font-medium sm:mt-0 sm:col-span-2");
-    			add_location(dd, file$6, 42, 20, 3975);
+    			add_location(dd, file$6, 40, 20, 3959);
     		},
     		m: function mount(target, anchor) {
     			insert_dev(target, dd, anchor);
@@ -5591,17 +5780,17 @@ var app = (function () {
 
     	dispatch_dev("SvelteRegisterBlock", {
     		block,
-    		id: create_if_block_4$2.name,
+    		id: create_if_block_9$1.name,
     		type: "if",
-    		source: "(42:74) ",
+    		source: "(40:74) ",
     		ctx
     	});
 
     	return block;
     }
 
-    // (40:75) 
-    function create_if_block_3$2(ctx) {
+    // (38:75) 
+    function create_if_block_8$1(ctx) {
     	let dd;
 
     	const block = {
@@ -5609,7 +5798,7 @@ var app = (function () {
     			dd = element("dd");
     			dd.textContent = "Stopping";
     			attr_dev(dd, "class", "mt-1 text-sm text-red-600 font-medium sm:mt-0 sm:col-span-2");
-    			add_location(dd, file$6, 40, 20, 3792);
+    			add_location(dd, file$6, 38, 20, 3776);
     		},
     		m: function mount(target, anchor) {
     			insert_dev(target, dd, anchor);
@@ -5621,17 +5810,17 @@ var app = (function () {
 
     	dispatch_dev("SvelteRegisterBlock", {
     		block,
-    		id: create_if_block_3$2.name,
+    		id: create_if_block_8$1.name,
     		type: "if",
-    		source: "(40:75) ",
+    		source: "(38:75) ",
     		ctx
     	});
 
     	return block;
     }
 
-    // (38:77) 
-    function create_if_block_2$2(ctx) {
+    // (36:77) 
+    function create_if_block_7$1(ctx) {
     	let dd;
 
     	const block = {
@@ -5639,7 +5828,7 @@ var app = (function () {
     			dd = element("dd");
     			dd.textContent = "Restarting";
     			attr_dev(dd, "class", "mt-1 text-sm text-orange-450 font-medium sm:mt-0 sm:col-span-2");
-    			add_location(dd, file$6, 38, 20, 3603);
+    			add_location(dd, file$6, 36, 20, 3587);
     		},
     		m: function mount(target, anchor) {
     			insert_dev(target, dd, anchor);
@@ -5651,17 +5840,17 @@ var app = (function () {
 
     	dispatch_dev("SvelteRegisterBlock", {
     		block,
-    		id: create_if_block_2$2.name,
+    		id: create_if_block_7$1.name,
     		type: "if",
-    		source: "(38:77) ",
+    		source: "(36:77) ",
     		ctx
     	});
 
     	return block;
     }
 
-    // (36:75) 
-    function create_if_block_1$2(ctx) {
+    // (34:75) 
+    function create_if_block_6$1(ctx) {
     	let dd;
 
     	const block = {
@@ -5669,7 +5858,7 @@ var app = (function () {
     			dd = element("dd");
     			dd.textContent = "Starting";
     			attr_dev(dd, "class", "mt-1 text-sm text-green-500 font-medium sm:mt-0 sm:col-span-2");
-    			add_location(dd, file$6, 36, 20, 3415);
+    			add_location(dd, file$6, 34, 20, 3399);
     		},
     		m: function mount(target, anchor) {
     			insert_dev(target, dd, anchor);
@@ -5681,17 +5870,17 @@ var app = (function () {
 
     	dispatch_dev("SvelteRegisterBlock", {
     		block,
-    		id: create_if_block_1$2.name,
+    		id: create_if_block_6$1.name,
     		type: "if",
-    		source: "(36:75) ",
+    		source: "(34:75) ",
     		ctx
     	});
 
     	return block;
     }
 
-    // (34:16) {#if $applicationState === ApplicationStates.started}
-    function create_if_block$3(ctx) {
+    // (32:16) {#if $applicationState === ApplicationStates.started}
+    function create_if_block_5$1(ctx) {
     	let dd;
 
     	const block = {
@@ -5699,7 +5888,7 @@ var app = (function () {
     			dd = element("dd");
     			dd.textContent = "Online";
     			attr_dev(dd, "class", "mt-1 text-sm text-green-500 font-medium sm:mt-0 sm:col-span-2");
-    			add_location(dd, file$6, 34, 20, 3231);
+    			add_location(dd, file$6, 32, 20, 3215);
     		},
     		m: function mount(target, anchor) {
     			insert_dev(target, dd, anchor);
@@ -5711,9 +5900,470 @@ var app = (function () {
 
     	dispatch_dev("SvelteRegisterBlock", {
     		block,
+    		id: create_if_block_5$1.name,
+    		type: "if",
+    		source: "(32:16) {#if $applicationState === ApplicationStates.started}",
+    		ctx
+    	});
+
+    	return block;
+    }
+
+    // (48:16) {:else}
+    function create_else_block_4(ctx) {
+    	let dd;
+    	let t;
+
+    	const block = {
+    		c: function create() {
+    			dd = element("dd");
+    			t = text(/*$applicationType*/ ctx[1]);
+    			attr_dev(dd, "class", "mt-1 text-sm text-gray-900 dark:text-gray-400 sm:mt-0 sm:col-span-2");
+    			add_location(dd, file$6, 48, 20, 4551);
+    		},
+    		m: function mount(target, anchor) {
+    			insert_dev(target, dd, anchor);
+    			append_dev(dd, t);
+    		},
+    		p: function update(ctx, dirty) {
+    			if (dirty & /*$applicationType*/ 2) set_data_dev(t, /*$applicationType*/ ctx[1]);
+    		},
+    		i: noop,
+    		o: noop,
+    		d: function destroy(detaching) {
+    			if (detaching) detach_dev(dd);
+    		}
+    	};
+
+    	dispatch_dev("SvelteRegisterBlock", {
+    		block,
+    		id: create_else_block_4.name,
+    		type: "else",
+    		source: "(48:16) {:else}",
+    		ctx
+    	});
+
+    	return block;
+    }
+
+    // (46:16) {#if $applicationType === undefined}
+    function create_if_block_4$2(ctx) {
+    	let dd;
+    	let icon;
+    	let current;
+
+    	icon = new Icon({
+    			props: {
+    				src: Refresh,
+    				class: "-ml-1 mr-2 h-5 w-5 service-button-loading"
+    			},
+    			$$inline: true
+    		});
+
+    	const block = {
+    		c: function create() {
+    			dd = element("dd");
+    			create_component(icon.$$.fragment);
+    			attr_dev(dd, "class", "mt-1 text-gray-500 dark:text-gray-400 sm:mt-0 sm:col-span-2");
+    			add_location(dd, file$6, 46, 20, 4354);
+    		},
+    		m: function mount(target, anchor) {
+    			insert_dev(target, dd, anchor);
+    			mount_component(icon, dd, null);
+    			current = true;
+    		},
+    		p: noop,
+    		i: function intro(local) {
+    			if (current) return;
+    			transition_in(icon.$$.fragment, local);
+    			current = true;
+    		},
+    		o: function outro(local) {
+    			transition_out(icon.$$.fragment, local);
+    			current = false;
+    		},
+    		d: function destroy(detaching) {
+    			if (detaching) detach_dev(dd);
+    			destroy_component(icon);
+    		}
+    	};
+
+    	dispatch_dev("SvelteRegisterBlock", {
+    		block,
+    		id: create_if_block_4$2.name,
+    		type: "if",
+    		source: "(46:16) {#if $applicationType === undefined}",
+    		ctx
+    	});
+
+    	return block;
+    }
+
+    // (56:16) {:else}
+    function create_else_block_3(ctx) {
+    	let dd;
+    	let t;
+
+    	const block = {
+    		c: function create() {
+    			dd = element("dd");
+    			t = text(/*$applicationUptime*/ ctx[2]);
+    			attr_dev(dd, "class", "mt-1 text-sm text-gray-900 dark:text-gray-400 sm:mt-0 sm:col-span-2");
+    			add_location(dd, file$6, 56, 20, 5176);
+    		},
+    		m: function mount(target, anchor) {
+    			insert_dev(target, dd, anchor);
+    			append_dev(dd, t);
+    		},
+    		p: function update(ctx, dirty) {
+    			if (dirty & /*$applicationUptime*/ 4) set_data_dev(t, /*$applicationUptime*/ ctx[2]);
+    		},
+    		i: noop,
+    		o: noop,
+    		d: function destroy(detaching) {
+    			if (detaching) detach_dev(dd);
+    		}
+    	};
+
+    	dispatch_dev("SvelteRegisterBlock", {
+    		block,
+    		id: create_else_block_3.name,
+    		type: "else",
+    		source: "(56:16) {:else}",
+    		ctx
+    	});
+
+    	return block;
+    }
+
+    // (54:16) {#if $applicationUptime === undefined}
+    function create_if_block_3$2(ctx) {
+    	let dd;
+    	let icon;
+    	let current;
+
+    	icon = new Icon({
+    			props: {
+    				src: Refresh,
+    				class: "-ml-1 mr-2 h-5 w-5 service-button-loading"
+    			},
+    			$$inline: true
+    		});
+
+    	const block = {
+    		c: function create() {
+    			dd = element("dd");
+    			create_component(icon.$$.fragment);
+    			attr_dev(dd, "class", "mt-1 text-gray-500 dark:text-gray-400 sm:mt-0 sm:col-span-2");
+    			add_location(dd, file$6, 54, 20, 4979);
+    		},
+    		m: function mount(target, anchor) {
+    			insert_dev(target, dd, anchor);
+    			mount_component(icon, dd, null);
+    			current = true;
+    		},
+    		p: noop,
+    		i: function intro(local) {
+    			if (current) return;
+    			transition_in(icon.$$.fragment, local);
+    			current = true;
+    		},
+    		o: function outro(local) {
+    			transition_out(icon.$$.fragment, local);
+    			current = false;
+    		},
+    		d: function destroy(detaching) {
+    			if (detaching) detach_dev(dd);
+    			destroy_component(icon);
+    		}
+    	};
+
+    	dispatch_dev("SvelteRegisterBlock", {
+    		block,
+    		id: create_if_block_3$2.name,
+    		type: "if",
+    		source: "(54:16) {#if $applicationUptime === undefined}",
+    		ctx
+    	});
+
+    	return block;
+    }
+
+    // (64:16) {:else}
+    function create_else_block_2(ctx) {
+    	let dd;
+    	let t0;
+    	let t1;
+
+    	const block = {
+    		c: function create() {
+    			dd = element("dd");
+    			t0 = text(/*$applicationCpuLoad*/ ctx[3]);
+    			t1 = text("%");
+    			attr_dev(dd, "class", "mt-1 text-sm text-gray-900 dark:text-gray-400 sm:mt-0 sm:col-span-2");
+    			add_location(dd, file$6, 64, 20, 5796);
+    		},
+    		m: function mount(target, anchor) {
+    			insert_dev(target, dd, anchor);
+    			append_dev(dd, t0);
+    			append_dev(dd, t1);
+    		},
+    		p: function update(ctx, dirty) {
+    			if (dirty & /*$applicationCpuLoad*/ 8) set_data_dev(t0, /*$applicationCpuLoad*/ ctx[3]);
+    		},
+    		i: noop,
+    		o: noop,
+    		d: function destroy(detaching) {
+    			if (detaching) detach_dev(dd);
+    		}
+    	};
+
+    	dispatch_dev("SvelteRegisterBlock", {
+    		block,
+    		id: create_else_block_2.name,
+    		type: "else",
+    		source: "(64:16) {:else}",
+    		ctx
+    	});
+
+    	return block;
+    }
+
+    // (62:16) {#if $applicationCpuLoad === undefined}
+    function create_if_block_2$2(ctx) {
+    	let dd;
+    	let icon;
+    	let current;
+
+    	icon = new Icon({
+    			props: {
+    				src: Refresh,
+    				class: "-ml-1 mr-2 h-5 w-5 service-button-loading"
+    			},
+    			$$inline: true
+    		});
+
+    	const block = {
+    		c: function create() {
+    			dd = element("dd");
+    			create_component(icon.$$.fragment);
+    			attr_dev(dd, "class", "mt-1 text-gray-500 dark:text-gray-400 sm:mt-0 sm:col-span-2");
+    			add_location(dd, file$6, 62, 20, 5599);
+    		},
+    		m: function mount(target, anchor) {
+    			insert_dev(target, dd, anchor);
+    			mount_component(icon, dd, null);
+    			current = true;
+    		},
+    		p: noop,
+    		i: function intro(local) {
+    			if (current) return;
+    			transition_in(icon.$$.fragment, local);
+    			current = true;
+    		},
+    		o: function outro(local) {
+    			transition_out(icon.$$.fragment, local);
+    			current = false;
+    		},
+    		d: function destroy(detaching) {
+    			if (detaching) detach_dev(dd);
+    			destroy_component(icon);
+    		}
+    	};
+
+    	dispatch_dev("SvelteRegisterBlock", {
+    		block,
+    		id: create_if_block_2$2.name,
+    		type: "if",
+    		source: "(62:16) {#if $applicationCpuLoad === undefined}",
+    		ctx
+    	});
+
+    	return block;
+    }
+
+    // (72:16) {:else}
+    function create_else_block_1(ctx) {
+    	let dd;
+
+    	const block = {
+    		c: function create() {
+    			dd = element("dd");
+    			dd.textContent = "Nothing";
+    			attr_dev(dd, "class", "mt-1 text-sm text-gray-900 dark:text-gray-400 sm:mt-0 sm:col-span-2");
+    			add_location(dd, file$6, 72, 20, 6423);
+    		},
+    		m: function mount(target, anchor) {
+    			insert_dev(target, dd, anchor);
+    		},
+    		p: noop,
+    		i: noop,
+    		o: noop,
+    		d: function destroy(detaching) {
+    			if (detaching) detach_dev(dd);
+    		}
+    	};
+
+    	dispatch_dev("SvelteRegisterBlock", {
+    		block,
+    		id: create_else_block_1.name,
+    		type: "else",
+    		source: "(72:16) {:else}",
+    		ctx
+    	});
+
+    	return block;
+    }
+
+    // (70:16) {#if $applicationCpuLoad === undefined}
+    function create_if_block_1$2(ctx) {
+    	let dd;
+    	let icon;
+    	let current;
+
+    	icon = new Icon({
+    			props: {
+    				src: Refresh,
+    				class: "-ml-1 mr-2 h-5 w-5 service-button-loading"
+    			},
+    			$$inline: true
+    		});
+
+    	const block = {
+    		c: function create() {
+    			dd = element("dd");
+    			create_component(icon.$$.fragment);
+    			attr_dev(dd, "class", "mt-1 text-gray-500 dark:text-gray-400 sm:mt-0 sm:col-span-2");
+    			add_location(dd, file$6, 70, 20, 6226);
+    		},
+    		m: function mount(target, anchor) {
+    			insert_dev(target, dd, anchor);
+    			mount_component(icon, dd, null);
+    			current = true;
+    		},
+    		p: noop,
+    		i: function intro(local) {
+    			if (current) return;
+    			transition_in(icon.$$.fragment, local);
+    			current = true;
+    		},
+    		o: function outro(local) {
+    			transition_out(icon.$$.fragment, local);
+    			current = false;
+    		},
+    		d: function destroy(detaching) {
+    			if (detaching) detach_dev(dd);
+    			destroy_component(icon);
+    		}
+    	};
+
+    	dispatch_dev("SvelteRegisterBlock", {
+    		block,
+    		id: create_if_block_1$2.name,
+    		type: "if",
+    		source: "(70:16) {#if $applicationCpuLoad === undefined}",
+    		ctx
+    	});
+
+    	return block;
+    }
+
+    // (82:16) {:else}
+    function create_else_block$2(ctx) {
+    	let dd;
+    	let t0_value = /*$applicationMemoryUsage*/ ctx[4][0] + "";
+    	let t0;
+    	let t1;
+    	let t2_value = /*$applicationMemoryUsage*/ ctx[4][1] + "";
+    	let t2;
+    	let t3;
+
+    	const block = {
+    		c: function create() {
+    			dd = element("dd");
+    			t0 = text(t0_value);
+    			t1 = text(" MB / ");
+    			t2 = text(t2_value);
+    			t3 = text(" MB");
+    			attr_dev(dd, "class", "mt-1 text-sm text-gray-900 dark:text-gray-400 sm:mt-0 sm:col-span-2");
+    			add_location(dd, file$6, 82, 20, 7086);
+    		},
+    		m: function mount(target, anchor) {
+    			insert_dev(target, dd, anchor);
+    			append_dev(dd, t0);
+    			append_dev(dd, t1);
+    			append_dev(dd, t2);
+    			append_dev(dd, t3);
+    		},
+    		p: function update(ctx, dirty) {
+    			if (dirty & /*$applicationMemoryUsage*/ 16 && t0_value !== (t0_value = /*$applicationMemoryUsage*/ ctx[4][0] + "")) set_data_dev(t0, t0_value);
+    			if (dirty & /*$applicationMemoryUsage*/ 16 && t2_value !== (t2_value = /*$applicationMemoryUsage*/ ctx[4][1] + "")) set_data_dev(t2, t2_value);
+    		},
+    		i: noop,
+    		o: noop,
+    		d: function destroy(detaching) {
+    			if (detaching) detach_dev(dd);
+    		}
+    	};
+
+    	dispatch_dev("SvelteRegisterBlock", {
+    		block,
+    		id: create_else_block$2.name,
+    		type: "else",
+    		source: "(82:16) {:else}",
+    		ctx
+    	});
+
+    	return block;
+    }
+
+    // (80:16) {#if $applicationMemoryUsage === undefined}
+    function create_if_block$3(ctx) {
+    	let dd;
+    	let icon;
+    	let current;
+
+    	icon = new Icon({
+    			props: {
+    				src: Refresh,
+    				class: "-ml-1 mr-2 h-5 w-5 service-button-loading"
+    			},
+    			$$inline: true
+    		});
+
+    	const block = {
+    		c: function create() {
+    			dd = element("dd");
+    			create_component(icon.$$.fragment);
+    			attr_dev(dd, "class", "mt-1 text-gray-500 dark:text-gray-400 sm:mt-0 sm:col-span-2");
+    			add_location(dd, file$6, 80, 20, 6889);
+    		},
+    		m: function mount(target, anchor) {
+    			insert_dev(target, dd, anchor);
+    			mount_component(icon, dd, null);
+    			current = true;
+    		},
+    		p: noop,
+    		i: function intro(local) {
+    			if (current) return;
+    			transition_in(icon.$$.fragment, local);
+    			current = true;
+    		},
+    		o: function outro(local) {
+    			transition_out(icon.$$.fragment, local);
+    			current = false;
+    		},
+    		d: function destroy(detaching) {
+    			if (detaching) detach_dev(dd);
+    			destroy_component(icon);
+    		}
+    	};
+
+    	dispatch_dev("SvelteRegisterBlock", {
+    		block,
     		id: create_if_block$3.name,
     		type: "if",
-    		source: "(34:16) {#if $applicationState === ApplicationStates.started}",
+    		source: "(80:16) {#if $applicationMemoryUsage === undefined}",
     		ctx
     	});
 
@@ -5746,29 +6396,34 @@ var app = (function () {
     	let div3;
     	let dt1;
     	let t11;
-    	let dd0;
-    	let t13;
+    	let current_block_type_index_3;
+    	let if_block4;
+    	let t12;
     	let div4;
     	let dt2;
+    	let t14;
+    	let current_block_type_index_4;
+    	let if_block5;
     	let t15;
-    	let dd1;
-    	let t17;
     	let div5;
     	let dt3;
-    	let t19;
-    	let dd2;
-    	let t21;
+    	let t17;
+    	let current_block_type_index_5;
+    	let if_block6;
+    	let t18;
     	let div6;
     	let dt4;
-    	let t23;
-    	let dd3;
-    	let t25;
+    	let t20;
+    	let current_block_type_index_6;
+    	let if_block7;
+    	let t21;
     	let div7;
     	let dt5;
-    	let t27;
-    	let dd4;
+    	let t23;
+    	let current_block_type_index_7;
+    	let if_block8;
     	let current;
-    	const if_block_creators = [create_if_block_7$1, create_else_block_2];
+    	const if_block_creators = [create_if_block_12, create_else_block_7];
     	const if_blocks = [];
 
     	function select_block_type(ctx, dirty) {
@@ -5778,7 +6433,7 @@ var app = (function () {
 
     	current_block_type_index = select_block_type(ctx);
     	if_block0 = if_blocks[current_block_type_index] = if_block_creators[current_block_type_index](ctx);
-    	const if_block_creators_1 = [create_if_block_6$1, create_else_block_1];
+    	const if_block_creators_1 = [create_if_block_11, create_else_block_6];
     	const if_blocks_1 = [];
 
     	function select_block_type_1(ctx, dirty) {
@@ -5788,7 +6443,7 @@ var app = (function () {
 
     	current_block_type_index_1 = select_block_type_1(ctx);
     	if_block1 = if_blocks_1[current_block_type_index_1] = if_block_creators_1[current_block_type_index_1](ctx);
-    	const if_block_creators_2 = [create_if_block_5$1, create_else_block$2];
+    	const if_block_creators_2 = [create_if_block_10, create_else_block_5];
     	const if_blocks_2 = [];
 
     	function select_block_type_2(ctx, dirty) {
@@ -5800,15 +6455,65 @@ var app = (function () {
     	if_block2 = if_blocks_2[current_block_type_index_2] = if_block_creators_2[current_block_type_index_2](ctx);
 
     	function select_block_type_3(ctx, dirty) {
-    		if (/*$applicationState*/ ctx[0] === ApplicationStates.started) return create_if_block$3;
-    		if (/*$applicationState*/ ctx[0] === ApplicationStates.starting) return create_if_block_1$2;
-    		if (/*$applicationState*/ ctx[0] === ApplicationStates.restarting) return create_if_block_2$2;
-    		if (/*$applicationState*/ ctx[0] === ApplicationStates.stopping) return create_if_block_3$2;
-    		if (/*$applicationState*/ ctx[0] === ApplicationStates.stopped) return create_if_block_4$2;
+    		if (/*$applicationState*/ ctx[0] === ApplicationStates.started) return create_if_block_5$1;
+    		if (/*$applicationState*/ ctx[0] === ApplicationStates.starting) return create_if_block_6$1;
+    		if (/*$applicationState*/ ctx[0] === ApplicationStates.restarting) return create_if_block_7$1;
+    		if (/*$applicationState*/ ctx[0] === ApplicationStates.stopping) return create_if_block_8$1;
+    		if (/*$applicationState*/ ctx[0] === ApplicationStates.stopped) return create_if_block_9$1;
     	}
 
     	let current_block_type = select_block_type_3(ctx);
     	let if_block3 = current_block_type && current_block_type(ctx);
+    	const if_block_creators_3 = [create_if_block_4$2, create_else_block_4];
+    	const if_blocks_3 = [];
+
+    	function select_block_type_4(ctx, dirty) {
+    		if (/*$applicationType*/ ctx[1] === undefined) return 0;
+    		return 1;
+    	}
+
+    	current_block_type_index_3 = select_block_type_4(ctx);
+    	if_block4 = if_blocks_3[current_block_type_index_3] = if_block_creators_3[current_block_type_index_3](ctx);
+    	const if_block_creators_4 = [create_if_block_3$2, create_else_block_3];
+    	const if_blocks_4 = [];
+
+    	function select_block_type_5(ctx, dirty) {
+    		if (/*$applicationUptime*/ ctx[2] === undefined) return 0;
+    		return 1;
+    	}
+
+    	current_block_type_index_4 = select_block_type_5(ctx);
+    	if_block5 = if_blocks_4[current_block_type_index_4] = if_block_creators_4[current_block_type_index_4](ctx);
+    	const if_block_creators_5 = [create_if_block_2$2, create_else_block_2];
+    	const if_blocks_5 = [];
+
+    	function select_block_type_6(ctx, dirty) {
+    		if (/*$applicationCpuLoad*/ ctx[3] === undefined) return 0;
+    		return 1;
+    	}
+
+    	current_block_type_index_5 = select_block_type_6(ctx);
+    	if_block6 = if_blocks_5[current_block_type_index_5] = if_block_creators_5[current_block_type_index_5](ctx);
+    	const if_block_creators_6 = [create_if_block_1$2, create_else_block_1];
+    	const if_blocks_6 = [];
+
+    	function select_block_type_7(ctx, dirty) {
+    		if (/*$applicationCpuLoad*/ ctx[3] === undefined) return 0;
+    		return 1;
+    	}
+
+    	current_block_type_index_6 = select_block_type_7(ctx);
+    	if_block7 = if_blocks_6[current_block_type_index_6] = if_block_creators_6[current_block_type_index_6](ctx);
+    	const if_block_creators_7 = [create_if_block$3, create_else_block$2];
+    	const if_blocks_7 = [];
+
+    	function select_block_type_8(ctx, dirty) {
+    		if (/*$applicationMemoryUsage*/ ctx[4] === undefined) return 0;
+    		return 1;
+    	}
+
+    	current_block_type_index_7 = select_block_type_8(ctx);
+    	if_block8 = if_blocks_7[current_block_type_index_7] = if_block_creators_7[current_block_type_index_7](ctx);
 
     	const block = {
     		c: function create() {
@@ -5839,83 +6544,68 @@ var app = (function () {
     			dt1 = element("dt");
     			dt1.textContent = "Type";
     			t11 = space();
-    			dd0 = element("dd");
-    			dd0.textContent = "Minecraft Server";
-    			t13 = space();
+    			if_block4.c();
+    			t12 = space();
     			div4 = element("div");
     			dt2 = element("dt");
     			dt2.textContent = "Current Uptime";
+    			t14 = space();
+    			if_block5.c();
     			t15 = space();
-    			dd1 = element("dd");
-    			dd1.textContent = "1 min 25 sec";
-    			t17 = space();
     			div5 = element("div");
     			dt3 = element("dt");
     			dt3.textContent = "CPU load";
-    			t19 = space();
-    			dd2 = element("dd");
-    			dd2.textContent = "35%";
-    			t21 = space();
+    			t17 = space();
+    			if_block6.c();
+    			t18 = space();
     			div6 = element("div");
     			dt4 = element("dt");
     			dt4.textContent = "Description";
-    			t23 = space();
-    			dd3 = element("dd");
-    			dd3.textContent = "Nothing";
-    			t25 = space();
+    			t20 = space();
+    			if_block7.c();
+    			t21 = space();
     			div7 = element("div");
     			dt5 = element("dt");
     			dt5.textContent = "Memory Usage";
-    			t27 = space();
-    			dd4 = element("dd");
-    			dd4.textContent = "2500 MB / 7000 MB";
+    			t23 = space();
+    			if_block8.c();
     			attr_dev(h3, "class", "text-lg leading-6 font-medium text-gray-900 dark:text-white");
-    			add_location(h3, file$6, 9, 8, 447);
+    			add_location(h3, file$6, 7, 8, 431);
     			attr_dev(p, "class", "mt-1 max-w-2xl text-sm text-gray-500 dark:text-gray-400");
-    			add_location(p, file$6, 10, 8, 557);
+    			add_location(p, file$6, 8, 8, 541);
     			attr_dev(div0, "class", "text-right mt-2");
-    			add_location(div0, file$6, 11, 8, 671);
+    			add_location(div0, file$6, 9, 8, 655);
     			attr_dev(div1, "class", "px-4 py-5 sm:px-6");
-    			add_location(div1, file$6, 8, 4, 406);
+    			add_location(div1, file$6, 6, 4, 390);
     			attr_dev(dt0, "class", "text-sm font-medium text-gray-500 dark:text-white");
-    			add_location(dt0, file$6, 32, 16, 3057);
+    			add_location(dt0, file$6, 30, 16, 3041);
     			attr_dev(div2, "class", "bg-gray-50 dark:bg-gray-850 px-4 py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6");
-    			add_location(div2, file$6, 31, 12, 2948);
+    			add_location(div2, file$6, 29, 12, 2932);
     			attr_dev(dt1, "class", "text-sm font-medium text-gray-500 dark:text-white");
-    			add_location(dt1, file$6, 46, 16, 4223);
-    			attr_dev(dd0, "class", "mt-1 text-sm text-gray-900 dark:text-gray-400 sm:mt-0 sm:col-span-2");
-    			add_location(dd0, file$6, 47, 16, 4312);
+    			add_location(dt1, file$6, 44, 16, 4207);
     			attr_dev(div3, "class", "bg-white dark:bg-gray-900 px-4 py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6");
-    			add_location(div3, file$6, 45, 12, 4116);
+    			add_location(div3, file$6, 43, 12, 4100);
     			attr_dev(dt2, "class", "text-sm font-medium text-gray-500 dark:text-white");
-    			add_location(dt2, file$6, 50, 16, 4556);
-    			attr_dev(dd1, "class", "mt-1 text-sm text-gray-900 dark:text-gray-400 sm:mt-0 sm:col-span-2");
-    			add_location(dd1, file$6, 51, 16, 4655);
+    			add_location(dt2, file$6, 52, 16, 4820);
     			attr_dev(div4, "class", "bg-gray-50 dark:bg-gray-850 px-4 py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6");
-    			add_location(div4, file$6, 49, 12, 4447);
+    			add_location(div4, file$6, 51, 12, 4711);
     			attr_dev(dt3, "class", "text-sm font-medium text-gray-500 dark:text-white");
-    			add_location(dt3, file$6, 54, 16, 4893);
-    			attr_dev(dd2, "class", "mt-1 text-sm text-gray-900 dark:text-gray-400 sm:mt-0 sm:col-span-2");
-    			add_location(dd2, file$6, 55, 16, 4986);
+    			add_location(dt3, file$6, 60, 16, 5445);
     			attr_dev(div5, "class", "bg-white dark:bg-gray-900 px-4 py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6");
-    			add_location(div5, file$6, 53, 12, 4786);
+    			add_location(div5, file$6, 59, 12, 5338);
     			attr_dev(dt4, "class", "text-sm font-medium text-gray-500 dark:text-white");
-    			add_location(dt4, file$6, 58, 16, 5217);
-    			attr_dev(dd3, "class", "mt-1 text-sm text-gray-900 dark:text-gray-400 sm:mt-0 sm:col-span-2");
-    			add_location(dd3, file$6, 59, 16, 5313);
+    			add_location(dt4, file$6, 68, 16, 6069);
     			attr_dev(div6, "class", "bg-gray-50 dark:bg-gray-850 px-4 py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6");
-    			add_location(div6, file$6, 57, 12, 5108);
+    			add_location(div6, file$6, 67, 12, 5960);
     			attr_dev(dt5, "class", "text-sm font-medium text-gray-500 dark:text-white");
-    			add_location(dt5, file$6, 64, 16, 5586);
-    			attr_dev(dd4, "class", "mt-1 text-sm text-gray-900 dark:text-gray-400 sm:mt-0 sm:col-span-2");
-    			add_location(dd4, file$6, 65, 16, 5683);
+    			add_location(dt5, file$6, 78, 16, 6727);
     			attr_dev(div7, "class", "bg-white dark:bg-gray-900 px-4 py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6");
-    			add_location(div7, file$6, 63, 12, 5479);
-    			add_location(dl, file$6, 30, 8, 2930);
+    			add_location(div7, file$6, 77, 12, 6620);
+    			add_location(dl, file$6, 28, 8, 2914);
     			attr_dev(div8, "class", "border-t border-gray-200 dark:border-gray-850");
-    			add_location(div8, file$6, 29, 4, 2861);
+    			add_location(div8, file$6, 27, 4, 2845);
     			attr_dev(div9, "class", "mr-9 ml-9 mt-9 mb-9 bg-white dark:bg-gray-900 rounded-lg shadow-lg");
-    			add_location(div9, file$6, 7, 0, 320);
+    			add_location(div9, file$6, 5, 0, 304);
     		},
     		l: function claim(nodes) {
     			throw new Error("options.hydrate only works if the component was compiled with the `hydratable: true` option");
@@ -5944,27 +6634,27 @@ var app = (function () {
     			append_dev(dl, div3);
     			append_dev(div3, dt1);
     			append_dev(div3, t11);
-    			append_dev(div3, dd0);
-    			append_dev(div3, t13);
+    			if_blocks_3[current_block_type_index_3].m(div3, null);
+    			append_dev(div3, t12);
     			append_dev(dl, div4);
     			append_dev(div4, dt2);
+    			append_dev(div4, t14);
+    			if_blocks_4[current_block_type_index_4].m(div4, null);
     			append_dev(div4, t15);
-    			append_dev(div4, dd1);
-    			append_dev(div4, t17);
     			append_dev(dl, div5);
     			append_dev(div5, dt3);
-    			append_dev(div5, t19);
-    			append_dev(div5, dd2);
-    			append_dev(div5, t21);
+    			append_dev(div5, t17);
+    			if_blocks_5[current_block_type_index_5].m(div5, null);
+    			append_dev(div5, t18);
     			append_dev(dl, div6);
     			append_dev(div6, dt4);
-    			append_dev(div6, t23);
-    			append_dev(div6, dd3);
-    			append_dev(div6, t25);
+    			append_dev(div6, t20);
+    			if_blocks_6[current_block_type_index_6].m(div6, null);
+    			append_dev(div6, t21);
     			append_dev(dl, div7);
     			append_dev(div7, dt5);
-    			append_dev(div7, t27);
-    			append_dev(div7, dd4);
+    			append_dev(div7, t23);
+    			if_blocks_7[current_block_type_index_7].m(div7, null);
     			current = true;
     		},
     		p: function update(ctx, [dirty]) {
@@ -6055,18 +6745,158 @@ var app = (function () {
     					if_block3.m(div2, t9);
     				}
     			}
+
+    			let previous_block_index_3 = current_block_type_index_3;
+    			current_block_type_index_3 = select_block_type_4(ctx);
+
+    			if (current_block_type_index_3 === previous_block_index_3) {
+    				if_blocks_3[current_block_type_index_3].p(ctx, dirty);
+    			} else {
+    				group_outros();
+
+    				transition_out(if_blocks_3[previous_block_index_3], 1, 1, () => {
+    					if_blocks_3[previous_block_index_3] = null;
+    				});
+
+    				check_outros();
+    				if_block4 = if_blocks_3[current_block_type_index_3];
+
+    				if (!if_block4) {
+    					if_block4 = if_blocks_3[current_block_type_index_3] = if_block_creators_3[current_block_type_index_3](ctx);
+    					if_block4.c();
+    				} else {
+    					if_block4.p(ctx, dirty);
+    				}
+
+    				transition_in(if_block4, 1);
+    				if_block4.m(div3, t12);
+    			}
+
+    			let previous_block_index_4 = current_block_type_index_4;
+    			current_block_type_index_4 = select_block_type_5(ctx);
+
+    			if (current_block_type_index_4 === previous_block_index_4) {
+    				if_blocks_4[current_block_type_index_4].p(ctx, dirty);
+    			} else {
+    				group_outros();
+
+    				transition_out(if_blocks_4[previous_block_index_4], 1, 1, () => {
+    					if_blocks_4[previous_block_index_4] = null;
+    				});
+
+    				check_outros();
+    				if_block5 = if_blocks_4[current_block_type_index_4];
+
+    				if (!if_block5) {
+    					if_block5 = if_blocks_4[current_block_type_index_4] = if_block_creators_4[current_block_type_index_4](ctx);
+    					if_block5.c();
+    				} else {
+    					if_block5.p(ctx, dirty);
+    				}
+
+    				transition_in(if_block5, 1);
+    				if_block5.m(div4, t15);
+    			}
+
+    			let previous_block_index_5 = current_block_type_index_5;
+    			current_block_type_index_5 = select_block_type_6(ctx);
+
+    			if (current_block_type_index_5 === previous_block_index_5) {
+    				if_blocks_5[current_block_type_index_5].p(ctx, dirty);
+    			} else {
+    				group_outros();
+
+    				transition_out(if_blocks_5[previous_block_index_5], 1, 1, () => {
+    					if_blocks_5[previous_block_index_5] = null;
+    				});
+
+    				check_outros();
+    				if_block6 = if_blocks_5[current_block_type_index_5];
+
+    				if (!if_block6) {
+    					if_block6 = if_blocks_5[current_block_type_index_5] = if_block_creators_5[current_block_type_index_5](ctx);
+    					if_block6.c();
+    				} else {
+    					if_block6.p(ctx, dirty);
+    				}
+
+    				transition_in(if_block6, 1);
+    				if_block6.m(div5, t18);
+    			}
+
+    			let previous_block_index_6 = current_block_type_index_6;
+    			current_block_type_index_6 = select_block_type_7(ctx);
+
+    			if (current_block_type_index_6 === previous_block_index_6) {
+    				if_blocks_6[current_block_type_index_6].p(ctx, dirty);
+    			} else {
+    				group_outros();
+
+    				transition_out(if_blocks_6[previous_block_index_6], 1, 1, () => {
+    					if_blocks_6[previous_block_index_6] = null;
+    				});
+
+    				check_outros();
+    				if_block7 = if_blocks_6[current_block_type_index_6];
+
+    				if (!if_block7) {
+    					if_block7 = if_blocks_6[current_block_type_index_6] = if_block_creators_6[current_block_type_index_6](ctx);
+    					if_block7.c();
+    				} else {
+    					if_block7.p(ctx, dirty);
+    				}
+
+    				transition_in(if_block7, 1);
+    				if_block7.m(div6, t21);
+    			}
+
+    			let previous_block_index_7 = current_block_type_index_7;
+    			current_block_type_index_7 = select_block_type_8(ctx);
+
+    			if (current_block_type_index_7 === previous_block_index_7) {
+    				if_blocks_7[current_block_type_index_7].p(ctx, dirty);
+    			} else {
+    				group_outros();
+
+    				transition_out(if_blocks_7[previous_block_index_7], 1, 1, () => {
+    					if_blocks_7[previous_block_index_7] = null;
+    				});
+
+    				check_outros();
+    				if_block8 = if_blocks_7[current_block_type_index_7];
+
+    				if (!if_block8) {
+    					if_block8 = if_blocks_7[current_block_type_index_7] = if_block_creators_7[current_block_type_index_7](ctx);
+    					if_block8.c();
+    				} else {
+    					if_block8.p(ctx, dirty);
+    				}
+
+    				transition_in(if_block8, 1);
+    				if_block8.m(div7, null);
+    			}
     		},
     		i: function intro(local) {
     			if (current) return;
     			transition_in(if_block0);
     			transition_in(if_block1);
     			transition_in(if_block2);
+    			transition_in(if_block4);
+    			transition_in(if_block5);
+    			transition_in(if_block6);
+    			transition_in(if_block7);
+    			transition_in(if_block8);
     			current = true;
     		},
     		o: function outro(local) {
     			transition_out(if_block0);
     			transition_out(if_block1);
     			transition_out(if_block2);
+    			transition_out(if_block4);
+    			transition_out(if_block5);
+    			transition_out(if_block6);
+    			transition_out(if_block7);
+    			transition_out(if_block8);
     			current = false;
     		},
     		d: function destroy(detaching) {
@@ -6078,6 +6908,12 @@ var app = (function () {
     			if (if_block3) {
     				if_block3.d();
     			}
+
+    			if_blocks_3[current_block_type_index_3].d();
+    			if_blocks_4[current_block_type_index_4].d();
+    			if_blocks_5[current_block_type_index_5].d();
+    			if_blocks_6[current_block_type_index_6].d();
+    			if_blocks_7[current_block_type_index_7].d();
     		}
     	};
 
@@ -6094,11 +6930,22 @@ var app = (function () {
 
     function instance$6($$self, $$props, $$invalidate) {
     	let $applicationState;
+    	let $applicationType;
+    	let $applicationUptime;
+    	let $applicationCpuLoad;
+    	let $applicationMemoryUsage;
     	validate_store(applicationState, 'applicationState');
     	component_subscribe($$self, applicationState, $$value => $$invalidate(0, $applicationState = $$value));
+    	validate_store(applicationType, 'applicationType');
+    	component_subscribe($$self, applicationType, $$value => $$invalidate(1, $applicationType = $$value));
+    	validate_store(applicationUptime, 'applicationUptime');
+    	component_subscribe($$self, applicationUptime, $$value => $$invalidate(2, $applicationUptime = $$value));
+    	validate_store(applicationCpuLoad, 'applicationCpuLoad');
+    	component_subscribe($$self, applicationCpuLoad, $$value => $$invalidate(3, $applicationCpuLoad = $$value));
+    	validate_store(applicationMemoryUsage, 'applicationMemoryUsage');
+    	component_subscribe($$self, applicationMemoryUsage, $$value => $$invalidate(4, $applicationMemoryUsage = $$value));
     	let { $$slots: slots = {}, $$scope } = $$props;
     	validate_slots('ApplicationStatus', slots, []);
-    	updateWorkerState();
     	const writable_props = [];
 
     	Object.keys($$props).forEach(key => {
@@ -6111,12 +6958,25 @@ var app = (function () {
     		Refresh,
     		Stop,
     		ApplicationStates,
+    		applicationCpuLoad,
+    		applicationMemoryUsage,
     		applicationState,
-    		updateWorkerState,
-    		$applicationState
+    		applicationType,
+    		applicationUptime,
+    		$applicationState,
+    		$applicationType,
+    		$applicationUptime,
+    		$applicationCpuLoad,
+    		$applicationMemoryUsage
     	});
 
-    	return [$applicationState];
+    	return [
+    		$applicationState,
+    		$applicationType,
+    		$applicationUptime,
+    		$applicationCpuLoad,
+    		$applicationMemoryUsage
+    	];
     }
 
     class ApplicationStatus extends SvelteComponentDev {
@@ -7817,26 +8677,12 @@ var app = (function () {
     	}
     }
 
-    const PageIds = {
-        register: -4,
-        login: -3,
-        addNode: -2,
-        loading: -1,
-        home: 0,
-        application: 1,
-        options: 2,
-        console: 3,
-        files: 4,
-        access: 5,
-        settings: 6
-    };
-
     /* src\App.svelte generated by Svelte v3.46.3 */
 
     const { console: console_1 } = globals;
     const file = "src\\App.svelte";
 
-    // (178:40) 
+    // (183:41) 
     function create_if_block_9(ctx) {
     	let accesscontent;
     	let current;
@@ -7869,14 +8715,14 @@ var app = (function () {
     		block,
     		id: create_if_block_9.name,
     		type: "if",
-    		source: "(178:40) ",
+    		source: "(183:41) ",
     		ctx
     	});
 
     	return block;
     }
 
-    // (176:39) 
+    // (181:40) 
     function create_if_block_8(ctx) {
     	let filescontent;
     	let current;
@@ -7909,14 +8755,14 @@ var app = (function () {
     		block,
     		id: create_if_block_8.name,
     		type: "if",
-    		source: "(176:39) ",
+    		source: "(181:40) ",
     		ctx
     	});
 
     	return block;
     }
 
-    // (174:41) 
+    // (179:42) 
     function create_if_block_7(ctx) {
     	let consolecontent;
     	let current;
@@ -7949,14 +8795,14 @@ var app = (function () {
     		block,
     		id: create_if_block_7.name,
     		type: "if",
-    		source: "(174:41) ",
+    		source: "(179:42) ",
     		ctx
     	});
 
     	return block;
     }
 
-    // (172:41) 
+    // (177:42) 
     function create_if_block_6(ctx) {
     	let optionscontent;
     	let current;
@@ -7989,14 +8835,14 @@ var app = (function () {
     		block,
     		id: create_if_block_6.name,
     		type: "if",
-    		source: "(172:41) ",
+    		source: "(177:42) ",
     		ctx
     	});
 
     	return block;
     }
 
-    // (170:45) 
+    // (175:46) 
     function create_if_block_5(ctx) {
     	let applicationcontent;
     	let current;
@@ -8029,14 +8875,14 @@ var app = (function () {
     		block,
     		id: create_if_block_5.name,
     		type: "if",
-    		source: "(170:45) ",
+    		source: "(175:46) ",
     		ctx
     	});
 
     	return block;
     }
 
-    // (168:41) 
+    // (173:42) 
     function create_if_block_4(ctx) {
     	let addnodecontent;
     	let current;
@@ -8073,21 +8919,21 @@ var app = (function () {
     		block,
     		id: create_if_block_4.name,
     		type: "if",
-    		source: "(168:41) ",
+    		source: "(173:42) ",
     		ctx
     	});
 
     	return block;
     }
 
-    // (166:42) 
+    // (169:43) 
     function create_if_block_3(ctx) {
     	let registercontent;
     	let current;
 
     	registercontent = new RegisterContent({
     			props: {
-    				changeToLoginCallback: /*func_1*/ ctx[6],
+    				changeToLoginCallback: /*func_2*/ ctx[7],
     				submitCallback: /*createAccount*/ ctx[3]
     			},
     			$$inline: true
@@ -8101,11 +8947,7 @@ var app = (function () {
     			mount_component(registercontent, target, anchor);
     			current = true;
     		},
-    		p: function update(ctx, dirty) {
-    			const registercontent_changes = {};
-    			if (dirty & /*pageId*/ 1) registercontent_changes.changeToLoginCallback = /*func_1*/ ctx[6];
-    			registercontent.$set(registercontent_changes);
-    		},
+    		p: noop,
     		i: function intro(local) {
     			if (current) return;
     			transition_in(registercontent.$$.fragment, local);
@@ -8124,21 +8966,21 @@ var app = (function () {
     		block,
     		id: create_if_block_3.name,
     		type: "if",
-    		source: "(166:42) ",
+    		source: "(169:43) ",
     		ctx
     	});
 
     	return block;
     }
 
-    // (164:39) 
+    // (165:40) 
     function create_if_block_2(ctx) {
     	let logincontent;
     	let current;
 
     	logincontent = new LoginContent({
     			props: {
-    				changeToRegisterCallback: /*func*/ ctx[5],
+    				changeToRegisterCallback: /*func_1*/ ctx[6],
     				submitCallback: /*requestLogin*/ ctx[2]
     			},
     			$$inline: true
@@ -8152,11 +8994,7 @@ var app = (function () {
     			mount_component(logincontent, target, anchor);
     			current = true;
     		},
-    		p: function update(ctx, dirty) {
-    			const logincontent_changes = {};
-    			if (dirty & /*pageId*/ 1) logincontent_changes.changeToRegisterCallback = /*func*/ ctx[5];
-    			logincontent.$set(logincontent_changes);
-    		},
+    		p: noop,
     		i: function intro(local) {
     			if (current) return;
     			transition_in(logincontent.$$.fragment, local);
@@ -8175,14 +9013,14 @@ var app = (function () {
     		block,
     		id: create_if_block_2.name,
     		type: "if",
-    		source: "(164:39) ",
+    		source: "(165:40) ",
     		ctx
     	});
 
     	return block;
     }
 
-    // (162:41) 
+    // (163:42) 
     function create_if_block_1(ctx) {
     	let loadingcontent;
     	let current;
@@ -8215,14 +9053,14 @@ var app = (function () {
     		block,
     		id: create_if_block_1.name,
     		type: "if",
-    		source: "(162:41) ",
+    		source: "(163:42) ",
     		ctx
     	});
 
     	return block;
     }
 
-    // (160:4) {#if pageId === PageIds.home}
+    // (161:4) {#if $pageId === PageIds.home}
     function create_if_block(ctx) {
     	let homecontent;
     	let current;
@@ -8255,7 +9093,7 @@ var app = (function () {
     		block,
     		id: create_if_block.name,
     		type: "if",
-    		source: "(160:4) {#if pageId === PageIds.home}",
+    		source: "(161:4) {#if $pageId === PageIds.home}",
     		ctx
     	});
 
@@ -8271,7 +9109,10 @@ var app = (function () {
     	let current;
 
     	sidebar = new SideBar({
-    			props: { hideIcon: /*hideSideBarIcon*/ ctx[1] },
+    			props: {
+    				hideIcon: /*hideSideBarIcon*/ ctx[0],
+    				iconPressed: /*func*/ ctx[5]
+    			},
     			$$inline: true
     		});
 
@@ -8291,16 +9132,16 @@ var app = (function () {
     	const if_blocks = [];
 
     	function select_block_type(ctx, dirty) {
-    		if (/*pageId*/ ctx[0] === PageIds.home) return 0;
-    		if (/*pageId*/ ctx[0] === PageIds.loading) return 1;
-    		if (/*pageId*/ ctx[0] === PageIds.login) return 2;
-    		if (/*pageId*/ ctx[0] === PageIds.register) return 3;
-    		if (/*pageId*/ ctx[0] === PageIds.addNode) return 4;
-    		if (/*pageId*/ ctx[0] === PageIds.application) return 5;
-    		if (/*pageId*/ ctx[0] === PageIds.options) return 6;
-    		if (/*pageId*/ ctx[0] === PageIds.console) return 7;
-    		if (/*pageId*/ ctx[0] === PageIds.files) return 8;
-    		if (/*pageId*/ ctx[0] === PageIds.access) return 9;
+    		if (/*$pageId*/ ctx[1] === PageIds.home) return 0;
+    		if (/*$pageId*/ ctx[1] === PageIds.loading) return 1;
+    		if (/*$pageId*/ ctx[1] === PageIds.login) return 2;
+    		if (/*$pageId*/ ctx[1] === PageIds.register) return 3;
+    		if (/*$pageId*/ ctx[1] === PageIds.addNode) return 4;
+    		if (/*$pageId*/ ctx[1] === PageIds.application) return 5;
+    		if (/*$pageId*/ ctx[1] === PageIds.options) return 6;
+    		if (/*$pageId*/ ctx[1] === PageIds.console) return 7;
+    		if (/*$pageId*/ ctx[1] === PageIds.files) return 8;
+    		if (/*$pageId*/ ctx[1] === PageIds.access) return 9;
     		return -1;
     	}
 
@@ -8315,7 +9156,7 @@ var app = (function () {
     			t = space();
     			if (if_block) if_block.c();
     			attr_dev(main, "class", "flex");
-    			add_location(main, file, 157, 0, 5978);
+    			add_location(main, file, 156, 0, 5989);
     		},
     		l: function claim(nodes) {
     			throw new Error("options.hydrate only works if the component was compiled with the `hydratable: true` option");
@@ -8333,7 +9174,7 @@ var app = (function () {
     		},
     		p: function update(ctx, [dirty]) {
     			const sidebar_changes = {};
-    			if (dirty & /*hideSideBarIcon*/ 2) sidebar_changes.hideIcon = /*hideSideBarIcon*/ ctx[1];
+    			if (dirty & /*hideSideBarIcon*/ 1) sidebar_changes.hideIcon = /*hideSideBarIcon*/ ctx[0];
     			sidebar.$set(sidebar_changes);
     			let previous_block_index = current_block_type_index;
     			current_block_type_index = select_block_type(ctx);
@@ -8402,21 +9243,27 @@ var app = (function () {
     	return block;
     }
 
+    function changePage(iconId) {
+    	
+    } //pageId.set(icon);
+
     function instance($$self, $$props, $$invalidate) {
+    	let $pageId;
+    	validate_store(pageId, 'pageId');
+    	component_subscribe($$self, pageId, $$value => $$invalidate(1, $pageId = $$value));
     	let { $$slots: slots = {}, $$scope } = $$props;
     	validate_slots('App', slots, []);
-    	let pageId = PageIds.loading;
     	let hideSideBarIcon = [1, 2, 3, 4, 5, 6, 7, 8];
 
     	onMount(() => {
     		userData.subscribe(value => {
     			if (value.applicationId > -1) {
-    				$$invalidate(1, hideSideBarIcon = []);
-    				$$invalidate(0, pageId = PageIds.application);
+    				$$invalidate(0, hideSideBarIcon = []);
+    				pageId.set(PageIds.application);
     			} else if (value.applicationId == -1) {
-    				$$invalidate(1, hideSideBarIcon = [1, 2, 3, 4, 5]);
+    				$$invalidate(0, hideSideBarIcon = [1, 2, 3, 4, 5]);
     			} else {
-    				$$invalidate(1, hideSideBarIcon = [1, 2, 3, 4, 5, 6, 7, 8]);
+    				$$invalidate(0, hideSideBarIcon = [1, 2, 3, 4, 5, 6, 7, 8]);
     			}
     		});
     	});
@@ -8425,7 +9272,7 @@ var app = (function () {
     		value.prepareManager();
 
     		if (value.nodeManager.nodes.length <= 0) {
-    			$$invalidate(0, pageId = PageIds.addNode);
+    			pageId.set(PageIds.addNode);
     		} else {
     			currentNode.update(nodeId => {
     				connectToNode();
@@ -8437,7 +9284,7 @@ var app = (function () {
     	});
 
     	function connectToNode() {
-    		$$invalidate(0, pageId = PageIds.loading);
+    		pageId.set(PageIds.loading);
 
     		networkManager.update(manager => {
     			manager.nodeManager.connect((result, node) => {
@@ -8445,7 +9292,7 @@ var app = (function () {
     					if (node.hasUser()) {
     						sendClientLoginRequest();
     					} else {
-    						$$invalidate(0, pageId = PageIds.login);
+    						pageId.set(PageIds.login);
     					}
     				}
     			});
@@ -8455,7 +9302,7 @@ var app = (function () {
     	}
 
     	function sendClientLoginRequest() {
-    		$$invalidate(0, pageId = PageIds.loading);
+    		pageId.set(PageIds.loading);
 
     		networkManager.update(value => {
     			currentNode.update(nodeId => {
@@ -8463,7 +9310,7 @@ var app = (function () {
 
     				node.requestLogin().then(result => {
     					if (result == 1) {
-    						$$invalidate(0, pageId = PageIds.home);
+    						pageId.set(PageIds.home);
 
     						// TODO: Load applications and currentApplication
     						updateUserData().then(userData => {
@@ -8472,9 +9319,9 @@ var app = (function () {
     					} else if (result == 0) {
     						node.user.delete();
     						currentError.set(new ApplicationError(ErrorIds.session_outdated, "Your session is out of date or has errors, please log in again."));
-    						$$invalidate(0, pageId = PageIds.login);
+    						pageId.set(PageIds.login);
     					} else {
-    						$$invalidate(0, pageId = PageIds.login);
+    						pageId.set(PageIds.login);
     					}
     				});
 
@@ -8517,7 +9364,7 @@ var app = (function () {
 
     				node.createAccount(username, password, token).then(result => {
     					if (result == 1) {
-    						$$invalidate(0, pageId = PageIds.login);
+    						pageId.set(PageIds.login);
     					} else if (result == 0) {
     						currentError.set(new ApplicationError(ErrorIds.create_account, "The token is wrong or a user with the username[" + username + "] already exists"));
     					}
@@ -8570,22 +9417,21 @@ var app = (function () {
     			});
     	}
 
-    	function changePage(page) {
-    		$$invalidate(0, pageId = page);
-    	}
-
     	const writable_props = [];
 
     	Object.keys($$props).forEach(key => {
     		if (!~writable_props.indexOf(key) && key.slice(0, 2) !== '$$' && key !== 'slot') console_1.warn(`<App> was created with unknown prop '${key}'`);
     	});
 
-    	const func = function () {
-    		$$invalidate(0, pageId = PageIds.register);
+    	const func = function (iconId) {
     	};
 
     	const func_1 = function () {
-    		$$invalidate(0, pageId = PageIds.login);
+    		pageId.set(PageIds.register);
+    	};
+
+    	const func_2 = function () {
+    		pageId.set(PageIds.login);
     	};
 
     	$$self.$capture_state = () => ({
@@ -8605,10 +9451,10 @@ var app = (function () {
     		currentError,
     		currentNode,
     		networkManager,
+    		pageId,
     		userData,
     		ErrorIds,
     		onMount,
-    		pageId,
     		hideSideBarIcon,
     		connectToNode,
     		sendClientLoginRequest,
@@ -8616,19 +9462,28 @@ var app = (function () {
     		createAccount,
     		addNode,
     		updateUserData,
-    		changePage
+    		changePage,
+    		$pageId
     	});
 
     	$$self.$inject_state = $$props => {
-    		if ('pageId' in $$props) $$invalidate(0, pageId = $$props.pageId);
-    		if ('hideSideBarIcon' in $$props) $$invalidate(1, hideSideBarIcon = $$props.hideSideBarIcon);
+    		if ('hideSideBarIcon' in $$props) $$invalidate(0, hideSideBarIcon = $$props.hideSideBarIcon);
     	};
 
     	if ($$props && "$$inject" in $$props) {
     		$$self.$inject_state($$props.$$inject);
     	}
 
-    	return [pageId, hideSideBarIcon, requestLogin, createAccount, addNode, func, func_1];
+    	return [
+    		hideSideBarIcon,
+    		$pageId,
+    		requestLogin,
+    		createAccount,
+    		addNode,
+    		func,
+    		func_1,
+    		func_2
+    	];
     }
 
     class App extends SvelteComponentDev {

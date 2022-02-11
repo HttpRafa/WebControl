@@ -1,5 +1,12 @@
 import type {ControlNode} from "../node/ControlNode";
 import type {Packet} from "../packet/Packet";
+import {
+    applicationCpuLoad,
+    applicationDescription,
+    applicationMemoryUsage,
+    applicationState, applicationType,
+    applicationUptime
+} from "../../Store";
 
 export class NodeConnection {
 
@@ -52,8 +59,41 @@ export class NodeConnection {
     handleMessage(event: MessageEvent) {
         let data: Packet = JSON.parse(event.data);
         console.table(data);
-        for (let i = 0; i < this._packetHandler.length; i++) {
-            this._packetHandler[i](data);
+        if(data.id === 5) {
+            // @ts-ignore
+            if(data.document.data.applicationState != undefined) {
+                // @ts-ignore
+                applicationState.set(data.document.data.applicationState);
+            }
+            // @ts-ignore
+            if(data.document.data.applicationType != undefined) {
+                // @ts-ignore
+                applicationType.set(data.document.data.applicationType);
+            }
+            // @ts-ignore
+            if(data.document.data.applicationUptime != undefined) {
+                // @ts-ignore
+                applicationUptime.set(data.document.data.applicationUptime);
+            }
+            // @ts-ignore
+            if(data.document.data.applicationCpuLoad != undefined) {
+                // @ts-ignore
+                applicationCpuLoad.set(data.document.data.applicationCpuLoad);
+            }
+            // @ts-ignore
+            if(data.document.data.applicationMemoryUsage != undefined) {
+                // @ts-ignore
+                applicationMemoryUsage.set(data.document.data.applicationMemoryUsage);
+            }
+            // @ts-ignore
+            if(data.document.data.applicationDescription != undefined) {
+                // @ts-ignore
+                applicationDescription.set(data.document.data.applicationDescription);
+            }
+        } else {
+            for (let i = 0; i < this._packetHandler.length; i++) {
+                this._packetHandler[i](data);
+            }
         }
     }
 

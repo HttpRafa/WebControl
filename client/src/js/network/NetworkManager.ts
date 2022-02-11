@@ -1,4 +1,6 @@
 import {NodeManager} from "./node/NodeManager";
+import {currentNode, pageId} from "../Store";
+import {update} from "../application/Application";
 
 export class NetworkManager {
 
@@ -7,6 +9,19 @@ export class NetworkManager {
     constructor() {
         this._nodeManager = new NodeManager();
         console.log("Initializing the networkManager...")
+
+        setInterval(() => {
+            currentNode.update(value => {
+                let node = this._nodeManager.getNodeById(value);
+                if(node != undefined) {
+                    pageId.update(value1 => {
+                        update(value1);
+                        return value1;
+                    })
+                }
+                return value;
+            });
+        }, 1000);
     }
 
     prepareManager() {

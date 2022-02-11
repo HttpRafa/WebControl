@@ -1,13 +1,12 @@
 package net.rafael.web.control.network.packet.input
 
 import com.google.gson.JsonArray
-import com.google.gson.JsonElement
 import net.rafael.web.control.network.client.Client
 import net.rafael.web.control.network.document.Document
 import net.rafael.web.control.network.packet.IPacketHandler
 import net.rafael.web.control.network.packet.Packet
-import net.rafael.web.control.network.packet.output.PacketOutCreateAccountAnswer
 import net.rafael.web.control.network.packet.output.PacketOutRequestAnswer
+import java.util.*
 
 //------------------------------
 //
@@ -19,17 +18,47 @@ import net.rafael.web.control.network.packet.output.PacketOutRequestAnswer
 
 class PacketInRequest : IPacketHandler {
 
+    var uptime = 0L
+    var lastUpdateTime = System.currentTimeMillis()
+
+    var state = 1
+
     override fun handle(client: Client, packet: Packet) {
         val dataIdsArray: JsonArray = packet.document.getAsElement("dataIds").asJsonArray
         val dataIds = mutableListOf<Int>()
         for (jsonElement in dataIdsArray) {
             dataIds.add(jsonElement.asInt)
         }
-        if(dataIds.contains(-1)) {
-            client.sendPacket(PacketOutRequestAnswer(packet.id, Document().append("applicationState", 1)))
-        } else {
-            client.sendPacket(PacketOutRequestAnswer(packet.id, Document()))
+
+        var sendPacket = PacketOutRequestAnswer(packet.id, Document())
+        if(dataIds.contains(0)) {
+            sendPacket = PacketOutRequestAnswer(packet.id, Document().append("applicationState", state))
         }
+        if(dataIds.contains(1)) {
+            sendPacket = PacketOutRequestAnswer(packet.id, Document().append("applicationType", "Minecraft Server"))
+        }
+        if(dataIds.contains(2)) {
+            uptime = uptime + System.currentTimeMillis() - lastUpdateTime
+            lastUpdateTime = System.currentTimeMillis()
+            if(uptime in 60001..79999) {
+                state = 2
+            }
+            if(uptime in 80001..129999) {
+                state = 4
+            }
+            sendPacket = PacketOutRequestAnswer(packet.id, Document().append("applicationUptime", uptime))
+        }
+        if(dataIds.contains(3)) {
+            sendPacket = PacketOutRequestAnswer(packet.id, Document().append("applicationCpuLoad", Random().nextInt(100)))
+        }
+        if(dataIds.contains(4)) {
+            sendPacket = PacketOutRequestAnswer(packet.id, Document().append("applicationMemoryUsage", arrayOf(1250, 5000)))
+        }
+        if(dataIds.contains(5)) {
+            sendPacket = PacketOutRequestAnswer(packet.id, Document().append("applicationDescription", "Test Desc"))
+        }
+        sendPacket.uuid = packet.uuid;
+        client.sendPacket(sendPacket)
     }
 
     override val packetId: Int

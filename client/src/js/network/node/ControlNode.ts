@@ -146,27 +146,8 @@ export class ControlNode {
         });
     }
 
-    request(name: string, sendPacket: Packet): Promise<Packet> {
-        return new Promise(resolve => {
-
-            let handled = false;
-
-            let handlerId = this._nodeConnection.addHandler(packet => {
-                if(packet.id == sendPacket.id) {
-                    this._nodeConnection.removeHandler(handlerId);
-                    handled = true;
-                    resolve(packet);
-                }
-            });
-            this._nodeConnection.sendPacket(sendPacket);
-            setTimeout(() => {
-                if(!handled) {
-                    this._nodeConnection.removeHandler(handlerId);
-                    currentError.set(new ApplicationError(ErrorIds.request, "Request of " + name + " took too long"));
-                    resolve(undefined);
-                }
-            }, 5000);
-        });
+    request(sendPacket: Packet) {
+        this._nodeConnection.sendPacket(sendPacket);
     }
 
     hasUser(): boolean {

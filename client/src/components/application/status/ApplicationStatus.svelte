@@ -1,10 +1,14 @@
 <script lang="ts">
+
     import {Icon, Play, Refresh, Stop} from "svelte-hero-icons";
     import {ApplicationStates} from "../../../js/enums/ApplicationStates";
-    import {applicationState} from "../../../js/Store";
-    import {updateWorkerState} from "../../../js/application/Application";
-
-    updateWorkerState();
+    import {
+        applicationCpuLoad,
+        applicationMemoryUsage,
+        applicationState,
+        applicationType,
+        applicationUptime
+    } from "../../../js/Store";
 
 </script>
 
@@ -48,25 +52,45 @@
             </div>
             <div class="bg-white dark:bg-gray-900 px-4 py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
                 <dt class="text-sm font-medium text-gray-500 dark:text-white">Type</dt>
-                <dd class="mt-1 text-sm text-gray-900 dark:text-gray-400 sm:mt-0 sm:col-span-2">Minecraft Server</dd>
+                {#if $applicationType === undefined}
+                    <dd class="mt-1 text-gray-500 dark:text-gray-400 sm:mt-0 sm:col-span-2"><Icon src="{Refresh}" class="-ml-1 mr-2 h-5 w-5 service-button-loading"/></dd>
+                {:else}
+                    <dd class="mt-1 text-sm text-gray-900 dark:text-gray-400 sm:mt-0 sm:col-span-2">{$applicationType}</dd>
+                {/if}
             </div>
             <div class="bg-gray-50 dark:bg-gray-850 px-4 py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
                 <dt class="text-sm font-medium text-gray-500 dark:text-white">Current Uptime</dt>
-                <dd class="mt-1 text-sm text-gray-900 dark:text-gray-400 sm:mt-0 sm:col-span-2">1 min 25 sec</dd>
+                {#if $applicationUptime === undefined}
+                    <dd class="mt-1 text-gray-500 dark:text-gray-400 sm:mt-0 sm:col-span-2"><Icon src="{Refresh}" class="-ml-1 mr-2 h-5 w-5 service-button-loading"/></dd>
+                {:else}
+                    <dd class="mt-1 text-sm text-gray-900 dark:text-gray-400 sm:mt-0 sm:col-span-2">{$applicationUptime}</dd>
+                {/if}
             </div>
             <div class="bg-white dark:bg-gray-900 px-4 py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
                 <dt class="text-sm font-medium text-gray-500 dark:text-white">CPU load</dt>
-                <dd class="mt-1 text-sm text-gray-900 dark:text-gray-400 sm:mt-0 sm:col-span-2">35%</dd>
+                {#if $applicationCpuLoad === undefined}
+                    <dd class="mt-1 text-gray-500 dark:text-gray-400 sm:mt-0 sm:col-span-2"><Icon src="{Refresh}" class="-ml-1 mr-2 h-5 w-5 service-button-loading"/></dd>
+                {:else}
+                    <dd class="mt-1 text-sm text-gray-900 dark:text-gray-400 sm:mt-0 sm:col-span-2">{$applicationCpuLoad}%</dd>
+                {/if}
             </div>
             <div class="bg-gray-50 dark:bg-gray-850 px-4 py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
                 <dt class="text-sm font-medium text-gray-500 dark:text-white">Description</dt>
-                <dd class="mt-1 text-sm text-gray-900 dark:text-gray-400 sm:mt-0 sm:col-span-2">
-                    Nothing
-                </dd>
+                {#if $applicationCpuLoad === undefined}
+                    <dd class="mt-1 text-gray-500 dark:text-gray-400 sm:mt-0 sm:col-span-2"><Icon src="{Refresh}" class="-ml-1 mr-2 h-5 w-5 service-button-loading"/></dd>
+                {:else}
+                    <dd class="mt-1 text-sm text-gray-900 dark:text-gray-400 sm:mt-0 sm:col-span-2">
+                        Nothing
+                    </dd>
+                {/if}
             </div>
             <div class="bg-white dark:bg-gray-900 px-4 py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
                 <dt class="text-sm font-medium text-gray-500 dark:text-white">Memory Usage</dt>
-                <dd class="mt-1 text-sm text-gray-900 dark:text-gray-400 sm:mt-0 sm:col-span-2">2500 MB / 7000 MB</dd>
+                {#if $applicationMemoryUsage === undefined}
+                    <dd class="mt-1 text-gray-500 dark:text-gray-400 sm:mt-0 sm:col-span-2"><Icon src="{Refresh}" class="-ml-1 mr-2 h-5 w-5 service-button-loading"/></dd>
+                {:else}
+                    <dd class="mt-1 text-sm text-gray-900 dark:text-gray-400 sm:mt-0 sm:col-span-2">{$applicationMemoryUsage[0]} MB / {$applicationMemoryUsage[1]} MB</dd>
+                {/if}
             </div>
         </dl>
     </div>

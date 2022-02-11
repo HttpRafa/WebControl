@@ -18,31 +18,46 @@
     import {userData} from "../../js/Store";
 
     export let hideIcon: Array<number>;
+    export let iconPressed: (iconId: number) => void;
 </script>
 
 <div class="fixed top-0 left-0 h-screen w-16 pt-1 flex flex-col bg-white dark:bg-gray-900 shadow-lg">
     {#if !hideIcon.includes(SideBarIconIds.home) }
-        <SideBarIcon icon={Home} text="Home" />
+        <SideBarIcon icon={Home} text="Home" on:click={function() {
+          iconPressed(SideBarIconIds.home);
+        }} />
     {/if}
     {#if !hideIcon.includes(SideBarIconIds.application) }
         <SideBarDivider hide={false} />
-        <SideBarIcon icon={Chip} text="Application" />
+        <SideBarIcon icon={Chip} text="Application" on:click={function() {
+          iconPressed(SideBarIconIds.application);
+        }}/>
     {/if}
     {#if !hideIcon.includes(SideBarIconIds.options) }
-        <SideBarIcon icon={Adjustments} text="Options" />
+        <SideBarIcon icon={Adjustments} text="Options" on:click={function() {
+          iconPressed(SideBarIconIds.options);
+        }}/>
     {/if}
     {#if !hideIcon.includes(SideBarIconIds.console) }
-        <SideBarIcon icon={Terminal} text="Console" />
+        <SideBarIcon icon={Terminal} text="Console" on:click={function() {
+          iconPressed(SideBarIconIds.console);
+        }} />
     {/if}
     {#if !hideIcon.includes(SideBarIconIds.files) }
-        <SideBarIcon icon={Folder} text="Files" />
+        <SideBarIcon icon={Folder} text="Files" on:click={function() {
+          iconPressed(SideBarIconIds.files);
+        }} />
     {/if}
     {#if !hideIcon.includes(SideBarIconIds.access) }
-        <SideBarIcon icon={Key} text="Access" />
+        <SideBarIcon icon={Key} text="Access" on:click={function() {
+          iconPressed(SideBarIconIds.access);
+        }}/>
     {/if}
     {#if !hideIcon.includes(SideBarIconIds.create_application) }
         <SideBarDivider hide={false} />
-        <SideBarIcon icon={Plus} text="Create Application" />
+        <SideBarIcon icon={Plus} text="Create Application" on:click={function() {
+          iconPressed(SideBarIconIds.create_application);
+        }} />
     {/if}
     {#if !hideIcon.includes(SideBarIconIds.applications) }
         {#each $userData.applications as application}
@@ -61,6 +76,8 @@
     {/if}
     {#if !hideIcon.includes(SideBarIconIds.settings) }
         <SideBarDivider hide={false} />
-        <SideBarIcon icon={FingerPrint} text="Settings" />
+        <SideBarIcon icon={FingerPrint} text="Settings" on:click={function() {
+          iconPressed(SideBarIconIds.settings);
+        }} />
     {/if}
 </div>
