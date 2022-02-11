@@ -29,6 +29,6 @@ fun showName() {
             "§3▒█░░▒█ █▀▀ █▀▀▄ §b▒█▀▀█ █▀▀█ █▀▀▄ ▀▀█▀▀ █▀▀█ █▀▀█ █░░ \n" +
             "§3▒█▒█▒█ █▀▀ █▀▀▄ §b▒█░░░ █░░█ █░░█ ░░█░░ █▄▄▀ █░░█ █░░ \n" +
             "§3▒█▄▀▄█ ▀▀▀ ▀▀▀░ §b▒█▄▄█ ▀▀▀▀ ▀░░▀ ░░▀░░ ▀░▀▀ ▀▀▀▀ ▀▀▀§r"))
-    println(ConsoleColor.toColouredString('§', "§8«§3*§8» §3Web§bControl §7v§8.§70§8.§b1 §7by §3Rafael K.§r"));
+    println(ConsoleColor.toColouredString('§', "§8«§3*§8» §3Web§bControl §7v§70§8.§70§8.§b1 §8# §b" + WebControl::class.java.getPackage().implementationVersion + " §7by §3Rafael K.§r"));
     println(" ")
 }

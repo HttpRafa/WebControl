@@ -76,7 +76,7 @@
                         <manifestEntries>
                             <Main-Class>net.rafael.web.control.main.MainKt</Main-Class>
                             <Version>${project.version}</Version>
-                            <Implementation-Version>1.0.0</Implementation-Version>
+                            <Implementation-Version>Af0ncci0Mz</Implementation-Version>
                             <Specification-Version>SNAPSHOT</Specification-Version>
                         </manifestEntries>
                     </archive>
