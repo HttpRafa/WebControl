@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:webcontrol/widgets/appdrawer.dart';
 
 class App extends StatelessWidget {
   const App({Key? key}) : super(key: key);
@@ -8,23 +9,24 @@ class App extends StatelessWidget {
     return MaterialApp(
         home: Scaffold(
       appBar: AppBar(
-        backgroundColor: Colors.green,
-        title: const Text("Test"),
+        backgroundColor: Colors.blue,
+        title: const Text("WebControl"),
       ),
-      body: const Text("Test"),
+      drawer: const AppDrawer(),
+      body: Container(),
       floatingActionButton: FloatingActionButton(
-        child: const Icon(Icons.add),
+        child: const Icon(Icons.api),
         onPressed: () {},
       ),
       bottomNavigationBar: BottomNavigationBar(
         items: const [
-          BottomNavigationBarItem(icon: Icon(Icons.home), label: "Test"),
-          BottomNavigationBarItem(icon: Icon(Icons.home), label: "Test"),
-          BottomNavigationBarItem(icon: Icon(Icons.home), label: "Test"),
+          BottomNavigationBarItem(
+              icon: Icon(Icons.android), label: "Application"),
+          BottomNavigationBarItem(
+              icon: Icon(Icons.android), label: "Applications"),
+          BottomNavigationBarItem(
+              icon: Icon(Icons.build_sharp), label: "Settings"),
         ],
-      ),
-      drawer: const Drawer(
-        child: Text("A Drawer"),
       ),
     ));
   }

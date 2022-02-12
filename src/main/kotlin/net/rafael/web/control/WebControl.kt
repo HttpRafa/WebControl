@@ -1,5 +1,6 @@
 package net.rafael.web.control
 
+import net.rafael.web.control.application.ApplicationManager
 import net.rafael.web.control.command.commands.*
 import net.rafael.web.control.command.manager.CommandManager
 import net.rafael.web.control.command.usage.CommandUsage
@@ -24,6 +25,7 @@ class WebControl(args: Array<String>) {
     lateinit var commandManager: CommandManager
     lateinit var networkServer: NetworkServer
     lateinit var userManager: UserManager
+    lateinit var applicationManager: ApplicationManager
 
     init {
 
@@ -49,6 +51,7 @@ class WebControl(args: Array<String>) {
         commandManager = CommandManager(logger.getConsole())
         networkServer = NetworkServer(InetSocketAddress(3388))
         userManager = UserManager()
+        applicationManager = ApplicationManager()
 
         load()
 
@@ -88,6 +91,7 @@ class WebControl(args: Array<String>) {
 
     fun load() {
         userManager.loadUsers()
+        applicationManager.loadApplications()
     }
 
     fun save() {
