@@ -1,8 +1,7 @@
 <script lang="ts">
     import TopNavigation from "../../top/TopNavigation.svelte";
     import {Check, Icon} from "svelte-hero-icons";
-
-    let messages = ["Test1", "Test2"]
+    import {applicationConsoleMessages} from "../../../js/Store";
 
     function sendCommand() {
         // @ts-ignore
@@ -10,17 +9,31 @@
         // @ts-ignore
         document.getElementById("console-input").value = "";
 
-        messages = [...messages, message];
+        addLog(message);
     }
+
+    function addLog(message: string) {
+        applicationConsoleMessages.update(value => {
+            return [...value, message];
+        });
+
+        document.getElementById("scrollDiv").scrollIntoView();
+    }
+
 </script>
 
 <div class="content-container">
     <TopNavigation title={"Console"}/>
     <div class="content-list">
         <div class="console">
-            {#each messages as message}
-                <div class="console-line">{message}</div>
-            {/each}
+            {#if $applicationConsoleMessages !== undefined}
+                {#each $applicationConsoleMessages as message}
+                    <div class="console-line">{message}</div>
+                {/each}
+                <div id="scrollDiv"></div>
+            {:else}
+
+            {/if}
         </div>
     </div>
     <form class="bottom-bar" on:submit={function(event) {event.preventDefault();sendCommand();}}>

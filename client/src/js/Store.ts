@@ -25,6 +25,11 @@ export const applicationCpuLoad = writable<number>(undefined);
 export const applicationMemoryUsage = writable<number[]>(undefined);
 export const applicationDescription = writable<number>(undefined);
 
+export const applicationOptions = writable<{ name: string, value: string }[]>(undefined);
+
+export const applicationConsoleMessages = writable<string[]>(undefined);
+
+
 currentError.subscribe(value => {
     if(value != undefined) {
         console.log("Error[id: " + value.id + "] " + value.message);

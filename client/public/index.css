@@ -1482,14 +1482,14 @@ body {
 	color: rgba(16, 185, 129, var(--tw-text-opacity));
 }
 
-.text-orange-450 {
-	--tw-text-opacity: 1;
-	color: rgba(247, 122, 34, var(--tw-text-opacity));
-}
-
 .text-red-600 {
 	--tw-text-opacity: 1;
 	color: rgba(220, 38, 38, var(--tw-text-opacity));
+}
+
+.text-orange-450 {
+	--tw-text-opacity: 1;
+	color: rgba(247, 122, 34, var(--tw-text-opacity));
 }
 
 .placeholder-gray-400::-moz-placeholder {

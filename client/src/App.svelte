@@ -17,6 +17,7 @@
     import {ErrorIds} from "./js/enums/ErrorIds";
     import {onMount} from "svelte";
     import {UserData} from "./js/data/UserData";
+    import {SideBarIconIds} from "./js/enums/SideBarIconIds";
 
     let hideSideBarIcon = [1, 2, 3, 4, 5, 6, 7, 8];
 
@@ -159,6 +160,27 @@
     }
 
     function changePage(iconId: number) {
+        if(iconId == SideBarIconIds.home) {
+            pageId.set(PageIds.home);
+        }
+        if(iconId == SideBarIconIds.application) {
+            pageId.set(PageIds.application);
+        }
+        if(iconId == SideBarIconIds.options) {
+            pageId.set(PageIds.options);
+        }
+        if(iconId == SideBarIconIds.console) {
+            pageId.set(PageIds.console);
+        }
+        if(iconId == SideBarIconIds.files) {
+            pageId.set(PageIds.files);
+        }
+        if(iconId == SideBarIconIds.access) {
+            pageId.set(PageIds.access);
+        }
+        if(iconId == SideBarIconIds.create_application) {
+            // TODO: Add Create Application
+        }
         //pageId.set(icon);
     }
 
@@ -166,7 +188,7 @@
 
 <main class="flex">
     <SideBar hideIcon={hideSideBarIcon} iconPressed={function(iconId) {
-      changePage(iconId);
+        changePage(iconId);
     }} />
     {#if $pageId === PageIds.home}
         <HomeContent />

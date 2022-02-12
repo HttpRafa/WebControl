@@ -3,7 +3,7 @@ import type {Packet} from "../packet/Packet";
 import {
     applicationCpuLoad,
     applicationDescription,
-    applicationMemoryUsage,
+    applicationMemoryUsage, applicationOptions,
     applicationState, applicationType,
     applicationUptime
 } from "../../Store";
@@ -89,6 +89,11 @@ export class NodeConnection {
             if(data.document.data.applicationDescription != undefined) {
                 // @ts-ignore
                 applicationDescription.set(data.document.data.applicationDescription);
+            }
+            // @ts-ignore
+            if(data.document.data.applicationOptions != undefined) {
+                // @ts-ignore
+                applicationOptions.set(data.document.data.applicationOptions);
             }
         } else {
             for (let i = 0; i < this._packetHandler.length; i++) {

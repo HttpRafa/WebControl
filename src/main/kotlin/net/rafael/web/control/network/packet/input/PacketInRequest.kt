@@ -1,6 +1,7 @@
 package net.rafael.web.control.network.packet.input
 
 import com.google.gson.JsonArray
+import com.google.gson.JsonObject
 import net.rafael.web.control.network.client.Client
 import net.rafael.web.control.network.document.Document
 import net.rafael.web.control.network.packet.IPacketHandler
@@ -56,6 +57,17 @@ class PacketInRequest : IPacketHandler {
         }
         if(dataIds.contains(5)) {
             sendPacket = PacketOutRequestAnswer(packet.id, Document().append("applicationDescription", "Test Desc"))
+        }
+        if(dataIds.contains(6)) {
+            val options = JsonArray()
+            for(i in 0 until 4*5) {
+                val objectData = JsonObject()
+                objectData.addProperty("name", "Test $i")
+                objectData.addProperty("value", "$i is the value")
+                options.add(objectData)
+            }
+
+            sendPacket = PacketOutRequestAnswer(packet.id, Document().append("applicationOptions", options))
         }
         sendPacket.uuid = packet.uuid;
         client.sendPacket(sendPacket)

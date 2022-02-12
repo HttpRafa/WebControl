@@ -20,6 +20,20 @@ export function update(pageId: number) {
         updateApplicationDescription();
         updateApplicationMemoryUsage();
     }
+    if(pageId == PageIds.options) {
+        updateOptions();
+    }
+}
+
+export function updateOptions() {
+    networkManager.update(value => {
+        currentNode.update(nodeId => {
+            let node = value.nodeManager.getNodeById(nodeId);
+            node.request(new PacketOutRequestApplicationData([ApplicationDataIds.applicationOptions]));
+            return nodeId;
+        });
+        return value;
+    });
 }
 
 export function updateApplicationState() {

@@ -570,12 +570,12 @@ var app = (function () {
     }
 
     // (22:0) {#if src && src != []}
-    function create_if_block$a(ctx) {
+    function create_if_block$b(ctx) {
     	let if_block_anchor;
 
     	function select_block_type(ctx, dirty) {
     		if (/*solid*/ ctx[2]) return create_if_block_1$4;
-    		return create_else_block$8;
+    		return create_else_block$9;
     	}
 
     	let current_block_type = select_block_type(ctx);
@@ -611,7 +611,7 @@ var app = (function () {
 
     	dispatch_dev("SvelteRegisterBlock", {
     		block,
-    		id: create_if_block$a.name,
+    		id: create_if_block$b.name,
     		type: "if",
     		source: "(22:0) {#if src && src != []}",
     		ctx
@@ -621,7 +621,7 @@ var app = (function () {
     }
 
     // (38:2) {:else}
-    function create_else_block$8(ctx) {
+    function create_else_block$9(ctx) {
     	let svg;
     	let each_value_1 = /*src*/ ctx[1][1] ?? [];
     	validate_each_argument(each_value_1);
@@ -710,7 +710,7 @@ var app = (function () {
 
     	dispatch_dev("SvelteRegisterBlock", {
     		block,
-    		id: create_else_block$8.name,
+    		id: create_else_block$9.name,
     		type: "else",
     		source: "(38:2) {:else}",
     		ctx
@@ -894,7 +894,7 @@ var app = (function () {
 
     function create_fragment$g(ctx) {
     	let if_block_anchor;
-    	let if_block = /*src*/ ctx[1] && /*src*/ ctx[1] != [] && create_if_block$a(ctx);
+    	let if_block = /*src*/ ctx[1] && /*src*/ ctx[1] != [] && create_if_block$b(ctx);
 
     	const block = {
     		c: function create() {
@@ -913,7 +913,7 @@ var app = (function () {
     				if (if_block) {
     					if_block.p(ctx, dirty);
     				} else {
-    					if_block = create_if_block$a(ctx);
+    					if_block = create_if_block$b(ctx);
     					if_block.c();
     					if_block.m(if_block_anchor.parentNode, if_block_anchor);
     				}
@@ -1042,6 +1042,8 @@ var app = (function () {
     	let span;
     	let t1;
     	let current;
+    	let mounted;
+    	let dispose;
 
     	icon_1 = new Icon({
     			props: { src: /*icon*/ ctx[0], size: "26" },
@@ -1056,9 +1058,9 @@ var app = (function () {
     			span = element("span");
     			t1 = text(/*text*/ ctx[1]);
     			attr_dev(span, "class", "sidebar-tooltip group-hover:scale-100");
-    			add_location(span, file$f, 7, 4, 185);
+    			add_location(span, file$f, 8, 4, 221);
     			attr_dev(div, "class", "sidebar-icon group");
-    			add_location(div, file$f, 5, 0, 110);
+    			add_location(div, file$f, 6, 0, 129);
     		},
     		l: function claim(nodes) {
     			throw new Error("options.hydrate only works if the component was compiled with the `hydratable: true` option");
@@ -1070,8 +1072,24 @@ var app = (function () {
     			append_dev(div, span);
     			append_dev(span, t1);
     			current = true;
+
+    			if (!mounted) {
+    				dispose = listen_dev(
+    					div,
+    					"click",
+    					function () {
+    						if (is_function(/*click*/ ctx[2])) /*click*/ ctx[2].apply(this, arguments);
+    					},
+    					false,
+    					false,
+    					false
+    				);
+
+    				mounted = true;
+    			}
     		},
-    		p: function update(ctx, [dirty]) {
+    		p: function update(new_ctx, [dirty]) {
+    			ctx = new_ctx;
     			const icon_1_changes = {};
     			if (dirty & /*icon*/ 1) icon_1_changes.src = /*icon*/ ctx[0];
     			icon_1.$set(icon_1_changes);
@@ -1089,6 +1107,8 @@ var app = (function () {
     		d: function destroy(detaching) {
     			if (detaching) detach_dev(div);
     			destroy_component(icon_1);
+    			mounted = false;
+    			dispose();
     		}
     	};
 
@@ -1108,7 +1128,8 @@ var app = (function () {
     	validate_slots('SideBarIcon', slots, []);
     	let { icon } = $$props;
     	let { text } = $$props;
-    	const writable_props = ['icon', 'text'];
+    	let { click } = $$props;
+    	const writable_props = ['icon', 'text', 'click'];
 
     	Object.keys($$props).forEach(key => {
     		if (!~writable_props.indexOf(key) && key.slice(0, 2) !== '$$' && key !== 'slot') console.warn(`<SideBarIcon> was created with unknown prop '${key}'`);
@@ -1117,26 +1138,28 @@ var app = (function () {
     	$$self.$$set = $$props => {
     		if ('icon' in $$props) $$invalidate(0, icon = $$props.icon);
     		if ('text' in $$props) $$invalidate(1, text = $$props.text);
+    		if ('click' in $$props) $$invalidate(2, click = $$props.click);
     	};
 
-    	$$self.$capture_state = () => ({ Icon, icon, text });
+    	$$self.$capture_state = () => ({ Icon, icon, text, click });
 
     	$$self.$inject_state = $$props => {
     		if ('icon' in $$props) $$invalidate(0, icon = $$props.icon);
     		if ('text' in $$props) $$invalidate(1, text = $$props.text);
+    		if ('click' in $$props) $$invalidate(2, click = $$props.click);
     	};
 
     	if ($$props && "$$inject" in $$props) {
     		$$self.$inject_state($$props.$$inject);
     	}
 
-    	return [icon, text];
+    	return [icon, text, click];
     }
 
     class SideBarIcon extends SvelteComponentDev {
     	constructor(options) {
     		super(options);
-    		init(this, options, instance$f, create_fragment$f, safe_not_equal, { icon: 0, text: 1 });
+    		init(this, options, instance$f, create_fragment$f, safe_not_equal, { icon: 0, text: 1, click: 2 });
 
     		dispatch_dev("SvelteRegisterComponent", {
     			component: this,
@@ -1155,6 +1178,10 @@ var app = (function () {
     		if (/*text*/ ctx[1] === undefined && !('text' in props)) {
     			console.warn("<SideBarIcon> was created without expected prop 'text'");
     		}
+
+    		if (/*click*/ ctx[2] === undefined && !('click' in props)) {
+    			console.warn("<SideBarIcon> was created without expected prop 'click'");
+    		}
     	}
 
     	get icon() {
@@ -1172,6 +1199,14 @@ var app = (function () {
     	set text(value) {
     		throw new Error("<SideBarIcon>: Props cannot be set directly on the component instance unless compiling with 'accessors: true' or '<svelte:options accessors/>'");
     	}
+
+    	get click() {
+    		throw new Error("<SideBarIcon>: Props cannot be read directly from the component instance unless compiling with 'accessors: true' or '<svelte:options accessors/>'");
+    	}
+
+    	set click(value) {
+    		throw new Error("<SideBarIcon>: Props cannot be set directly on the component instance unless compiling with 'accessors: true' or '<svelte:options accessors/>'");
+    	}
     }
 
     /* src\components\sidebar\SideBarDivider.svelte generated by Svelte v3.46.3 */
@@ -1179,7 +1214,7 @@ var app = (function () {
     const file$e = "src\\components\\sidebar\\SideBarDivider.svelte";
 
     // (6:0) {:else}
-    function create_else_block$7(ctx) {
+    function create_else_block$8(ctx) {
     	let hr;
 
     	const block = {
@@ -1198,7 +1233,7 @@ var app = (function () {
 
     	dispatch_dev("SvelteRegisterBlock", {
     		block,
-    		id: create_else_block$7.name,
+    		id: create_else_block$8.name,
     		type: "else",
     		source: "(6:0) {:else}",
     		ctx
@@ -1208,7 +1243,7 @@ var app = (function () {
     }
 
     // (4:0) {#if hide}
-    function create_if_block$9(ctx) {
+    function create_if_block$a(ctx) {
     	let hr;
 
     	const block = {
@@ -1227,7 +1262,7 @@ var app = (function () {
 
     	dispatch_dev("SvelteRegisterBlock", {
     		block,
-    		id: create_if_block$9.name,
+    		id: create_if_block$a.name,
     		type: "if",
     		source: "(4:0) {#if hide}",
     		ctx
@@ -1240,8 +1275,8 @@ var app = (function () {
     	let if_block_anchor;
 
     	function select_block_type(ctx, dirty) {
-    		if (/*hide*/ ctx[0]) return create_if_block$9;
-    		return create_else_block$7;
+    		if (/*hide*/ ctx[0]) return create_if_block$a;
+    		return create_else_block$8;
     	}
 
     	let current_block_type = select_block_type(ctx);
@@ -1472,6 +1507,11 @@ var app = (function () {
                 if (data.document.data.applicationDescription != undefined) {
                     // @ts-ignore
                     applicationDescription.set(data.document.data.applicationDescription);
+                }
+                // @ts-ignore
+                if (data.document.data.applicationOptions != undefined) {
+                    // @ts-ignore
+                    applicationOptions.set(data.document.data.applicationOptions);
                 }
             }
             else {
@@ -1895,7 +1935,8 @@ var app = (function () {
         applicationUptime: 2,
         applicationCpuLoad: 3,
         applicationMemoryUsage: 4,
-        applicationDescription: 5
+        applicationDescription: 5,
+        applicationOptions: 6
     };
 
     const PageIds = {
@@ -1921,6 +1962,19 @@ var app = (function () {
             updateApplicationDescription();
             updateApplicationMemoryUsage();
         }
+        if (pageId == PageIds.options) {
+            updateOptions();
+        }
+    }
+    function updateOptions() {
+        networkManager.update(value => {
+            currentNode.update(nodeId => {
+                let node = value.nodeManager.getNodeById(nodeId);
+                node.request(new PacketOutRequestApplicationData([ApplicationDataIds.applicationOptions]));
+                return nodeId;
+            });
+            return value;
+        });
     }
     function updateApplicationState() {
         networkManager.update(value => {
@@ -2035,6 +2089,8 @@ var app = (function () {
     const applicationCpuLoad = writable(undefined);
     const applicationMemoryUsage = writable(undefined);
     const applicationDescription = writable(undefined);
+    const applicationOptions = writable(undefined);
+    const applicationConsoleMessages = writable(undefined);
     currentError.subscribe(value => {
         if (value != undefined) {
             console.log("Error[id: " + value.id + "] " + value.message);
@@ -2065,11 +2121,13 @@ var app = (function () {
     	let current;
 
     	sidebaricon = new SideBarIcon({
-    			props: { icon: Home, text: "Home" },
+    			props: {
+    				icon: Home,
+    				text: "Home",
+    				click: /*func*/ ctx[3]
+    			},
     			$$inline: true
     		});
-
-    	sidebaricon.$on("click", /*click_handler*/ ctx[3]);
 
     	const block = {
     		c: function create() {
@@ -2079,7 +2137,11 @@ var app = (function () {
     			mount_component(sidebaricon, target, anchor);
     			current = true;
     		},
-    		p: noop,
+    		p: function update(ctx, dirty) {
+    			const sidebaricon_changes = {};
+    			if (dirty & /*iconPressed*/ 2) sidebaricon_changes.click = /*func*/ ctx[3];
+    			sidebaricon.$set(sidebaricon_changes);
+    		},
     		i: function intro(local) {
     			if (current) return;
     			transition_in(sidebaricon.$$.fragment, local);
@@ -2114,11 +2176,13 @@ var app = (function () {
     	sidebardivider = new SideBarDivider({ props: { hide: false }, $$inline: true });
 
     	sidebaricon = new SideBarIcon({
-    			props: { icon: Chip, text: "Application" },
+    			props: {
+    				icon: Chip,
+    				text: "Application",
+    				click: /*func_1*/ ctx[4]
+    			},
     			$$inline: true
     		});
-
-    	sidebaricon.$on("click", /*click_handler_1*/ ctx[4]);
 
     	const block = {
     		c: function create() {
@@ -2132,7 +2196,11 @@ var app = (function () {
     			mount_component(sidebaricon, target, anchor);
     			current = true;
     		},
-    		p: noop,
+    		p: function update(ctx, dirty) {
+    			const sidebaricon_changes = {};
+    			if (dirty & /*iconPressed*/ 2) sidebaricon_changes.click = /*func_1*/ ctx[4];
+    			sidebaricon.$set(sidebaricon_changes);
+    		},
     		i: function intro(local) {
     			if (current) return;
     			transition_in(sidebardivider.$$.fragment, local);
@@ -2168,11 +2236,13 @@ var app = (function () {
     	let current;
 
     	sidebaricon = new SideBarIcon({
-    			props: { icon: Adjustments, text: "Options" },
+    			props: {
+    				icon: Adjustments,
+    				text: "Options",
+    				click: /*func_2*/ ctx[5]
+    			},
     			$$inline: true
     		});
-
-    	sidebaricon.$on("click", /*click_handler_2*/ ctx[5]);
 
     	const block = {
     		c: function create() {
@@ -2182,7 +2252,11 @@ var app = (function () {
     			mount_component(sidebaricon, target, anchor);
     			current = true;
     		},
-    		p: noop,
+    		p: function update(ctx, dirty) {
+    			const sidebaricon_changes = {};
+    			if (dirty & /*iconPressed*/ 2) sidebaricon_changes.click = /*func_2*/ ctx[5];
+    			sidebaricon.$set(sidebaricon_changes);
+    		},
     		i: function intro(local) {
     			if (current) return;
     			transition_in(sidebaricon.$$.fragment, local);
@@ -2214,11 +2288,13 @@ var app = (function () {
     	let current;
 
     	sidebaricon = new SideBarIcon({
-    			props: { icon: Terminal, text: "Console" },
+    			props: {
+    				icon: Terminal,
+    				text: "Console",
+    				click: /*func_3*/ ctx[6]
+    			},
     			$$inline: true
     		});
-
-    	sidebaricon.$on("click", /*click_handler_3*/ ctx[6]);
 
     	const block = {
     		c: function create() {
@@ -2228,7 +2304,11 @@ var app = (function () {
     			mount_component(sidebaricon, target, anchor);
     			current = true;
     		},
-    		p: noop,
+    		p: function update(ctx, dirty) {
+    			const sidebaricon_changes = {};
+    			if (dirty & /*iconPressed*/ 2) sidebaricon_changes.click = /*func_3*/ ctx[6];
+    			sidebaricon.$set(sidebaricon_changes);
+    		},
     		i: function intro(local) {
     			if (current) return;
     			transition_in(sidebaricon.$$.fragment, local);
@@ -2260,11 +2340,13 @@ var app = (function () {
     	let current;
 
     	sidebaricon = new SideBarIcon({
-    			props: { icon: Folder, text: "Files" },
+    			props: {
+    				icon: Folder,
+    				text: "Files",
+    				click: /*func_4*/ ctx[7]
+    			},
     			$$inline: true
     		});
-
-    	sidebaricon.$on("click", /*click_handler_4*/ ctx[7]);
 
     	const block = {
     		c: function create() {
@@ -2274,7 +2356,11 @@ var app = (function () {
     			mount_component(sidebaricon, target, anchor);
     			current = true;
     		},
-    		p: noop,
+    		p: function update(ctx, dirty) {
+    			const sidebaricon_changes = {};
+    			if (dirty & /*iconPressed*/ 2) sidebaricon_changes.click = /*func_4*/ ctx[7];
+    			sidebaricon.$set(sidebaricon_changes);
+    		},
     		i: function intro(local) {
     			if (current) return;
     			transition_in(sidebaricon.$$.fragment, local);
@@ -2306,11 +2392,13 @@ var app = (function () {
     	let current;
 
     	sidebaricon = new SideBarIcon({
-    			props: { icon: Key, text: "Access" },
+    			props: {
+    				icon: Key,
+    				text: "Access",
+    				click: /*func_5*/ ctx[8]
+    			},
     			$$inline: true
     		});
-
-    	sidebaricon.$on("click", /*click_handler_5*/ ctx[8]);
 
     	const block = {
     		c: function create() {
@@ -2320,7 +2408,11 @@ var app = (function () {
     			mount_component(sidebaricon, target, anchor);
     			current = true;
     		},
-    		p: noop,
+    		p: function update(ctx, dirty) {
+    			const sidebaricon_changes = {};
+    			if (dirty & /*iconPressed*/ 2) sidebaricon_changes.click = /*func_5*/ ctx[8];
+    			sidebaricon.$set(sidebaricon_changes);
+    		},
     		i: function intro(local) {
     			if (current) return;
     			transition_in(sidebaricon.$$.fragment, local);
@@ -2355,11 +2447,13 @@ var app = (function () {
     	sidebardivider = new SideBarDivider({ props: { hide: false }, $$inline: true });
 
     	sidebaricon = new SideBarIcon({
-    			props: { icon: Plus, text: "Create Application" },
+    			props: {
+    				icon: Plus,
+    				text: "Create Application",
+    				click: /*func_6*/ ctx[9]
+    			},
     			$$inline: true
     		});
-
-    	sidebaricon.$on("click", /*click_handler_6*/ ctx[9]);
 
     	const block = {
     		c: function create() {
@@ -2373,7 +2467,11 @@ var app = (function () {
     			mount_component(sidebaricon, target, anchor);
     			current = true;
     		},
-    		p: noop,
+    		p: function update(ctx, dirty) {
+    			const sidebaricon_changes = {};
+    			if (dirty & /*iconPressed*/ 2) sidebaricon_changes.click = /*func_6*/ ctx[9];
+    			sidebaricon.$set(sidebaricon_changes);
+    		},
     		i: function intro(local) {
     			if (current) return;
     			transition_in(sidebardivider.$$.fragment, local);
@@ -2499,7 +2597,7 @@ var app = (function () {
     	return block;
     }
 
-    // (58:45) 
+    // (66:45) 
     function create_if_block_6$2(ctx) {
     	let sidebaricon;
     	let current;
@@ -2507,7 +2605,8 @@ var app = (function () {
     	sidebaricon = new SideBarIcon({
     			props: {
     				icon: DocumentDuplicate,
-    				text: /*application*/ ctx[11].name
+    				text: /*application*/ ctx[11].name,
+    				click: func_11
     			},
     			$$inline: true
     		});
@@ -2543,14 +2642,14 @@ var app = (function () {
     		block,
     		id: create_if_block_6$2.name,
     		type: "if",
-    		source: "(58:45) ",
+    		source: "(66:45) ",
     		ctx
     	});
 
     	return block;
     }
 
-    // (56:45) 
+    // (62:45) 
     function create_if_block_5$2(ctx) {
     	let sidebaricon;
     	let current;
@@ -2558,7 +2657,8 @@ var app = (function () {
     	sidebaricon = new SideBarIcon({
     			props: {
     				icon: DesktopComputer,
-    				text: /*application*/ ctx[11].name
+    				text: /*application*/ ctx[11].name,
+    				click: func_10
     			},
     			$$inline: true
     		});
@@ -2594,14 +2694,14 @@ var app = (function () {
     		block,
     		id: create_if_block_5$2.name,
     		type: "if",
-    		source: "(56:45) ",
+    		source: "(62:45) ",
     		ctx
     	});
 
     	return block;
     }
 
-    // (54:45) 
+    // (58:45) 
     function create_if_block_4$3(ctx) {
     	let sidebaricon;
     	let current;
@@ -2609,7 +2709,8 @@ var app = (function () {
     	sidebaricon = new SideBarIcon({
     			props: {
     				icon: Cloud,
-    				text: /*application*/ ctx[11].name
+    				text: /*application*/ ctx[11].name,
+    				click: func_9
     			},
     			$$inline: true
     		});
@@ -2645,14 +2746,14 @@ var app = (function () {
     		block,
     		id: create_if_block_4$3.name,
     		type: "if",
-    		source: "(54:45) ",
+    		source: "(58:45) ",
     		ctx
     	});
 
     	return block;
     }
 
-    // (52:45) 
+    // (54:45) 
     function create_if_block_3$3(ctx) {
     	let sidebaricon;
     	let current;
@@ -2660,7 +2761,8 @@ var app = (function () {
     	sidebaricon = new SideBarIcon({
     			props: {
     				icon: Chip,
-    				text: /*application*/ ctx[11].name
+    				text: /*application*/ ctx[11].name,
+    				click: func_8
     			},
     			$$inline: true
     		});
@@ -2696,7 +2798,7 @@ var app = (function () {
     		block,
     		id: create_if_block_3$3.name,
     		type: "if",
-    		source: "(52:45) ",
+    		source: "(54:45) ",
     		ctx
     	});
 
@@ -2711,7 +2813,8 @@ var app = (function () {
     	sidebaricon = new SideBarIcon({
     			props: {
     				icon: Server,
-    				text: /*application*/ ctx[11].name
+    				text: /*application*/ ctx[11].name,
+    				click: func_7
     			},
     			$$inline: true
     		});
@@ -2862,8 +2965,8 @@ var app = (function () {
     	return block;
     }
 
-    // (63:4) {#if !hideIcon.includes(SideBarIconIds.settings) }
-    function create_if_block$8(ctx) {
+    // (73:4) {#if !hideIcon.includes(SideBarIconIds.settings) }
+    function create_if_block$9(ctx) {
     	let sidebardivider;
     	let t;
     	let sidebaricon;
@@ -2871,11 +2974,13 @@ var app = (function () {
     	sidebardivider = new SideBarDivider({ props: { hide: false }, $$inline: true });
 
     	sidebaricon = new SideBarIcon({
-    			props: { icon: FingerPrint, text: "Settings" },
+    			props: {
+    				icon: FingerPrint,
+    				text: "Settings",
+    				click: /*func_12*/ ctx[10]
+    			},
     			$$inline: true
     		});
-
-    	sidebaricon.$on("click", /*click_handler_7*/ ctx[10]);
 
     	const block = {
     		c: function create() {
@@ -2889,7 +2994,11 @@ var app = (function () {
     			mount_component(sidebaricon, target, anchor);
     			current = true;
     		},
-    		p: noop,
+    		p: function update(ctx, dirty) {
+    			const sidebaricon_changes = {};
+    			if (dirty & /*iconPressed*/ 2) sidebaricon_changes.click = /*func_12*/ ctx[10];
+    			sidebaricon.$set(sidebaricon_changes);
+    		},
     		i: function intro(local) {
     			if (current) return;
     			transition_in(sidebardivider.$$.fragment, local);
@@ -2910,9 +3019,9 @@ var app = (function () {
 
     	dispatch_dev("SvelteRegisterBlock", {
     		block,
-    		id: create_if_block$8.name,
+    		id: create_if_block$9.name,
     		type: "if",
-    		source: "(63:4) {#if !hideIcon.includes(SideBarIconIds.settings) }",
+    		source: "(73:4) {#if !hideIcon.includes(SideBarIconIds.settings) }",
     		ctx
     	});
 
@@ -2947,7 +3056,7 @@ var app = (function () {
     	let if_block5 = show_if_3 && create_if_block_8$2(ctx);
     	let if_block6 = show_if_2 && create_if_block_7$2(ctx);
     	let if_block7 = show_if_1 && create_if_block_1$3(ctx);
-    	let if_block8 = show_if && create_if_block$8(ctx);
+    	let if_block8 = show_if && create_if_block$9(ctx);
 
     	const block = {
     		c: function create() {
@@ -3207,7 +3316,7 @@ var app = (function () {
     						transition_in(if_block8, 1);
     					}
     				} else {
-    					if_block8 = create_if_block$8(ctx);
+    					if_block8 = create_if_block$9(ctx);
     					if_block8.c();
     					transition_in(if_block8, 1);
     					if_block8.m(div, null);
@@ -3272,6 +3381,26 @@ var app = (function () {
     	return block;
     }
 
+    const func_7 = function () {
+    	
+    };
+
+    const func_8 = function () {
+    	
+    };
+
+    const func_9 = function () {
+    	
+    };
+
+    const func_10 = function () {
+    	
+    };
+
+    const func_11 = function () {
+    	
+    };
+
     function instance$d($$self, $$props, $$invalidate) {
     	let $userData;
     	validate_store(userData, 'userData');
@@ -3286,35 +3415,35 @@ var app = (function () {
     		if (!~writable_props.indexOf(key) && key.slice(0, 2) !== '$$' && key !== 'slot') console.warn(`<SideBar> was created with unknown prop '${key}'`);
     	});
 
-    	const click_handler = function () {
+    	const func = function () {
     		iconPressed(SideBarIconIds.home);
     	};
 
-    	const click_handler_1 = function () {
+    	const func_1 = function () {
     		iconPressed(SideBarIconIds.application);
     	};
 
-    	const click_handler_2 = function () {
+    	const func_2 = function () {
     		iconPressed(SideBarIconIds.options);
     	};
 
-    	const click_handler_3 = function () {
+    	const func_3 = function () {
     		iconPressed(SideBarIconIds.console);
     	};
 
-    	const click_handler_4 = function () {
+    	const func_4 = function () {
     		iconPressed(SideBarIconIds.files);
     	};
 
-    	const click_handler_5 = function () {
+    	const func_5 = function () {
     		iconPressed(SideBarIconIds.access);
     	};
 
-    	const click_handler_6 = function () {
+    	const func_6 = function () {
     		iconPressed(SideBarIconIds.create_application);
     	};
 
-    	const click_handler_7 = function () {
+    	const func_12 = function () {
     		iconPressed(SideBarIconIds.settings);
     	};
 
@@ -3358,14 +3487,14 @@ var app = (function () {
     		hideIcon,
     		iconPressed,
     		$userData,
-    		click_handler,
-    		click_handler_1,
-    		click_handler_2,
-    		click_handler_3,
-    		click_handler_4,
-    		click_handler_5,
-    		click_handler_6,
-    		click_handler_7
+    		func,
+    		func_1,
+    		func_2,
+    		func_3,
+    		func_4,
+    		func_5,
+    		func_6,
+    		func_12
     	];
     }
 
@@ -3414,7 +3543,7 @@ var app = (function () {
     const file$c = "src\\components\\top\\TopNavigation.svelte";
 
     // (30:8) {:else}
-    function create_else_block$6(ctx) {
+    function create_else_block$7(ctx) {
     	let icon;
     	let current;
 
@@ -3452,7 +3581,7 @@ var app = (function () {
 
     	dispatch_dev("SvelteRegisterBlock", {
     		block,
-    		id: create_else_block$6.name,
+    		id: create_else_block$7.name,
     		type: "else",
     		source: "(30:8) {:else}",
     		ctx
@@ -3462,7 +3591,7 @@ var app = (function () {
     }
 
     // (28:8) {#if $darkMode}
-    function create_if_block$7(ctx) {
+    function create_if_block$8(ctx) {
     	let icon;
     	let current;
 
@@ -3500,7 +3629,7 @@ var app = (function () {
 
     	dispatch_dev("SvelteRegisterBlock", {
     		block,
-    		id: create_if_block$7.name,
+    		id: create_if_block$8.name,
     		type: "if",
     		source: "(28:8) {#if $darkMode}",
     		ctx
@@ -3536,7 +3665,7 @@ var app = (function () {
     			$$inline: true
     		});
 
-    	const if_block_creators = [create_if_block$7, create_else_block$6];
+    	const if_block_creators = [create_if_block$8, create_else_block$7];
     	const if_blocks = [];
 
     	function select_block_type(ctx, dirty) {
@@ -3982,7 +4111,7 @@ var app = (function () {
     const file$9 = "src\\components\\other\\LoginContent.svelte";
 
     // (69:32) {:else}
-    function create_else_block$5(ctx) {
+    function create_else_block$6(ctx) {
     	let icon;
     	let current;
 
@@ -4021,7 +4150,7 @@ var app = (function () {
 
     	dispatch_dev("SvelteRegisterBlock", {
     		block,
-    		id: create_else_block$5.name,
+    		id: create_else_block$6.name,
     		type: "else",
     		source: "(69:32) {:else}",
     		ctx
@@ -4031,7 +4160,7 @@ var app = (function () {
     }
 
     // (67:32) {#if siteState}
-    function create_if_block$6(ctx) {
+    function create_if_block$7(ctx) {
     	let icon;
     	let current;
 
@@ -4070,7 +4199,7 @@ var app = (function () {
 
     	dispatch_dev("SvelteRegisterBlock", {
     		block,
-    		id: create_if_block$6.name,
+    		id: create_if_block$7.name,
     		type: "if",
     		source: "(67:32) {#if siteState}",
     		ctx
@@ -4133,7 +4262,7 @@ var app = (function () {
     			$$inline: true
     		});
 
-    	const if_block_creators = [create_if_block$6, create_else_block$5];
+    	const if_block_creators = [create_if_block$7, create_else_block$6];
     	const if_blocks = [];
 
     	function select_block_type(ctx, dirty) {
@@ -4497,7 +4626,7 @@ var app = (function () {
     const file$8 = "src\\components\\other\\AddNodeContent.svelte";
 
     // (54:32) {:else}
-    function create_else_block$4(ctx) {
+    function create_else_block$5(ctx) {
     	let icon;
     	let current;
 
@@ -4536,7 +4665,7 @@ var app = (function () {
 
     	dispatch_dev("SvelteRegisterBlock", {
     		block,
-    		id: create_else_block$4.name,
+    		id: create_else_block$5.name,
     		type: "else",
     		source: "(54:32) {:else}",
     		ctx
@@ -4546,7 +4675,7 @@ var app = (function () {
     }
 
     // (52:32) {#if siteState}
-    function create_if_block$5(ctx) {
+    function create_if_block$6(ctx) {
     	let icon;
     	let current;
 
@@ -4585,7 +4714,7 @@ var app = (function () {
 
     	dispatch_dev("SvelteRegisterBlock", {
     		block,
-    		id: create_if_block$5.name,
+    		id: create_if_block$6.name,
     		type: "if",
     		source: "(52:32) {#if siteState}",
     		ctx
@@ -4630,7 +4759,7 @@ var app = (function () {
     	let mounted;
     	let dispose;
     	topnavigation = new TopNavigation({ props: { title: "Node" }, $$inline: true });
-    	const if_block_creators = [create_if_block$5, create_else_block$4];
+    	const if_block_creators = [create_if_block$6, create_else_block$5];
     	const if_blocks = [];
 
     	function select_block_type(ctx, dirty) {
@@ -4916,7 +5045,7 @@ var app = (function () {
     const file$7 = "src\\components\\other\\RegisterContent.svelte";
 
     // (72:32) {:else}
-    function create_else_block$3(ctx) {
+    function create_else_block$4(ctx) {
     	let icon;
     	let current;
 
@@ -4955,7 +5084,7 @@ var app = (function () {
 
     	dispatch_dev("SvelteRegisterBlock", {
     		block,
-    		id: create_else_block$3.name,
+    		id: create_else_block$4.name,
     		type: "else",
     		source: "(72:32) {:else}",
     		ctx
@@ -4965,7 +5094,7 @@ var app = (function () {
     }
 
     // (70:32) {#if siteState}
-    function create_if_block$4(ctx) {
+    function create_if_block$5(ctx) {
     	let icon;
     	let current;
 
@@ -5004,7 +5133,7 @@ var app = (function () {
 
     	dispatch_dev("SvelteRegisterBlock", {
     		block,
-    		id: create_if_block$4.name,
+    		id: create_if_block$5.name,
     		type: "if",
     		source: "(70:32) {#if siteState}",
     		ctx
@@ -5062,7 +5191,7 @@ var app = (function () {
     			$$inline: true
     		});
 
-    	const if_block_creators = [create_if_block$4, create_else_block$3];
+    	const if_block_creators = [create_if_block$5, create_else_block$4];
     	const if_blocks = [];
 
     	function select_block_type(ctx, dirty) {
@@ -5442,7 +5571,7 @@ var app = (function () {
     			t = text("Start");
     			attr_dev(button, "type", "button");
     			attr_dev(button, "class", "transition inline-flex items-center mt-2 mr-2 px-3 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-green-600 hover:bg-green-700 focus:bg-green-700");
-    			add_location(button, file$6, 13, 16, 1111);
+    			add_location(button, file$6, 13, 16, 1114);
     		},
     		m: function mount(target, anchor) {
     			insert_dev(target, button, anchor);
@@ -5496,7 +5625,7 @@ var app = (function () {
     		c: function create() {
     			button = element("button");
     			create_component(icon.$$.fragment);
-    			t = text("Start");
+    			t = text("Starting");
     			attr_dev(button, "type", "button");
     			attr_dev(button, "class", "transition inline-flex items-center mt-2 mr-2 px-3 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-green-600 hover:bg-green-700 focus:bg-green-700");
     			add_location(button, file$6, 11, 16, 770);
@@ -5556,7 +5685,7 @@ var app = (function () {
     			t = text("Restart");
     			attr_dev(button, "type", "button");
     			attr_dev(button, "class", "transition inline-flex items-center mt-2 mr-2 px-3 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-orange-450 hover:bg-yellow-500");
-    			add_location(button, file$6, 18, 16, 1820);
+    			add_location(button, file$6, 18, 16, 1826);
     		},
     		m: function mount(target, anchor) {
     			insert_dev(target, button, anchor);
@@ -5610,10 +5739,10 @@ var app = (function () {
     		c: function create() {
     			button = element("button");
     			create_component(icon.$$.fragment);
-    			t = text("Restart");
+    			t = text("Restarting");
     			attr_dev(button, "type", "button");
     			attr_dev(button, "class", "transition inline-flex items-center mt-2 mr-2 px-3 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-orange-450 hover:bg-yellow-500");
-    			add_location(button, file$6, 16, 16, 1494);
+    			add_location(button, file$6, 16, 16, 1497);
     		},
     		m: function mount(target, anchor) {
     			insert_dev(target, button, anchor);
@@ -5667,7 +5796,7 @@ var app = (function () {
     			t = text("Stop");
     			attr_dev(button, "type", "button");
     			attr_dev(button, "class", "transition inline-flex items-center mt-2 mr-2 px-3 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-red-500 hover:bg-red-700 focus:bg-red-700");
-    			add_location(button, file$6, 23, 16, 2523);
+    			add_location(button, file$6, 23, 16, 2533);
     		},
     		m: function mount(target, anchor) {
     			insert_dev(target, button, anchor);
@@ -5721,10 +5850,10 @@ var app = (function () {
     		c: function create() {
     			button = element("button");
     			create_component(icon.$$.fragment);
-    			t = text("Stop");
+    			t = text("Stopping");
     			attr_dev(button, "type", "button");
     			attr_dev(button, "class", "transition inline-flex items-center mt-2 mr-2 px-3 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-red-500 hover:bg-red-700 focus:bg-red-700");
-    			add_location(button, file$6, 21, 16, 2189);
+    			add_location(button, file$6, 21, 16, 2195);
     		},
     		m: function mount(target, anchor) {
     			insert_dev(target, button, anchor);
@@ -5768,7 +5897,7 @@ var app = (function () {
     			dd = element("dd");
     			dd.textContent = "Offline";
     			attr_dev(dd, "class", "mt-1 text-sm text-red-600 font-medium sm:mt-0 sm:col-span-2");
-    			add_location(dd, file$6, 40, 20, 3959);
+    			add_location(dd, file$6, 40, 20, 3969);
     		},
     		m: function mount(target, anchor) {
     			insert_dev(target, dd, anchor);
@@ -5798,7 +5927,7 @@ var app = (function () {
     			dd = element("dd");
     			dd.textContent = "Stopping";
     			attr_dev(dd, "class", "mt-1 text-sm text-red-600 font-medium sm:mt-0 sm:col-span-2");
-    			add_location(dd, file$6, 38, 20, 3776);
+    			add_location(dd, file$6, 38, 20, 3786);
     		},
     		m: function mount(target, anchor) {
     			insert_dev(target, dd, anchor);
@@ -5828,7 +5957,7 @@ var app = (function () {
     			dd = element("dd");
     			dd.textContent = "Restarting";
     			attr_dev(dd, "class", "mt-1 text-sm text-orange-450 font-medium sm:mt-0 sm:col-span-2");
-    			add_location(dd, file$6, 36, 20, 3587);
+    			add_location(dd, file$6, 36, 20, 3597);
     		},
     		m: function mount(target, anchor) {
     			insert_dev(target, dd, anchor);
@@ -5858,7 +5987,7 @@ var app = (function () {
     			dd = element("dd");
     			dd.textContent = "Starting";
     			attr_dev(dd, "class", "mt-1 text-sm text-green-500 font-medium sm:mt-0 sm:col-span-2");
-    			add_location(dd, file$6, 34, 20, 3399);
+    			add_location(dd, file$6, 34, 20, 3409);
     		},
     		m: function mount(target, anchor) {
     			insert_dev(target, dd, anchor);
@@ -5888,7 +6017,7 @@ var app = (function () {
     			dd = element("dd");
     			dd.textContent = "Online";
     			attr_dev(dd, "class", "mt-1 text-sm text-green-500 font-medium sm:mt-0 sm:col-span-2");
-    			add_location(dd, file$6, 32, 20, 3215);
+    			add_location(dd, file$6, 32, 20, 3225);
     		},
     		m: function mount(target, anchor) {
     			insert_dev(target, dd, anchor);
@@ -5919,7 +6048,7 @@ var app = (function () {
     			dd = element("dd");
     			t = text(/*$applicationType*/ ctx[1]);
     			attr_dev(dd, "class", "mt-1 text-sm text-gray-900 dark:text-gray-400 sm:mt-0 sm:col-span-2");
-    			add_location(dd, file$6, 48, 20, 4551);
+    			add_location(dd, file$6, 48, 20, 4561);
     		},
     		m: function mount(target, anchor) {
     			insert_dev(target, dd, anchor);
@@ -5965,7 +6094,7 @@ var app = (function () {
     			dd = element("dd");
     			create_component(icon.$$.fragment);
     			attr_dev(dd, "class", "mt-1 text-gray-500 dark:text-gray-400 sm:mt-0 sm:col-span-2");
-    			add_location(dd, file$6, 46, 20, 4354);
+    			add_location(dd, file$6, 46, 20, 4364);
     		},
     		m: function mount(target, anchor) {
     			insert_dev(target, dd, anchor);
@@ -6009,7 +6138,7 @@ var app = (function () {
     			dd = element("dd");
     			t = text(/*$applicationUptime*/ ctx[2]);
     			attr_dev(dd, "class", "mt-1 text-sm text-gray-900 dark:text-gray-400 sm:mt-0 sm:col-span-2");
-    			add_location(dd, file$6, 56, 20, 5176);
+    			add_location(dd, file$6, 56, 20, 5186);
     		},
     		m: function mount(target, anchor) {
     			insert_dev(target, dd, anchor);
@@ -6055,7 +6184,7 @@ var app = (function () {
     			dd = element("dd");
     			create_component(icon.$$.fragment);
     			attr_dev(dd, "class", "mt-1 text-gray-500 dark:text-gray-400 sm:mt-0 sm:col-span-2");
-    			add_location(dd, file$6, 54, 20, 4979);
+    			add_location(dd, file$6, 54, 20, 4989);
     		},
     		m: function mount(target, anchor) {
     			insert_dev(target, dd, anchor);
@@ -6101,7 +6230,7 @@ var app = (function () {
     			t0 = text(/*$applicationCpuLoad*/ ctx[3]);
     			t1 = text("%");
     			attr_dev(dd, "class", "mt-1 text-sm text-gray-900 dark:text-gray-400 sm:mt-0 sm:col-span-2");
-    			add_location(dd, file$6, 64, 20, 5796);
+    			add_location(dd, file$6, 64, 20, 5806);
     		},
     		m: function mount(target, anchor) {
     			insert_dev(target, dd, anchor);
@@ -6148,7 +6277,7 @@ var app = (function () {
     			dd = element("dd");
     			create_component(icon.$$.fragment);
     			attr_dev(dd, "class", "mt-1 text-gray-500 dark:text-gray-400 sm:mt-0 sm:col-span-2");
-    			add_location(dd, file$6, 62, 20, 5599);
+    			add_location(dd, file$6, 62, 20, 5609);
     		},
     		m: function mount(target, anchor) {
     			insert_dev(target, dd, anchor);
@@ -6191,7 +6320,7 @@ var app = (function () {
     			dd = element("dd");
     			dd.textContent = "Nothing";
     			attr_dev(dd, "class", "mt-1 text-sm text-gray-900 dark:text-gray-400 sm:mt-0 sm:col-span-2");
-    			add_location(dd, file$6, 72, 20, 6423);
+    			add_location(dd, file$6, 72, 20, 6433);
     		},
     		m: function mount(target, anchor) {
     			insert_dev(target, dd, anchor);
@@ -6234,7 +6363,7 @@ var app = (function () {
     			dd = element("dd");
     			create_component(icon.$$.fragment);
     			attr_dev(dd, "class", "mt-1 text-gray-500 dark:text-gray-400 sm:mt-0 sm:col-span-2");
-    			add_location(dd, file$6, 70, 20, 6226);
+    			add_location(dd, file$6, 70, 20, 6236);
     		},
     		m: function mount(target, anchor) {
     			insert_dev(target, dd, anchor);
@@ -6269,7 +6398,7 @@ var app = (function () {
     }
 
     // (82:16) {:else}
-    function create_else_block$2(ctx) {
+    function create_else_block$3(ctx) {
     	let dd;
     	let t0_value = /*$applicationMemoryUsage*/ ctx[4][0] + "";
     	let t0;
@@ -6286,7 +6415,7 @@ var app = (function () {
     			t2 = text(t2_value);
     			t3 = text(" MB");
     			attr_dev(dd, "class", "mt-1 text-sm text-gray-900 dark:text-gray-400 sm:mt-0 sm:col-span-2");
-    			add_location(dd, file$6, 82, 20, 7086);
+    			add_location(dd, file$6, 82, 20, 7096);
     		},
     		m: function mount(target, anchor) {
     			insert_dev(target, dd, anchor);
@@ -6308,7 +6437,7 @@ var app = (function () {
 
     	dispatch_dev("SvelteRegisterBlock", {
     		block,
-    		id: create_else_block$2.name,
+    		id: create_else_block$3.name,
     		type: "else",
     		source: "(82:16) {:else}",
     		ctx
@@ -6318,7 +6447,7 @@ var app = (function () {
     }
 
     // (80:16) {#if $applicationMemoryUsage === undefined}
-    function create_if_block$3(ctx) {
+    function create_if_block$4(ctx) {
     	let dd;
     	let icon;
     	let current;
@@ -6336,7 +6465,7 @@ var app = (function () {
     			dd = element("dd");
     			create_component(icon.$$.fragment);
     			attr_dev(dd, "class", "mt-1 text-gray-500 dark:text-gray-400 sm:mt-0 sm:col-span-2");
-    			add_location(dd, file$6, 80, 20, 6889);
+    			add_location(dd, file$6, 80, 20, 6899);
     		},
     		m: function mount(target, anchor) {
     			insert_dev(target, dd, anchor);
@@ -6361,7 +6490,7 @@ var app = (function () {
 
     	dispatch_dev("SvelteRegisterBlock", {
     		block,
-    		id: create_if_block$3.name,
+    		id: create_if_block$4.name,
     		type: "if",
     		source: "(80:16) {#if $applicationMemoryUsage === undefined}",
     		ctx
@@ -6504,7 +6633,7 @@ var app = (function () {
 
     	current_block_type_index_6 = select_block_type_7(ctx);
     	if_block7 = if_blocks_6[current_block_type_index_6] = if_block_creators_6[current_block_type_index_6](ctx);
-    	const if_block_creators_7 = [create_if_block$3, create_else_block$2];
+    	const if_block_creators_7 = [create_if_block$4, create_else_block$3];
     	const if_blocks_7 = [];
 
     	function select_block_type_8(ctx, dirty) {
@@ -6578,32 +6707,32 @@ var app = (function () {
     			attr_dev(div1, "class", "px-4 py-5 sm:px-6");
     			add_location(div1, file$6, 6, 4, 390);
     			attr_dev(dt0, "class", "text-sm font-medium text-gray-500 dark:text-white");
-    			add_location(dt0, file$6, 30, 16, 3041);
+    			add_location(dt0, file$6, 30, 16, 3051);
     			attr_dev(div2, "class", "bg-gray-50 dark:bg-gray-850 px-4 py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6");
-    			add_location(div2, file$6, 29, 12, 2932);
+    			add_location(div2, file$6, 29, 12, 2942);
     			attr_dev(dt1, "class", "text-sm font-medium text-gray-500 dark:text-white");
-    			add_location(dt1, file$6, 44, 16, 4207);
+    			add_location(dt1, file$6, 44, 16, 4217);
     			attr_dev(div3, "class", "bg-white dark:bg-gray-900 px-4 py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6");
-    			add_location(div3, file$6, 43, 12, 4100);
+    			add_location(div3, file$6, 43, 12, 4110);
     			attr_dev(dt2, "class", "text-sm font-medium text-gray-500 dark:text-white");
-    			add_location(dt2, file$6, 52, 16, 4820);
+    			add_location(dt2, file$6, 52, 16, 4830);
     			attr_dev(div4, "class", "bg-gray-50 dark:bg-gray-850 px-4 py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6");
-    			add_location(div4, file$6, 51, 12, 4711);
+    			add_location(div4, file$6, 51, 12, 4721);
     			attr_dev(dt3, "class", "text-sm font-medium text-gray-500 dark:text-white");
-    			add_location(dt3, file$6, 60, 16, 5445);
+    			add_location(dt3, file$6, 60, 16, 5455);
     			attr_dev(div5, "class", "bg-white dark:bg-gray-900 px-4 py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6");
-    			add_location(div5, file$6, 59, 12, 5338);
+    			add_location(div5, file$6, 59, 12, 5348);
     			attr_dev(dt4, "class", "text-sm font-medium text-gray-500 dark:text-white");
-    			add_location(dt4, file$6, 68, 16, 6069);
+    			add_location(dt4, file$6, 68, 16, 6079);
     			attr_dev(div6, "class", "bg-gray-50 dark:bg-gray-850 px-4 py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6");
-    			add_location(div6, file$6, 67, 12, 5960);
+    			add_location(div6, file$6, 67, 12, 5970);
     			attr_dev(dt5, "class", "text-sm font-medium text-gray-500 dark:text-white");
-    			add_location(dt5, file$6, 78, 16, 6727);
+    			add_location(dt5, file$6, 78, 16, 6737);
     			attr_dev(div7, "class", "bg-white dark:bg-gray-900 px-4 py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6");
-    			add_location(div7, file$6, 77, 12, 6620);
-    			add_location(dl, file$6, 28, 8, 2914);
+    			add_location(div7, file$6, 77, 12, 6630);
+    			add_location(dl, file$6, 28, 8, 2924);
     			attr_dev(div8, "class", "border-t border-gray-200 dark:border-gray-850");
-    			add_location(div8, file$6, 27, 4, 2845);
+    			add_location(div8, file$6, 27, 4, 2855);
     			attr_dev(div9, "class", "mr-9 ml-9 mt-9 mb-9 bg-white dark:bg-gray-900 rounded-lg shadow-lg");
     			add_location(div9, file$6, 5, 0, 304);
     		},
@@ -7091,14 +7220,103 @@ var app = (function () {
 
     function get_each_context$2(ctx, list, i) {
     	const child_ctx = ctx.slice();
-    	child_ctx[4] = list[i];
+    	child_ctx[5] = list[i];
     	return child_ctx;
     }
 
-    // (17:12) {#each messages as message}
+    // (28:12) {:else}
+    function create_else_block$2(ctx) {
+    	const block = { c: noop, m: noop, p: noop, d: noop };
+
+    	dispatch_dev("SvelteRegisterBlock", {
+    		block,
+    		id: create_else_block$2.name,
+    		type: "else",
+    		source: "(28:12) {:else}",
+    		ctx
+    	});
+
+    	return block;
+    }
+
+    // (23:12) {#if $applicationConsoleMessages !== undefined}
+    function create_if_block$3(ctx) {
+    	let t;
+    	let div;
+    	let each_value = /*$applicationConsoleMessages*/ ctx[0];
+    	validate_each_argument(each_value);
+    	let each_blocks = [];
+
+    	for (let i = 0; i < each_value.length; i += 1) {
+    		each_blocks[i] = create_each_block$2(get_each_context$2(ctx, each_value, i));
+    	}
+
+    	const block = {
+    		c: function create() {
+    			for (let i = 0; i < each_blocks.length; i += 1) {
+    				each_blocks[i].c();
+    			}
+
+    			t = space();
+    			div = element("div");
+    			attr_dev(div, "id", "scrollDiv");
+    			add_location(div, file$4, 26, 16, 973);
+    		},
+    		m: function mount(target, anchor) {
+    			for (let i = 0; i < each_blocks.length; i += 1) {
+    				each_blocks[i].m(target, anchor);
+    			}
+
+    			insert_dev(target, t, anchor);
+    			insert_dev(target, div, anchor);
+    		},
+    		p: function update(ctx, dirty) {
+    			if (dirty & /*$applicationConsoleMessages*/ 1) {
+    				each_value = /*$applicationConsoleMessages*/ ctx[0];
+    				validate_each_argument(each_value);
+    				let i;
+
+    				for (i = 0; i < each_value.length; i += 1) {
+    					const child_ctx = get_each_context$2(ctx, each_value, i);
+
+    					if (each_blocks[i]) {
+    						each_blocks[i].p(child_ctx, dirty);
+    					} else {
+    						each_blocks[i] = create_each_block$2(child_ctx);
+    						each_blocks[i].c();
+    						each_blocks[i].m(t.parentNode, t);
+    					}
+    				}
+
+    				for (; i < each_blocks.length; i += 1) {
+    					each_blocks[i].d(1);
+    				}
+
+    				each_blocks.length = each_value.length;
+    			}
+    		},
+    		d: function destroy(detaching) {
+    			destroy_each(each_blocks, detaching);
+    			if (detaching) detach_dev(t);
+    			if (detaching) detach_dev(div);
+    		}
+    	};
+
+    	dispatch_dev("SvelteRegisterBlock", {
+    		block,
+    		id: create_if_block$3.name,
+    		type: "if",
+    		source: "(23:12) {#if $applicationConsoleMessages !== undefined}",
+    		ctx
+    	});
+
+    	return block;
+    }
+
+    // (24:16) {#each $applicationConsoleMessages as message}
     function create_each_block$2(ctx) {
     	let div;
-    	let t_value = /*message*/ ctx[4] + "";
+    	let t_value = /*message*/ ctx[5] + "";
     	let t;
 
     	const block = {
@@ -7106,14 +7324,14 @@ var app = (function () {
     			div = element("div");
     			t = text(t_value);
     			attr_dev(div, "class", "console-line");
-    			add_location(div, file$4, 17, 16, 603);
+    			add_location(div, file$4, 24, 20, 889);
     		},
     		m: function mount(target, anchor) {
     			insert_dev(target, div, anchor);
     			append_dev(div, t);
     		},
     		p: function update(ctx, dirty) {
-    			if (dirty & /*messages*/ 1 && t_value !== (t_value = /*message*/ ctx[4] + "")) set_data_dev(t, t_value);
+    			if (dirty & /*$applicationConsoleMessages*/ 1 && t_value !== (t_value = /*message*/ ctx[5] + "")) set_data_dev(t, t_value);
     		},
     		d: function destroy(detaching) {
     			if (detaching) detach_dev(div);
@@ -7124,7 +7342,7 @@ var app = (function () {
     		block,
     		id: create_each_block$2.name,
     		type: "each",
-    		source: "(17:12) {#each messages as message}",
+    		source: "(24:16) {#each $applicationConsoleMessages as message}",
     		ctx
     	});
 
@@ -7152,13 +7370,13 @@ var app = (function () {
     			$$inline: true
     		});
 
-    	let each_value = /*messages*/ ctx[0];
-    	validate_each_argument(each_value);
-    	let each_blocks = [];
-
-    	for (let i = 0; i < each_value.length; i += 1) {
-    		each_blocks[i] = create_each_block$2(get_each_context$2(ctx, each_value, i));
+    	function select_block_type(ctx, dirty) {
+    		if (/*$applicationConsoleMessages*/ ctx[0] !== undefined) return create_if_block$3;
+    		return create_else_block$2;
     	}
+
+    	let current_block_type = select_block_type(ctx);
+    	let if_block = current_block_type(ctx);
 
     	icon = new Icon({
     			props: {
@@ -7176,11 +7394,7 @@ var app = (function () {
     			t0 = space();
     			div1 = element("div");
     			div0 = element("div");
-
-    			for (let i = 0; i < each_blocks.length; i += 1) {
-    				each_blocks[i].c();
-    			}
-
+    			if_block.c();
     			t1 = space();
     			form = element("form");
     			input = element("input");
@@ -7188,19 +7402,19 @@ var app = (function () {
     			div2 = element("div");
     			create_component(icon.$$.fragment);
     			attr_dev(div0, "class", "console");
-    			add_location(div0, file$4, 15, 8, 523);
+    			add_location(div0, file$4, 21, 8, 721);
     			attr_dev(div1, "class", "content-list");
-    			add_location(div1, file$4, 14, 4, 487);
+    			add_location(div1, file$4, 20, 4, 685);
     			attr_dev(input, "type", "text");
     			attr_dev(input, "id", "console-input");
     			attr_dev(input, "placeholder", "Enter command...");
     			attr_dev(input, "class", "bottom-bar-input");
-    			add_location(input, file$4, 22, 8, 802);
-    			add_location(div2, file$4, 23, 8, 908);
+    			add_location(input, file$4, 33, 8, 1178);
+    			add_location(div2, file$4, 34, 8, 1284);
     			attr_dev(form, "class", "bottom-bar");
-    			add_location(form, file$4, 21, 4, 699);
+    			add_location(form, file$4, 32, 4, 1075);
     			attr_dev(div3, "class", "content-container");
-    			add_location(div3, file$4, 12, 0, 410);
+    			add_location(div3, file$4, 18, 0, 608);
     		},
     		l: function claim(nodes) {
     			throw new Error("options.hydrate only works if the component was compiled with the `hydratable: true` option");
@@ -7211,11 +7425,7 @@ var app = (function () {
     			append_dev(div3, t0);
     			append_dev(div3, div1);
     			append_dev(div1, div0);
-
-    			for (let i = 0; i < each_blocks.length; i += 1) {
-    				each_blocks[i].m(div0, null);
-    			}
-
+    			if_block.m(div0, null);
     			append_dev(div3, t1);
     			append_dev(div3, form);
     			append_dev(form, input);
@@ -7234,28 +7444,16 @@ var app = (function () {
     			}
     		},
     		p: function update(ctx, [dirty]) {
-    			if (dirty & /*messages*/ 1) {
-    				each_value = /*messages*/ ctx[0];
-    				validate_each_argument(each_value);
-    				let i;
+    			if (current_block_type === (current_block_type = select_block_type(ctx)) && if_block) {
+    				if_block.p(ctx, dirty);
+    			} else {
+    				if_block.d(1);
+    				if_block = current_block_type(ctx);
 
-    				for (i = 0; i < each_value.length; i += 1) {
-    					const child_ctx = get_each_context$2(ctx, each_value, i);
-
-    					if (each_blocks[i]) {
-    						each_blocks[i].p(child_ctx, dirty);
-    					} else {
-    						each_blocks[i] = create_each_block$2(child_ctx);
-    						each_blocks[i].c();
-    						each_blocks[i].m(div0, null);
-    					}
+    				if (if_block) {
+    					if_block.c();
+    					if_block.m(div0, null);
     				}
-
-    				for (; i < each_blocks.length; i += 1) {
-    					each_blocks[i].d(1);
-    				}
-
-    				each_blocks.length = each_value.length;
     			}
     		},
     		i: function intro(local) {
@@ -7272,7 +7470,7 @@ var app = (function () {
     		d: function destroy(detaching) {
     			if (detaching) detach_dev(div3);
     			destroy_component(topnavigation);
-    			destroy_each(each_blocks, detaching);
+    			if_block.d();
     			destroy_component(icon);
     			mounted = false;
     			run_all(dispose);
@@ -7291,9 +7489,11 @@ var app = (function () {
     }
 
     function instance$4($$self, $$props, $$invalidate) {
+    	let $applicationConsoleMessages;
+    	validate_store(applicationConsoleMessages, 'applicationConsoleMessages');
+    	component_subscribe($$self, applicationConsoleMessages, $$value => $$invalidate(0, $applicationConsoleMessages = $$value));
     	let { $$slots: slots = {}, $$scope } = $$props;
     	validate_slots('ConsoleContent', slots, []);
-    	let messages = ["Test1", "Test2"];
 
     	function sendCommand() {
     		// @ts-ignore
@@ -7302,7 +7502,15 @@ var app = (function () {
     		// @ts-ignore
     		document.getElementById("console-input").value = "";
 
-    		$$invalidate(0, messages = [...messages, message]);
+    		addLog(message);
+    	}
+
+    	function addLog(message) {
+    		applicationConsoleMessages.update(value => {
+    			return [...value, message];
+    		});
+
+    		document.getElementById("scrollDiv").scrollIntoView();
     	}
 
     	const writable_props = [];
@@ -7324,19 +7532,13 @@ var app = (function () {
     		TopNavigation,
     		Check,
     		Icon,
-    		messages,
-    		sendCommand
+    		applicationConsoleMessages,
+    		sendCommand,
+    		addLog,
+    		$applicationConsoleMessages
     	});
 
-    	$$self.$inject_state = $$props => {
-    		if ('messages' in $$props) $$invalidate(0, messages = $$props.messages);
-    	};
-
-    	if ($$props && "$$inject" in $$props) {
-    		$$self.$inject_state($$props.$$inject);
-    	}
-
-    	return [messages, sendCommand, click_handler, submit_handler];
+    	return [$applicationConsoleMessages, sendCommand, click_handler, submit_handler];
     }
 
     class ConsoleContent extends SvelteComponentDev {
@@ -7369,7 +7571,7 @@ var app = (function () {
     	return child_ctx;
     }
 
-    // (15:16) {#if options.length > 0}
+    // (15:16) {#if $applicationOptions !== undefined && $applicationOptions.length > 0}
     function create_if_block_1$1(ctx) {
     	let div;
     	let button;
@@ -7380,9 +7582,9 @@ var app = (function () {
     	const if_blocks = [];
 
     	function select_block_type(ctx, dirty) {
-    		if (/*saveStatus*/ ctx[0] === SaveStates.need_to_save) return 0;
-    		if (/*saveStatus*/ ctx[0] === SaveStates.saving) return 1;
-    		if (/*saveStatus*/ ctx[0] === SaveStates.saved) return 2;
+    		if (/*saveStatus*/ ctx[1] === SaveStates.need_to_save) return 0;
+    		if (/*saveStatus*/ ctx[1] === SaveStates.saving) return 1;
+    		if (/*saveStatus*/ ctx[1] === SaveStates.saved) return 2;
     		return -1;
     	}
 
@@ -7397,9 +7599,9 @@ var app = (function () {
     			if (if_block) if_block.c();
     			attr_dev(button, "type", "button");
     			attr_dev(button, "class", "transition inline-flex items-center mt-2 mr-2 px-3 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-green-600 hover:bg-green-700 focus:bg-green-700");
-    			add_location(button, file$3, 16, 24, 888);
+    			add_location(button, file$3, 16, 24, 975);
     			attr_dev(div, "class", "text-right mt-2");
-    			add_location(div, file$3, 15, 20, 833);
+    			add_location(div, file$3, 15, 20, 920);
     		},
     		m: function mount(target, anchor) {
     			insert_dev(target, div, anchor);
@@ -7436,7 +7638,7 @@ var app = (function () {
     		block,
     		id: create_if_block_1$1.name,
     		type: "if",
-    		source: "(15:16) {#if options.length > 0}",
+    		source: "(15:16) {#if $applicationOptions !== undefined && $applicationOptions.length > 0}",
     		ctx
     	});
 
@@ -7605,12 +7807,12 @@ var app = (function () {
     			dt = element("dt");
     			dt.textContent = "This Application has no options";
     			attr_dev(dt, "class", "text-sm font-medium text-gray-500 dark:text-white");
-    			add_location(dt, file$3, 51, 28, 3486);
+    			add_location(dt, file$3, 51, 28, 3634);
     			attr_dev(div0, "class", "bg-gray-50 dark:bg-gray-850 px-4 py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6");
-    			add_location(div0, file$3, 50, 24, 3365);
-    			add_location(dl, file$3, 49, 20, 3335);
+    			add_location(div0, file$3, 50, 24, 3513);
+    			add_location(dl, file$3, 49, 20, 3483);
     			attr_dev(div1, "class", "ml-4 mb-4 border-t border-gray-200 dark:border-gray-850");
-    			add_location(div1, file$3, 48, 16, 3244);
+    			add_location(div1, file$3, 48, 16, 3392);
     		},
     		m: function mount(target, anchor) {
     			insert_dev(target, div1, anchor);
@@ -7637,11 +7839,11 @@ var app = (function () {
     	return block;
     }
 
-    // (29:12) {#if options.length > 0}
+    // (29:12) {#if $applicationOptions !== undefined && $applicationOptions.length > 0}
     function create_if_block$2(ctx) {
     	let div;
     	let current;
-    	let each_value = /*options*/ ctx[1];
+    	let each_value = /*$applicationOptions*/ ctx[0];
     	validate_each_argument(each_value);
     	let each_blocks = [];
 
@@ -7662,7 +7864,7 @@ var app = (function () {
     			}
 
     			attr_dev(div, "class", "ml-4 mb-4 mr-4 grid gap-4 sm:grid-cols-2 lg:grid-cols-4");
-    			add_location(div, file$3, 29, 16, 1804);
+    			add_location(div, file$3, 29, 16, 1940);
     		},
     		m: function mount(target, anchor) {
     			insert_dev(target, div, anchor);
@@ -7674,8 +7876,8 @@ var app = (function () {
     			current = true;
     		},
     		p: function update(ctx, dirty) {
-    			if (dirty & /*Pencil, options, Database*/ 2) {
-    				each_value = /*options*/ ctx[1];
+    			if (dirty & /*Pencil, $applicationOptions, Database*/ 1) {
+    				each_value = /*$applicationOptions*/ ctx[0];
     				validate_each_argument(each_value);
     				let i;
 
@@ -7730,14 +7932,14 @@ var app = (function () {
     		block,
     		id: create_if_block$2.name,
     		type: "if",
-    		source: "(29:12) {#if options.length > 0}",
+    		source: "(29:12) {#if $applicationOptions !== undefined && $applicationOptions.length > 0}",
     		ctx
     	});
 
     	return block;
     }
 
-    // (31:20) {#each options as option}
+    // (31:20) {#each $applicationOptions as option}
     function create_each_block$1(ctx) {
     	let div5;
     	let div4;
@@ -7788,18 +7990,18 @@ var app = (function () {
     			create_component(icon1.$$.fragment);
     			t5 = space();
     			attr_dev(div0, "class", "cursor-pointer mr-2 text-green-500 w-12 h-12 flex justify-center items-center");
-    			add_location(div0, file$3, 33, 32, 2103);
+    			add_location(div0, file$3, 33, 32, 2251);
     			attr_dev(div1, "class", "font-medium text-xlss text-gray-800 dark:text-gray-300");
-    			add_location(div1, file$3, 37, 36, 2383);
+    			add_location(div1, file$3, 37, 36, 2531);
     			attr_dev(p, "class", "mt-1 bg-transparent focus:outline-0 font-bold text-xls text-gray-800 dark:text-gray-300");
-    			add_location(p, file$3, 38, 36, 2508);
-    			add_location(div2, file$3, 36, 32, 2340);
+    			add_location(p, file$3, 38, 36, 2656);
+    			add_location(div2, file$3, 36, 32, 2488);
     			attr_dev(div3, "class", "ml-auto mr-4 relative flex items-center justify-center h-12 w-12 bg-gray-400 hover:bg-blue-600 dark:bg-gray-900 text-blue-500 hover:text-white hover:rounded-xl rounded-3xl transition-all duration-300 ease-linear cursor-pointer shadow-lg");
-    			add_location(div3, file$3, 40, 32, 2699);
+    			add_location(div3, file$3, 40, 32, 2847);
     			attr_dev(div4, "class", "flex");
-    			add_location(div4, file$3, 32, 28, 2051);
+    			add_location(div4, file$3, 32, 28, 2199);
     			attr_dev(div5, "class", "bg-gray-200 dark:bg-gray-800 shadow-sm rounded pt-4 pb-4 pl-2");
-    			add_location(div5, file$3, 31, 24, 1946);
+    			add_location(div5, file$3, 31, 24, 2094);
     		},
     		m: function mount(target, anchor) {
     			insert_dev(target, div5, anchor);
@@ -7824,7 +8026,10 @@ var app = (function () {
     				mounted = true;
     			}
     		},
-    		p: noop,
+    		p: function update(ctx, dirty) {
+    			if ((!current || dirty & /*$applicationOptions*/ 1) && t1_value !== (t1_value = /*option*/ ctx[2].name + "")) set_data_dev(t1, t1_value);
+    			if ((!current || dirty & /*$applicationOptions*/ 1) && t3_value !== (t3_value = /*option*/ ctx[2].value + "")) set_data_dev(t3, t3_value);
+    		},
     		i: function intro(local) {
     			if (current) return;
     			transition_in(icon0.$$.fragment, local);
@@ -7849,7 +8054,7 @@ var app = (function () {
     		block,
     		id: create_each_block$1.name,
     		type: "each",
-    		source: "(31:20) {#each options as option}",
+    		source: "(31:20) {#each $applicationOptions as option}",
     		ctx
     	});
 
@@ -7876,12 +8081,12 @@ var app = (function () {
     			$$inline: true
     		});
 
-    	let if_block0 = /*options*/ ctx[1].length > 0 && create_if_block_1$1(ctx);
+    	let if_block0 = /*$applicationOptions*/ ctx[0] !== undefined && /*$applicationOptions*/ ctx[0].length > 0 && create_if_block_1$1(ctx);
     	const if_block_creators = [create_if_block$2, create_else_block$1];
     	const if_blocks = [];
 
     	function select_block_type_1(ctx, dirty) {
-    		if (/*options*/ ctx[1].length > 0) return 0;
+    		if (/*$applicationOptions*/ ctx[0] !== undefined && /*$applicationOptions*/ ctx[0].length > 0) return 0;
     		return 1;
     	}
 
@@ -7905,15 +8110,15 @@ var app = (function () {
     			t5 = space();
     			if_block1.c();
     			attr_dev(h3, "class", "text-lg leading-6 font-medium text-gray-900 dark:text-white");
-    			add_location(h3, file$3, 12, 16, 534);
+    			add_location(h3, file$3, 12, 16, 572);
     			attr_dev(p, "class", "mt-1 max-w-2xl text-sm text-gray-500 dark:text-gray-400");
-    			add_location(p, file$3, 13, 16, 648);
+    			add_location(p, file$3, 13, 16, 686);
     			attr_dev(div0, "class", "px-4 py-5 sm:px-6");
-    			add_location(div0, file$3, 11, 12, 485);
+    			add_location(div0, file$3, 11, 12, 523);
     			attr_dev(div1, "class", "overflow-y-scroll mr-9 ml-9 mt-9 mb-9 bg-white dark:bg-gray-900 rounded-lg shadow-lg");
-    			add_location(div1, file$3, 10, 8, 373);
+    			add_location(div1, file$3, 10, 8, 411);
     			attr_dev(div2, "class", "content-container");
-    			add_location(div2, file$3, 7, 0, 290);
+    			add_location(div2, file$3, 7, 0, 328);
     		},
     		l: function claim(nodes) {
     			throw new Error("options.hydrate only works if the component was compiled with the `hydratable: true` option");
@@ -7934,8 +8139,54 @@ var app = (function () {
     			current = true;
     		},
     		p: function update(ctx, [dirty]) {
-    			if (/*options*/ ctx[1].length > 0) if_block0.p(ctx, dirty);
-    			if_block1.p(ctx, dirty);
+    			if (/*$applicationOptions*/ ctx[0] !== undefined && /*$applicationOptions*/ ctx[0].length > 0) {
+    				if (if_block0) {
+    					if_block0.p(ctx, dirty);
+
+    					if (dirty & /*$applicationOptions*/ 1) {
+    						transition_in(if_block0, 1);
+    					}
+    				} else {
+    					if_block0 = create_if_block_1$1(ctx);
+    					if_block0.c();
+    					transition_in(if_block0, 1);
+    					if_block0.m(div0, null);
+    				}
+    			} else if (if_block0) {
+    				group_outros();
+
+    				transition_out(if_block0, 1, 1, () => {
+    					if_block0 = null;
+    				});
+
+    				check_outros();
+    			}
+
+    			let previous_block_index = current_block_type_index;
+    			current_block_type_index = select_block_type_1(ctx);
+
+    			if (current_block_type_index === previous_block_index) {
+    				if_blocks[current_block_type_index].p(ctx, dirty);
+    			} else {
+    				group_outros();
+
+    				transition_out(if_blocks[previous_block_index], 1, 1, () => {
+    					if_blocks[previous_block_index] = null;
+    				});
+
+    				check_outros();
+    				if_block1 = if_blocks[current_block_type_index];
+
+    				if (!if_block1) {
+    					if_block1 = if_blocks[current_block_type_index] = if_block_creators[current_block_type_index](ctx);
+    					if_block1.c();
+    				} else {
+    					if_block1.p(ctx, dirty);
+    				}
+
+    				transition_in(if_block1, 1);
+    				if_block1.m(div1, null);
+    			}
     		},
     		i: function intro(local) {
     			if (current) return;
@@ -7974,10 +8225,12 @@ var app = (function () {
     };
 
     function instance$3($$self, $$props, $$invalidate) {
+    	let $applicationOptions;
+    	validate_store(applicationOptions, 'applicationOptions');
+    	component_subscribe($$self, applicationOptions, $$value => $$invalidate(0, $applicationOptions = $$value));
     	let { $$slots: slots = {}, $$scope } = $$props;
     	validate_slots('OptionsContent', slots, []);
     	let saveStatus = SaveStates.saved;
-    	let options = [];
     	const writable_props = [];
 
     	Object.keys($$props).forEach(key => {
@@ -7993,20 +8246,20 @@ var app = (function () {
     		Pencil,
     		Refresh,
     		Save,
+    		applicationOptions,
     		saveStatus,
-    		options
+    		$applicationOptions
     	});
 
     	$$self.$inject_state = $$props => {
-    		if ('saveStatus' in $$props) $$invalidate(0, saveStatus = $$props.saveStatus);
-    		if ('options' in $$props) $$invalidate(1, options = $$props.options);
+    		if ('saveStatus' in $$props) $$invalidate(1, saveStatus = $$props.saveStatus);
     	};
 
     	if ($$props && "$$inject" in $$props) {
     		$$self.$inject_state($$props.$$inject);
     	}
 
-    	return [saveStatus, options];
+    	return [$applicationOptions, saveStatus];
     }
 
     class OptionsContent extends SvelteComponentDev {
@@ -8682,7 +8935,7 @@ var app = (function () {
     const { console: console_1 } = globals;
     const file = "src\\App.svelte";
 
-    // (183:41) 
+    // (205:41) 
     function create_if_block_9(ctx) {
     	let accesscontent;
     	let current;
@@ -8715,14 +8968,14 @@ var app = (function () {
     		block,
     		id: create_if_block_9.name,
     		type: "if",
-    		source: "(183:41) ",
+    		source: "(205:41) ",
     		ctx
     	});
 
     	return block;
     }
 
-    // (181:40) 
+    // (203:40) 
     function create_if_block_8(ctx) {
     	let filescontent;
     	let current;
@@ -8755,14 +9008,14 @@ var app = (function () {
     		block,
     		id: create_if_block_8.name,
     		type: "if",
-    		source: "(181:40) ",
+    		source: "(203:40) ",
     		ctx
     	});
 
     	return block;
     }
 
-    // (179:42) 
+    // (201:42) 
     function create_if_block_7(ctx) {
     	let consolecontent;
     	let current;
@@ -8795,14 +9048,14 @@ var app = (function () {
     		block,
     		id: create_if_block_7.name,
     		type: "if",
-    		source: "(179:42) ",
+    		source: "(201:42) ",
     		ctx
     	});
 
     	return block;
     }
 
-    // (177:42) 
+    // (199:42) 
     function create_if_block_6(ctx) {
     	let optionscontent;
     	let current;
@@ -8835,14 +9088,14 @@ var app = (function () {
     		block,
     		id: create_if_block_6.name,
     		type: "if",
-    		source: "(177:42) ",
+    		source: "(199:42) ",
     		ctx
     	});
 
     	return block;
     }
 
-    // (175:46) 
+    // (197:46) 
     function create_if_block_5(ctx) {
     	let applicationcontent;
     	let current;
@@ -8875,14 +9128,14 @@ var app = (function () {
     		block,
     		id: create_if_block_5.name,
     		type: "if",
-    		source: "(175:46) ",
+    		source: "(197:46) ",
     		ctx
     	});
 
     	return block;
     }
 
-    // (173:42) 
+    // (195:42) 
     function create_if_block_4(ctx) {
     	let addnodecontent;
     	let current;
@@ -8919,21 +9172,21 @@ var app = (function () {
     		block,
     		id: create_if_block_4.name,
     		type: "if",
-    		source: "(173:42) ",
+    		source: "(195:42) ",
     		ctx
     	});
 
     	return block;
     }
 
-    // (169:43) 
+    // (191:43) 
     function create_if_block_3(ctx) {
     	let registercontent;
     	let current;
 
     	registercontent = new RegisterContent({
     			props: {
-    				changeToLoginCallback: /*func_2*/ ctx[7],
+    				changeToLoginCallback: /*func_2*/ ctx[8],
     				submitCallback: /*createAccount*/ ctx[3]
     			},
     			$$inline: true
@@ -8966,21 +9219,21 @@ var app = (function () {
     		block,
     		id: create_if_block_3.name,
     		type: "if",
-    		source: "(169:43) ",
+    		source: "(191:43) ",
     		ctx
     	});
 
     	return block;
     }
 
-    // (165:40) 
+    // (187:40) 
     function create_if_block_2(ctx) {
     	let logincontent;
     	let current;
 
     	logincontent = new LoginContent({
     			props: {
-    				changeToRegisterCallback: /*func_1*/ ctx[6],
+    				changeToRegisterCallback: /*func_1*/ ctx[7],
     				submitCallback: /*requestLogin*/ ctx[2]
     			},
     			$$inline: true
@@ -9013,14 +9266,14 @@ var app = (function () {
     		block,
     		id: create_if_block_2.name,
     		type: "if",
-    		source: "(165:40) ",
+    		source: "(187:40) ",
     		ctx
     	});
 
     	return block;
     }
 
-    // (163:42) 
+    // (185:42) 
     function create_if_block_1(ctx) {
     	let loadingcontent;
     	let current;
@@ -9053,14 +9306,14 @@ var app = (function () {
     		block,
     		id: create_if_block_1.name,
     		type: "if",
-    		source: "(163:42) ",
+    		source: "(185:42) ",
     		ctx
     	});
 
     	return block;
     }
 
-    // (161:4) {#if $pageId === PageIds.home}
+    // (183:4) {#if $pageId === PageIds.home}
     function create_if_block(ctx) {
     	let homecontent;
     	let current;
@@ -9093,7 +9346,7 @@ var app = (function () {
     		block,
     		id: create_if_block.name,
     		type: "if",
-    		source: "(161:4) {#if $pageId === PageIds.home}",
+    		source: "(183:4) {#if $pageId === PageIds.home}",
     		ctx
     	});
 
@@ -9111,7 +9364,7 @@ var app = (function () {
     	sidebar = new SideBar({
     			props: {
     				hideIcon: /*hideSideBarIcon*/ ctx[0],
-    				iconPressed: /*func*/ ctx[5]
+    				iconPressed: /*func*/ ctx[6]
     			},
     			$$inline: true
     		});
@@ -9156,7 +9409,7 @@ var app = (function () {
     			t = space();
     			if (if_block) if_block.c();
     			attr_dev(main, "class", "flex");
-    			add_location(main, file, 156, 0, 5989);
+    			add_location(main, file, 178, 0, 6690);
     		},
     		l: function claim(nodes) {
     			throw new Error("options.hydrate only works if the component was compiled with the `hydratable: true` option");
@@ -9242,10 +9495,6 @@ var app = (function () {
 
     	return block;
     }
-
-    function changePage(iconId) {
-    	
-    } //pageId.set(icon);
 
     function instance($$self, $$props, $$invalidate) {
     	let $pageId;
@@ -9417,6 +9666,34 @@ var app = (function () {
     			});
     	}
 
+    	function changePage(iconId) {
+    		if (iconId == SideBarIconIds.home) {
+    			pageId.set(PageIds.home);
+    		}
+
+    		if (iconId == SideBarIconIds.application) {
+    			pageId.set(PageIds.application);
+    		}
+
+    		if (iconId == SideBarIconIds.options) {
+    			pageId.set(PageIds.options);
+    		}
+
+    		if (iconId == SideBarIconIds.console) {
+    			pageId.set(PageIds.console);
+    		}
+
+    		if (iconId == SideBarIconIds.files) {
+    			pageId.set(PageIds.files);
+    		}
+
+    		if (iconId == SideBarIconIds.access) {
+    			pageId.set(PageIds.access);
+    		}
+
+    		if (iconId == SideBarIconIds.create_application) ; // TODO: Add Create Application
+    	} //pageId.set(icon);
+
     	const writable_props = [];
 
     	Object.keys($$props).forEach(key => {
@@ -9424,6 +9701,7 @@ var app = (function () {
     	});
 
     	const func = function (iconId) {
+    		changePage(iconId);
     	};
 
     	const func_1 = function () {
@@ -9455,6 +9733,7 @@ var app = (function () {
     		userData,
     		ErrorIds,
     		onMount,
+    		SideBarIconIds,
     		hideSideBarIcon,
     		connectToNode,
     		sendClientLoginRequest,
@@ -9480,6 +9759,7 @@ var app = (function () {
     		requestLogin,
     		createAccount,
     		addNode,
+    		changePage,
     		func,
     		func_1,
     		func_2

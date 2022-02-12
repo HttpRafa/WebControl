@@ -18,17 +18,17 @@
         <p class="mt-1 max-w-2xl text-sm text-gray-500 dark:text-gray-400">Information about the Application</p>
         <div class="text-right mt-2">
             {#if $applicationState === ApplicationStates.starting}
-                <button type="button" class="transition inline-flex items-center mt-2 mr-2 px-3 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-green-600 hover:bg-green-700 focus:bg-green-700"><Icon src="{Refresh}" class="-ml-1 mr-2 h-5 w-5 service-button-loading"/>Start</button>
+                <button type="button" class="transition inline-flex items-center mt-2 mr-2 px-3 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-green-600 hover:bg-green-700 focus:bg-green-700"><Icon src="{Refresh}" class="-ml-1 mr-2 h-5 w-5 service-button-loading"/>Starting</button>
             {:else}
                 <button type="button" class="transition inline-flex items-center mt-2 mr-2 px-3 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-green-600 hover:bg-green-700 focus:bg-green-700"><Icon src="{Play}" class="-ml-1 mr-2 h-5 w-5"/>Start</button>
             {/if}
             {#if $applicationState === ApplicationStates.restarting}
-                <button type="button" class="transition inline-flex items-center mt-2 mr-2 px-3 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-orange-450 hover:bg-yellow-500"><Icon src="{Refresh}" class="-ml-1 mr-2 h-5 w-5 service-button-loading"/>Restart</button>
+                <button type="button" class="transition inline-flex items-center mt-2 mr-2 px-3 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-orange-450 hover:bg-yellow-500"><Icon src="{Refresh}" class="-ml-1 mr-2 h-5 w-5 service-button-loading"/>Restarting</button>
             {:else}
                 <button type="button" class="transition inline-flex items-center mt-2 mr-2 px-3 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-orange-450 hover:bg-yellow-500"><Icon src="{Refresh}" class="-ml-1 mr-2 h-5 w-5"/>Restart</button>
             {/if}
             {#if $applicationState === ApplicationStates.stopping}
-                <button type="button" class="transition inline-flex items-center mt-2 mr-2 px-3 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-red-500 hover:bg-red-700 focus:bg-red-700"><Icon src="{Refresh}" class="-ml-1 mr-2 h-5 w-5 service-button-loading"/>Stop</button>
+                <button type="button" class="transition inline-flex items-center mt-2 mr-2 px-3 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-red-500 hover:bg-red-700 focus:bg-red-700"><Icon src="{Refresh}" class="-ml-1 mr-2 h-5 w-5 service-button-loading"/>Stopping</button>
             {:else}
                 <button type="button" class="transition inline-flex items-center mt-2 mr-2 px-3 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-red-500 hover:bg-red-700 focus:bg-red-700"><Icon src="{Stop}" class="-ml-1 mr-2 h-5 w-5"/>Stop</button>
             {/if}

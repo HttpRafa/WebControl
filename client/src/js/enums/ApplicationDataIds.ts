@@ -4,5 +4,6 @@ export const ApplicationDataIds = {
     applicationUptime: 2,
     applicationCpuLoad: 3,
     applicationMemoryUsage: 4,
-    applicationDescription: 5
+    applicationDescription: 5,
+    applicationOptions: 6
 }
