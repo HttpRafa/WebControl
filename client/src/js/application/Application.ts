@@ -23,6 +23,20 @@ export function update(pageId: number) {
     if(pageId == PageIds.options) {
         updateOptions();
     }
+    if(pageId == PageIds.access) {
+        updateAccessUsers();
+    }
+}
+
+export function updateAccessUsers() {
+    networkManager.update(value => {
+        currentNode.update(nodeId => {
+            let node = value.nodeManager.getNodeById(nodeId);
+            node.request(new PacketOutRequestApplicationData([ApplicationDataIds.applicationAccessUsers]));
+            return nodeId;
+        });
+        return value;
+    });
 }
 
 export function updateOptions() {

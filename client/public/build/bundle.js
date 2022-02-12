@@ -1513,6 +1513,11 @@ var app = (function () {
                     // @ts-ignore
                     applicationOptions.set(data.document.data.applicationOptions);
                 }
+                // @ts-ignore
+                if (data.document.data.applicationAccessUsers != undefined) {
+                    // @ts-ignore
+                    applicationAccessUsers.set(data.document.data.applicationAccessUsers);
+                }
             }
             else {
                 for (let i = 0; i < this._packetHandler.length; i++) {
@@ -1936,7 +1941,8 @@ var app = (function () {
         applicationCpuLoad: 3,
         applicationMemoryUsage: 4,
         applicationDescription: 5,
-        applicationOptions: 6
+        applicationOptions: 6,
+        applicationAccessUsers: 7
     };
 
     const PageIds = {
@@ -1965,6 +1971,19 @@ var app = (function () {
         if (pageId == PageIds.options) {
             updateOptions();
         }
+        if (pageId == PageIds.access) {
+            updateAccessUsers();
+        }
+    }
+    function updateAccessUsers() {
+        networkManager.update(value => {
+            currentNode.update(nodeId => {
+                let node = value.nodeManager.getNodeById(nodeId);
+                node.request(new PacketOutRequestApplicationData([ApplicationDataIds.applicationAccessUsers]));
+                return nodeId;
+            });
+            return value;
+        });
     }
     function updateOptions() {
         networkManager.update(value => {
@@ -2090,6 +2109,7 @@ var app = (function () {
     const applicationMemoryUsage = writable(undefined);
     const applicationDescription = writable(undefined);
     const applicationOptions = writable(undefined);
+    const applicationAccessUsers = writable(undefined);
     const applicationConsoleMessages = writable(undefined);
     currentError.subscribe(value => {
         if (value != undefined) {
@@ -8300,12 +8320,12 @@ var app = (function () {
     			dt = element("dt");
     			dt.textContent = "This Application has no added users";
     			attr_dev(dt, "class", "text-sm font-medium text-gray-500 dark:text-white");
-    			add_location(dt, file$2, 37, 28, 2562);
+    			add_location(dt, file$2, 37, 28, 2631);
     			attr_dev(div0, "class", "bg-gray-50 dark:bg-gray-850 px-4 py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6");
-    			add_location(div0, file$2, 36, 24, 2441);
-    			add_location(dl, file$2, 35, 20, 2411);
+    			add_location(div0, file$2, 36, 24, 2510);
+    			add_location(dl, file$2, 35, 20, 2480);
     			attr_dev(div1, "class", "ml-4 mb-4 border-t border-gray-200 dark:border-gray-850");
-    			add_location(div1, file$2, 34, 16, 2320);
+    			add_location(div1, file$2, 34, 16, 2389);
     		},
     		m: function mount(target, anchor) {
     			insert_dev(target, div1, anchor);
@@ -8332,11 +8352,11 @@ var app = (function () {
     	return block;
     }
 
-    // (16:12) {#if users.length > 0}
+    // (16:12) {#if $applicationAccessUsers !== undefined && $applicationAccessUsers.length > 0}
     function create_if_block$1(ctx) {
     	let div;
     	let current;
-    	let each_value = /*users*/ ctx[0];
+    	let each_value = /*$applicationAccessUsers*/ ctx[0];
     	validate_each_argument(each_value);
     	let each_blocks = [];
 
@@ -8357,7 +8377,7 @@ var app = (function () {
     			}
 
     			attr_dev(div, "class", "ml-4 mb-4 mr-4 grid gap-4 sm:grid-cols-2 lg:grid-cols-4");
-    			add_location(div, file$2, 16, 16, 827);
+    			add_location(div, file$2, 16, 16, 878);
     		},
     		m: function mount(target, anchor) {
     			insert_dev(target, div, anchor);
@@ -8369,8 +8389,8 @@ var app = (function () {
     			current = true;
     		},
     		p: function update(ctx, dirty) {
-    			if (dirty & /*Trash, Pencil, users*/ 1) {
-    				each_value = /*users*/ ctx[0];
+    			if (dirty & /*Trash, Pencil, $applicationAccessUsers*/ 1) {
+    				each_value = /*$applicationAccessUsers*/ ctx[0];
     				validate_each_argument(each_value);
     				let i;
 
@@ -8425,14 +8445,14 @@ var app = (function () {
     		block,
     		id: create_if_block$1.name,
     		type: "if",
-    		source: "(16:12) {#if users.length > 0}",
+    		source: "(16:12) {#if $applicationAccessUsers !== undefined && $applicationAccessUsers.length > 0}",
     		ctx
     	});
 
     	return block;
     }
 
-    // (18:20) {#each users as user}
+    // (18:20) {#each $applicationAccessUsers as user}
     function create_each_block(ctx) {
     	let div5;
     	let div4;
@@ -8476,17 +8496,17 @@ var app = (function () {
     			create_component(icon1.$$.fragment);
     			t3 = space();
     			attr_dev(div0, "class", "font-medium lg:text-xls sm:text-xs text-gray-800 dark:text-gray-300");
-    			add_location(div0, file$2, 21, 36, 1211);
+    			add_location(div0, file$2, 21, 36, 1280);
     			attr_dev(div1, "class", "ml-4 flex justify-center items-center");
-    			add_location(div1, file$2, 20, 32, 1122);
+    			add_location(div1, file$2, 20, 32, 1191);
     			attr_dev(div2, "class", "ml-auto mr-0 relative flex items-center justify-center h-12 w-12 bg-gray-400 hover:bg-blue-600 dark:bg-gray-900 text-blue-500 hover:text-white hover:rounded-xl rounded-3xl transition-all duration-300 ease-linear cursor-pointer shadow-lg");
-    			add_location(div2, file$2, 23, 32, 1387);
+    			add_location(div2, file$2, 23, 32, 1456);
     			attr_dev(div3, "class", "ml-2 mr-4 relative flex items-center justify-center h-12 w-12 bg-gray-400 hover:bg-red-600 dark:bg-gray-900 text-red-500 hover:text-white hover:rounded-xl rounded-3xl transition-all duration-300 ease-linear cursor-pointer shadow-lg");
-    			add_location(div3, file$2, 26, 32, 1781);
+    			add_location(div3, file$2, 26, 32, 1850);
     			attr_dev(div4, "class", "flex");
-    			add_location(div4, file$2, 19, 28, 1070);
+    			add_location(div4, file$2, 19, 28, 1139);
     			attr_dev(div5, "class", "bg-gray-200 dark:bg-gray-800 shadow-sm rounded pt-4 pb-4 pl-2");
-    			add_location(div5, file$2, 18, 24, 965);
+    			add_location(div5, file$2, 18, 24, 1034);
     		},
     		m: function mount(target, anchor) {
     			insert_dev(target, div5, anchor);
@@ -8508,7 +8528,9 @@ var app = (function () {
     				mounted = true;
     			}
     		},
-    		p: noop,
+    		p: function update(ctx, dirty) {
+    			if ((!current || dirty & /*$applicationAccessUsers*/ 1) && t0_value !== (t0_value = /*user*/ ctx[3].username + "")) set_data_dev(t0, t0_value);
+    		},
     		i: function intro(local) {
     			if (current) return;
     			transition_in(icon0.$$.fragment, local);
@@ -8533,7 +8555,7 @@ var app = (function () {
     		block,
     		id: create_each_block.name,
     		type: "each",
-    		source: "(18:20) {#each users as user}",
+    		source: "(18:20) {#each $applicationAccessUsers as user}",
     		ctx
     	});
 
@@ -8572,7 +8594,7 @@ var app = (function () {
     	const if_blocks = [];
 
     	function select_block_type(ctx, dirty) {
-    		if (/*users*/ ctx[0].length > 0) return 0;
+    		if (/*$applicationAccessUsers*/ ctx[0] !== undefined && /*$applicationAccessUsers*/ ctx[0].length > 0) return 0;
     		return 1;
     	}
 
@@ -8610,25 +8632,25 @@ var app = (function () {
     			div1 = element("div");
     			create_component(icon.$$.fragment);
     			attr_dev(h3, "class", "text-lg leading-6 font-medium text-gray-900 dark:text-white");
-    			add_location(h3, file$2, 12, 16, 511);
+    			add_location(h3, file$2, 12, 16, 503);
     			attr_dev(p, "class", "mt-1 max-w-2xl text-sm text-gray-500 dark:text-gray-400");
-    			add_location(p, file$2, 13, 16, 624);
+    			add_location(p, file$2, 13, 16, 616);
     			attr_dev(div0, "class", "px-4 py-5 sm:px-6");
-    			add_location(div0, file$2, 11, 12, 462);
+    			add_location(div0, file$2, 11, 12, 454);
     			attr_dev(input, "type", "text");
     			attr_dev(input, "id", "access-input");
     			attr_dev(input, "placeholder", "Enter username...");
     			attr_dev(input, "class", "bottom-bar-input");
-    			add_location(input, file$2, 43, 16, 2887);
-    			add_location(div1, file$2, 44, 16, 3001);
+    			add_location(input, file$2, 43, 16, 2956);
+    			add_location(div1, file$2, 44, 16, 3070);
     			attr_dev(form, "class", "bottom-bar");
-    			add_location(form, file$2, 42, 12, 2780);
+    			add_location(form, file$2, 42, 12, 2849);
     			attr_dev(div2, "class", "mr-9 ml-9 mt-9 mb-9 mb-24 bg-white dark:bg-gray-900 rounded-lg shadow-lg");
-    			add_location(div2, file$2, 10, 8, 362);
+    			add_location(div2, file$2, 10, 8, 354);
     			attr_dev(div3, "class", "content-list");
-    			add_location(div3, file$2, 9, 4, 326);
+    			add_location(div3, file$2, 9, 4, 318);
     			attr_dev(div4, "class", "content-container");
-    			add_location(div4, file$2, 7, 0, 250);
+    			add_location(div4, file$2, 7, 0, 242);
     		},
     		l: function claim(nodes) {
     			throw new Error("options.hydrate only works if the component was compiled with the `hydratable: true` option");
@@ -8663,7 +8685,31 @@ var app = (function () {
     			}
     		},
     		p: function update(ctx, [dirty]) {
-    			if_block.p(ctx, dirty);
+    			let previous_block_index = current_block_type_index;
+    			current_block_type_index = select_block_type(ctx);
+
+    			if (current_block_type_index === previous_block_index) {
+    				if_blocks[current_block_type_index].p(ctx, dirty);
+    			} else {
+    				group_outros();
+
+    				transition_out(if_blocks[previous_block_index], 1, 1, () => {
+    					if_blocks[previous_block_index] = null;
+    				});
+
+    				check_outros();
+    				if_block = if_blocks[current_block_type_index];
+
+    				if (!if_block) {
+    					if_block = if_blocks[current_block_type_index] = if_block_creators[current_block_type_index](ctx);
+    					if_block.c();
+    				} else {
+    					if_block.p(ctx, dirty);
+    				}
+
+    				transition_in(if_block, 1);
+    				if_block.m(div2, t5);
+    			}
     		},
     		i: function intro(local) {
     			if (current) return;
@@ -8708,9 +8754,11 @@ var app = (function () {
     };
 
     function instance$2($$self, $$props, $$invalidate) {
+    	let $applicationAccessUsers;
+    	validate_store(applicationAccessUsers, 'applicationAccessUsers');
+    	component_subscribe($$self, applicationAccessUsers, $$value => $$invalidate(0, $applicationAccessUsers = $$value));
     	let { $$slots: slots = {}, $$scope } = $$props;
     	validate_slots('AccessContent', slots, []);
-    	let users = [{ username: "HttpRafa" }, { username: "MainSkript" }];
     	const writable_props = [];
 
     	Object.keys($$props).forEach(key => {
@@ -8730,19 +8778,12 @@ var app = (function () {
     		Plus,
     		Pencil,
     		Trash,
-    		users,
-    		addUser
+    		applicationAccessUsers,
+    		addUser,
+    		$applicationAccessUsers
     	});
 
-    	$$self.$inject_state = $$props => {
-    		if ('users' in $$props) $$invalidate(0, users = $$props.users);
-    	};
-
-    	if ($$props && "$$inject" in $$props) {
-    		$$self.$inject_state($$props.$$inject);
-    	}
-
-    	return [users, click_handler_1, submit_handler];
+    	return [$applicationAccessUsers, click_handler_1, submit_handler];
     }
 
     class AccessContent extends SvelteComponentDev {

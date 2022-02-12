@@ -69,6 +69,17 @@ class PacketInRequest : IPacketHandler {
 
             sendPacket = PacketOutRequestAnswer(packet.id, Document().append("applicationOptions", options))
         }
+        if(dataIds.contains(7)) {
+            val users = JsonArray()
+            for(i in 0 until 2) {
+                val objectData = JsonObject()
+                objectData.addProperty("username", "User $i")
+                users.add(objectData)
+            }
+
+            sendPacket = PacketOutRequestAnswer(packet.id, Document().append("applicationAccessUsers", users))
+        }
+
         sendPacket.uuid = packet.uuid;
         client.sendPacket(sendPacket)
     }

@@ -1,8 +1,7 @@
 <script lang="ts">
     import TopNavigation from "../../top/TopNavigation.svelte";
     import {Icon, Plus, Pencil, Trash} from "svelte-hero-icons";
-
-    let users = [{ username: "HttpRafa" }, { username: "MainSkript" }];
+    import {applicationAccessUsers} from "../../../js/Store";
 
     function addUser() {
 
@@ -18,9 +17,9 @@
                 <h3 class="text-lg leading-6 font-medium text-gray-900 dark:text-white">Application Access</h3>
                 <p class="mt-1 max-w-2xl text-sm text-gray-500 dark:text-gray-400">Here you can specify with user can access your application</p>
             </div>
-            {#if users.length > 0}
+            {#if $applicationAccessUsers !== undefined && $applicationAccessUsers.length > 0}
                 <div class="ml-4 mb-4 mr-4 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-                    {#each users as user}
+                    {#each $applicationAccessUsers as user}
                         <div class="bg-gray-200 dark:bg-gray-800 shadow-sm rounded pt-4 pb-4 pl-2">
                             <div class="flex">
                                 <div class="ml-4 flex justify-center items-center">

@@ -27,6 +27,8 @@ export const applicationDescription = writable<number>(undefined);
 
 export const applicationOptions = writable<{ name: string, value: string }[]>(undefined);
 
+export const applicationAccessUsers = writable<{ username: string }[]>(undefined);
+
 export const applicationConsoleMessages = writable<string[]>(undefined);
 
 
