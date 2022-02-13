@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:webcontrol/screens/add_node_screen.dart';
 import 'package:webcontrol/screens/login_screen.dart';
 
 class App extends StatelessWidget {
@@ -10,7 +11,7 @@ class App extends StatelessWidget {
       debugShowCheckedModeBanner: false,
       title: "WebControl",
       theme: ThemeData(),
-      home: const LoginScreen()
+      home: const AddNodeScreen()
     );
   }
 }

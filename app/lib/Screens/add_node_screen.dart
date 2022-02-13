@@ -1,3 +1,4 @@
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:webcontrol/widgets/rounded_button.dart';
@@ -6,15 +7,16 @@ import 'package:webcontrol/widgets/rounded_text_field.dart';
 
 import '../constants.dart';
 
-class LoginScreen extends StatelessWidget {
-  const LoginScreen({Key? key}) : super(key: key);
+class AddNodeScreen extends StatelessWidget {
+
+  const AddNodeScreen({Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
     Size size = MediaQuery.of(context).size;
 
     return Scaffold(
-      body: LoginScreenBackground(
+      body: AddNodeScreenBackground(
         child: Container(
           padding: const EdgeInsets.fromLTRB(0, 50, 0, 0),
           child: ListView(
@@ -22,7 +24,7 @@ class LoginScreen extends StatelessWidget {
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 const Text(
-                    "Login",
+                    "Add Node",
                     style: TextStyle(fontWeight: FontWeight.bold)
                 ),
                 SvgPicture.asset(
@@ -32,42 +34,25 @@ class LoginScreen extends StatelessWidget {
                 ),
                 RoundedTextField(
                   textInputType: TextInputType.text,
-                  hintText: "Username",
-                  icon: Icons.person,
+                  hintText: "Host",
+                  icon: Icons.alt_route,
                   onChanged: (value) {
 
                   },
                 ),
-                RoundedPasswordField(
-                  hintText: "Password",
-                  icon: Icons.lock, onChanged: (value) {
+                RoundedTextField(
+                  textInputType: TextInputType.number,
+                  hintText: "Port",
+                  icon: Icons.polymer,
+                  onChanged: (value) {
 
-                },
+                  },
                 ),
                 RoundedButton(
-                  text: "Login",
+                  text: "Connect",
                   press: () {
-
                   }, color: kPrimaryColor, textColor: Colors.white,
                 ),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    const Text("Don't have an account? ",
-                        style: TextStyle(
-                            color: kPrimaryColor
-                        )),
-                    GestureDetector(
-                        onTap: () {
-
-                        },
-                        child: const Text("Register", style: TextStyle(
-                          color: kPrimaryColor,
-                          fontWeight: FontWeight.bold,
-                        ),
-                        ))
-                  ],
-                )
               ],
             ),],
           ),
@@ -77,10 +62,10 @@ class LoginScreen extends StatelessWidget {
   }
 }
 
-class LoginScreenBackground extends StatelessWidget {
+class AddNodeScreenBackground extends StatelessWidget {
   final Widget child;
 
-  const LoginScreenBackground({Key? key, required this.child})
+  const AddNodeScreenBackground({Key? key, required this.child})
       : super(key: key);
 
   @override
