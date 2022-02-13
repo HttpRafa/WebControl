@@ -3,13 +3,13 @@ package net.rafael.web.control.application
 //------------------------------
 //
 // This class was developed by Rafael K.
-// On 2/12/2022 at 5:25 PM
+// On 2/12/2022 at 11:10 PM
 // In the project WebControl
 //
 //------------------------------
 
-class Application(val name: String, val uuid: String, val startDetail: ProcessStartDetail) {
+class ApplicationProcess {
 
-
+    val javaProcess: Process? = null;
 
 }
