@@ -2,7 +2,6 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:webcontrol/widgets/rounded_button.dart';
-import 'package:webcontrol/widgets/rounded_password_field.dart';
 import 'package:webcontrol/widgets/rounded_text_field.dart';
 
 import '../constants.dart';
@@ -73,7 +72,7 @@ class AddNodeScreenBackground extends StatelessWidget {
     Size size = MediaQuery.of(context).size;
 
     return Container(
-        width: double.infinity,
+        width: size.width,
         height: size.height,
         child: Stack(
           alignment: Alignment.center,
@@ -82,14 +81,14 @@ class AddNodeScreenBackground extends StatelessWidget {
               top: 0,
               left: 0,
               child: Image.asset("assets/images/main_top.png",
-                  width: size.width * 0.35),
+                  width: 150),
             ),
             Positioned(
               bottom: 0,
               right: 0,
               child: Image.asset(
                 "assets/images/login_bottom.png",
-                width: size.width * 0.3,
+                width: 150,
               ),
             ),
             child,
