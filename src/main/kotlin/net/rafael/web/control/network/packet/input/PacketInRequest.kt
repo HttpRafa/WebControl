@@ -2,6 +2,7 @@ package net.rafael.web.control.network.packet.input
 
 import com.google.gson.JsonArray
 import com.google.gson.JsonObject
+import net.rafael.web.control.WebControl
 import net.rafael.web.control.network.client.Client
 import net.rafael.web.control.network.document.Document
 import net.rafael.web.control.network.packet.IPacketHandler

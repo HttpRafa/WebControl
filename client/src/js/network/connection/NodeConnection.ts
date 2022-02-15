@@ -1,7 +1,7 @@
 import type {ControlNode} from "../node/ControlNode";
 import type {Packet} from "../packet/Packet";
 import {
-    applicationAccessUsers,
+    applicationAccessUsers, applicationConsoleMessages,
     applicationCpuLoad,
     applicationDescription,
     applicationMemoryUsage, applicationOptions,
@@ -100,6 +100,18 @@ export class NodeConnection {
             if(data.document.data.applicationAccessUsers != undefined) {
                 // @ts-ignore
                 applicationAccessUsers.set(data.document.data.applicationAccessUsers);
+            }
+            // @ts-ignore
+            if(data.document.data.applicationConsoleMessage != undefined) {
+                // @ts-ignore
+                let message: string = data.document.data.applicationConsoleMessage;
+                applicationConsoleMessages.update(value => {
+                    if(value == undefined) {
+                        return [message];
+                    }
+                    // @ts-ignore
+                    return [...value, message];
+                });
             }
         } else {
             for (let i = 0; i < this._packetHandler.length; i++) {

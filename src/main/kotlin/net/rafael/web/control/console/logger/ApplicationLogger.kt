@@ -1,10 +1,13 @@
 package net.rafael.web.control.console.logger
 
+import net.rafael.web.control.WebControl
 import net.rafael.web.control.console.interfaces.IApplicationLogger
 import net.rafael.web.control.console.service.ApplicationConsole
 import java.text.SimpleDateFormat
 import net.rafael.web.control.console.level.LoggingLevel
 import net.rafael.web.control.console.interfaces.IApplicationConsole
+import net.rafael.web.control.network.document.Document
+import net.rafael.web.control.network.packet.output.PacketOutRequestAnswer
 import java.util.*
 
 //------------------------------

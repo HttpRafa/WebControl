@@ -575,7 +575,7 @@ var app = (function () {
 
     	function select_block_type(ctx, dirty) {
     		if (/*solid*/ ctx[2]) return create_if_block_1$4;
-    		return create_else_block$9;
+    		return create_else_block$8;
     	}
 
     	let current_block_type = select_block_type(ctx);
@@ -621,7 +621,7 @@ var app = (function () {
     }
 
     // (38:2) {:else}
-    function create_else_block$9(ctx) {
+    function create_else_block$8(ctx) {
     	let svg;
     	let each_value_1 = /*src*/ ctx[1][1] ?? [];
     	validate_each_argument(each_value_1);
@@ -710,7 +710,7 @@ var app = (function () {
 
     	dispatch_dev("SvelteRegisterBlock", {
     		block,
-    		id: create_else_block$9.name,
+    		id: create_else_block$8.name,
     		type: "else",
     		source: "(38:2) {:else}",
     		ctx
@@ -1214,7 +1214,7 @@ var app = (function () {
     const file$e = "src\\components\\sidebar\\SideBarDivider.svelte";
 
     // (6:0) {:else}
-    function create_else_block$8(ctx) {
+    function create_else_block$7(ctx) {
     	let hr;
 
     	const block = {
@@ -1233,7 +1233,7 @@ var app = (function () {
 
     	dispatch_dev("SvelteRegisterBlock", {
     		block,
-    		id: create_else_block$8.name,
+    		id: create_else_block$7.name,
     		type: "else",
     		source: "(6:0) {:else}",
     		ctx
@@ -1276,7 +1276,7 @@ var app = (function () {
 
     	function select_block_type(ctx, dirty) {
     		if (/*hide*/ ctx[0]) return create_if_block$a;
-    		return create_else_block$8;
+    		return create_else_block$7;
     	}
 
     	let current_block_type = select_block_type(ctx);
@@ -1517,6 +1517,18 @@ var app = (function () {
                 if (data.document.data.applicationAccessUsers != undefined) {
                     // @ts-ignore
                     applicationAccessUsers.set(data.document.data.applicationAccessUsers);
+                }
+                // @ts-ignore
+                if (data.document.data.applicationConsoleMessage != undefined) {
+                    // @ts-ignore
+                    let message = data.document.data.applicationConsoleMessage;
+                    applicationConsoleMessages.update(value => {
+                        if (value == undefined) {
+                            return [message];
+                        }
+                        // @ts-ignore
+                        return [...value, message];
+                    });
                 }
             }
             else {
@@ -3563,7 +3575,7 @@ var app = (function () {
     const file$c = "src\\components\\top\\TopNavigation.svelte";
 
     // (30:8) {:else}
-    function create_else_block$7(ctx) {
+    function create_else_block$6(ctx) {
     	let icon;
     	let current;
 
@@ -3601,7 +3613,7 @@ var app = (function () {
 
     	dispatch_dev("SvelteRegisterBlock", {
     		block,
-    		id: create_else_block$7.name,
+    		id: create_else_block$6.name,
     		type: "else",
     		source: "(30:8) {:else}",
     		ctx
@@ -3685,7 +3697,7 @@ var app = (function () {
     			$$inline: true
     		});
 
-    	const if_block_creators = [create_if_block$8, create_else_block$7];
+    	const if_block_creators = [create_if_block$8, create_else_block$6];
     	const if_blocks = [];
 
     	function select_block_type(ctx, dirty) {
@@ -4131,7 +4143,7 @@ var app = (function () {
     const file$9 = "src\\components\\other\\LoginContent.svelte";
 
     // (69:32) {:else}
-    function create_else_block$6(ctx) {
+    function create_else_block$5(ctx) {
     	let icon;
     	let current;
 
@@ -4170,7 +4182,7 @@ var app = (function () {
 
     	dispatch_dev("SvelteRegisterBlock", {
     		block,
-    		id: create_else_block$6.name,
+    		id: create_else_block$5.name,
     		type: "else",
     		source: "(69:32) {:else}",
     		ctx
@@ -4282,7 +4294,7 @@ var app = (function () {
     			$$inline: true
     		});
 
-    	const if_block_creators = [create_if_block$7, create_else_block$6];
+    	const if_block_creators = [create_if_block$7, create_else_block$5];
     	const if_blocks = [];
 
     	function select_block_type(ctx, dirty) {
@@ -4646,7 +4658,7 @@ var app = (function () {
     const file$8 = "src\\components\\other\\AddNodeContent.svelte";
 
     // (54:32) {:else}
-    function create_else_block$5(ctx) {
+    function create_else_block$4(ctx) {
     	let icon;
     	let current;
 
@@ -4685,7 +4697,7 @@ var app = (function () {
 
     	dispatch_dev("SvelteRegisterBlock", {
     		block,
-    		id: create_else_block$5.name,
+    		id: create_else_block$4.name,
     		type: "else",
     		source: "(54:32) {:else}",
     		ctx
@@ -4779,7 +4791,7 @@ var app = (function () {
     	let mounted;
     	let dispose;
     	topnavigation = new TopNavigation({ props: { title: "Node" }, $$inline: true });
-    	const if_block_creators = [create_if_block$6, create_else_block$5];
+    	const if_block_creators = [create_if_block$6, create_else_block$4];
     	const if_blocks = [];
 
     	function select_block_type(ctx, dirty) {
@@ -5065,7 +5077,7 @@ var app = (function () {
     const file$7 = "src\\components\\other\\RegisterContent.svelte";
 
     // (72:32) {:else}
-    function create_else_block$4(ctx) {
+    function create_else_block$3(ctx) {
     	let icon;
     	let current;
 
@@ -5104,7 +5116,7 @@ var app = (function () {
 
     	dispatch_dev("SvelteRegisterBlock", {
     		block,
-    		id: create_else_block$4.name,
+    		id: create_else_block$3.name,
     		type: "else",
     		source: "(72:32) {:else}",
     		ctx
@@ -5211,7 +5223,7 @@ var app = (function () {
     			$$inline: true
     		});
 
-    	const if_block_creators = [create_if_block$5, create_else_block$4];
+    	const if_block_creators = [create_if_block$5, create_else_block$3];
     	const if_blocks = [];
 
     	function select_block_type(ctx, dirty) {
@@ -6418,7 +6430,7 @@ var app = (function () {
     }
 
     // (82:16) {:else}
-    function create_else_block$3(ctx) {
+    function create_else_block$2(ctx) {
     	let dd;
     	let t0_value = /*$applicationMemoryUsage*/ ctx[4][0] + "";
     	let t0;
@@ -6457,7 +6469,7 @@ var app = (function () {
 
     	dispatch_dev("SvelteRegisterBlock", {
     		block,
-    		id: create_else_block$3.name,
+    		id: create_else_block$2.name,
     		type: "else",
     		source: "(82:16) {:else}",
     		ctx
@@ -6653,7 +6665,7 @@ var app = (function () {
 
     	current_block_type_index_6 = select_block_type_7(ctx);
     	if_block7 = if_blocks_6[current_block_type_index_6] = if_block_creators_6[current_block_type_index_6](ctx);
-    	const if_block_creators_7 = [create_if_block$4, create_else_block$3];
+    	const if_block_creators_7 = [create_if_block$4, create_else_block$2];
     	const if_blocks_7 = [];
 
     	function select_block_type_8(ctx, dirty) {
@@ -7244,21 +7256,6 @@ var app = (function () {
     	return child_ctx;
     }
 
-    // (28:12) {:else}
-    function create_else_block$2(ctx) {
-    	const block = { c: noop, m: noop, p: noop, d: noop };
-
-    	dispatch_dev("SvelteRegisterBlock", {
-    		block,
-    		id: create_else_block$2.name,
-    		type: "else",
-    		source: "(28:12) {:else}",
-    		ctx
-    	});
-
-    	return block;
-    }
-
     // (23:12) {#if $applicationConsoleMessages !== undefined}
     function create_if_block$3(ctx) {
     	let t;
@@ -7390,13 +7387,7 @@ var app = (function () {
     			$$inline: true
     		});
 
-    	function select_block_type(ctx, dirty) {
-    		if (/*$applicationConsoleMessages*/ ctx[0] !== undefined) return create_if_block$3;
-    		return create_else_block$2;
-    	}
-
-    	let current_block_type = select_block_type(ctx);
-    	let if_block = current_block_type(ctx);
+    	let if_block = /*$applicationConsoleMessages*/ ctx[0] !== undefined && create_if_block$3(ctx);
 
     	icon = new Icon({
     			props: {
@@ -7414,7 +7405,7 @@ var app = (function () {
     			t0 = space();
     			div1 = element("div");
     			div0 = element("div");
-    			if_block.c();
+    			if (if_block) if_block.c();
     			t1 = space();
     			form = element("form");
     			input = element("input");
@@ -7429,10 +7420,10 @@ var app = (function () {
     			attr_dev(input, "id", "console-input");
     			attr_dev(input, "placeholder", "Enter command...");
     			attr_dev(input, "class", "bottom-bar-input");
-    			add_location(input, file$4, 33, 8, 1178);
-    			add_location(div2, file$4, 34, 8, 1284);
+    			add_location(input, file$4, 31, 8, 1155);
+    			add_location(div2, file$4, 32, 8, 1261);
     			attr_dev(form, "class", "bottom-bar");
-    			add_location(form, file$4, 32, 4, 1075);
+    			add_location(form, file$4, 30, 4, 1052);
     			attr_dev(div3, "class", "content-container");
     			add_location(div3, file$4, 18, 0, 608);
     		},
@@ -7445,7 +7436,7 @@ var app = (function () {
     			append_dev(div3, t0);
     			append_dev(div3, div1);
     			append_dev(div1, div0);
-    			if_block.m(div0, null);
+    			if (if_block) if_block.m(div0, null);
     			append_dev(div3, t1);
     			append_dev(div3, form);
     			append_dev(form, input);
@@ -7464,16 +7455,17 @@ var app = (function () {
     			}
     		},
     		p: function update(ctx, [dirty]) {
-    			if (current_block_type === (current_block_type = select_block_type(ctx)) && if_block) {
-    				if_block.p(ctx, dirty);
-    			} else {
-    				if_block.d(1);
-    				if_block = current_block_type(ctx);
-
+    			if (/*$applicationConsoleMessages*/ ctx[0] !== undefined) {
     				if (if_block) {
+    					if_block.p(ctx, dirty);
+    				} else {
+    					if_block = create_if_block$3(ctx);
     					if_block.c();
     					if_block.m(div0, null);
     				}
+    			} else if (if_block) {
+    				if_block.d(1);
+    				if_block = null;
     			}
     		},
     		i: function intro(local) {
@@ -7490,7 +7482,7 @@ var app = (function () {
     		d: function destroy(detaching) {
     			if (detaching) detach_dev(div3);
     			destroy_component(topnavigation);
-    			if_block.d();
+    			if (if_block) if_block.d();
     			destroy_component(icon);
     			mounted = false;
     			run_all(dispose);

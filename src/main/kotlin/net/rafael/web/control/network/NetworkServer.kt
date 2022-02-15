@@ -28,8 +28,8 @@ class NetworkServer(address: InetSocketAddress?) : WebSocketServer(address) {
 
     private val gson = GsonBuilder().create()
 
-    private val clientHandler = ClientHandler()
     private val packetHandler = PacketHandler();
+    val clientHandler = ClientHandler()
 
     init {
         packetHandler.register(PacketInRequestSession())

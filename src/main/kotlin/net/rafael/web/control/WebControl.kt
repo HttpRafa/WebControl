@@ -55,6 +55,9 @@ class WebControl(args: Array<String>) {
 
         load()
 
+        // TODO: Remove this
+        commandManager.registerCommand(TestCommand("test").withDescription("Test"))
+
         // Register commandList
         commandManager.registerCommand(HelpCommand("help").withDescription("Displays all executable commands"))
         commandManager.registerCommand(UserCommand("user").withUsage(

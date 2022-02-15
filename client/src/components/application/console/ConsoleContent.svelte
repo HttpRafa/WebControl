@@ -31,8 +31,6 @@
                     <div class="console-line">{message}</div>
                 {/each}
                 <div id="scrollDiv"></div>
-            {:else}
-
             {/if}
         </div>
     </div>
