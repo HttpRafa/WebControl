@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_svg/flutter_svg.dart';
+import 'package:ionicons/ionicons.dart';
 import 'package:webcontrol/constants.dart';
 import 'package:webcontrol/widgets/applications_dropdown.dart';
 import 'package:webcontrol/widgets/custom_app_bar.dart';
@@ -24,12 +26,13 @@ class _HomeScreenState extends State<HomeScreen> {
     final size = MediaQuery.of(context).size;
 
     return Scaffold(
-      appBar: CustomAppBar(),
+      appBar: const CustomAppBar(),
       body: CustomScrollView(
-        physics: ClampingScrollPhysics(),
+        physics: const ClampingScrollPhysics(),
         slivers: [
           _buildHeader(size.height),
           _buildApplicationStatus(size.height),
+          _buildAppInformation(size.height),
         ],
       ),
     );
@@ -71,7 +74,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 ),
               ],
             ),
-            SizedBox(height: screenHeight * 0.03),
+            SizedBox(height: screenHeight * 0.02),
             Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
@@ -91,18 +94,18 @@ class _HomeScreenState extends State<HomeScreen> {
                     fontSize: 15,
                   ),
                 ),
-                SizedBox(height: screenHeight * 0.03),
+                SizedBox(height: screenHeight * 0.02),
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
                     FlatButton.icon(
                       padding: const EdgeInsets.symmetric(
-                          vertical: 20,
+                          vertical: 10,
                           horizontal: 20
                       ),
                       onPressed: () {},
                       icon: const Icon(
-                        Icons.api,
+                        Ionicons.play,
                         color: Colors.white,
                       ),
                       label: const Text(
@@ -117,12 +120,12 @@ class _HomeScreenState extends State<HomeScreen> {
                     ),
                     FlatButton.icon(
                       padding: const EdgeInsets.symmetric(
-                          vertical: 20,
+                          vertical: 10,
                           horizontal: 20
                       ),
                       onPressed: () {},
                       icon: const Icon(
-                        Icons.api,
+                        Ionicons.refresh,
                         color: Colors.white,
                       ),
                       label: const Text(
@@ -137,12 +140,12 @@ class _HomeScreenState extends State<HomeScreen> {
                     ),
                     FlatButton.icon(
                       padding: const EdgeInsets.symmetric(
-                        vertical: 20,
+                        vertical: 10,
                         horizontal: 20
                       ),
                       onPressed: () {},
                       icon: const Icon(
-                        Icons.api,
+                        Ionicons.stop,
                         color: Colors.white,
                       ),
                       label: const Text(
@@ -179,27 +182,119 @@ class _HomeScreenState extends State<HomeScreen> {
                 fontWeight: FontWeight.w600
               ),
             ),
-            const SizedBox(height: 20),
+            const SizedBox(height: 30),
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 Column(
                   children: [
-                    Image.asset(
-                      "assets/images/dummy.png",
-                      height: screenHeight * 0.12,
+                    SvgPicture.asset(
+                      "assets/svg/hardware-chip-outline.svg",
+                      height: screenHeight * 0.08,
+                      color: kPrimaryMiddleColor,
                     ),
                     SizedBox(height: screenHeight * 0.015),
                     const Text(
-                      "CPU: 100%",
+                      "Online",
                       style: TextStyle(
                         fontSize: 16,
-                        fontWeight: FontWeight.w600
+                        fontWeight: FontWeight.w500
+                      ),
+                      textAlign: TextAlign.center,
+                    ),
+                  ],
+                ),
+                Column(
+                  children: [
+                    SvgPicture.asset(
+                      "assets/svg/cloud-outline.svg",
+                      height: screenHeight * 0.08,
+                      color: kPrimaryMiddleColor,
+                    ),
+                    SizedBox(height: screenHeight * 0.015),
+                    const Text(
+                      "100%",
+                      style: TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.w500
+                      ),
+                      textAlign: TextAlign.center,
+                    ),
+                  ],
+                ),
+                Column(
+                  children: [
+                    SvgPicture.asset(
+                      "assets/svg/barcode-outline.svg",
+                      height: screenHeight * 0.08,
+                      color: kPrimaryMiddleColor,
+                    ),
+                    SizedBox(height: screenHeight * 0.015),
+                    const Text(
+                      "100%",
+                      style: TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.w500
                       ),
                       textAlign: TextAlign.center,
                     ),
                   ],
                 )
+              ],
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  SliverToBoxAdapter _buildAppInformation(double screenHeight) {
+    return SliverToBoxAdapter(
+      child: Container(
+        margin: const EdgeInsets.symmetric(
+          vertical: 10,
+          horizontal: 20,
+        ),
+        padding: const EdgeInsets.all(10),
+        height: screenHeight * 0.15,
+        decoration: BoxDecoration(
+          gradient: const LinearGradient(
+            colors: [
+              kPrimaryMiddleColor,
+              kPrimaryColor
+            ],
+          ),
+          borderRadius: BorderRadius.circular(20),
+        ),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceAround,
+          children: [
+            SvgPicture.asset(
+              "assets/svg/server-outline.svg",
+              height: screenHeight * 0.09,
+              color: Colors.white
+            ),
+            Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const Text(
+                  "Node",
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontSize: 18,
+                     fontWeight: FontWeight.bold,
+                  ),
+                ),
+                SizedBox(height: screenHeight * 0.01),
+                const Text(
+                  "Applications: 10",
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontSize: 16,
+                  ),
+                  maxLines: 2,
+                ),
               ],
             ),
           ],

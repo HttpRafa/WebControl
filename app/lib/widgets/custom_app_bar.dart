@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:ionicons/ionicons.dart';
 import 'package:webcontrol/constants.dart';
 
 class CustomAppBar extends StatelessWidget with PreferredSizeWidget {
@@ -19,7 +20,7 @@ class CustomAppBar extends StatelessWidget with PreferredSizeWidget {
       ),
       actions: [
         IconButton(
-          icon: const Icon(Icons.alarm_on),
+          icon: const Icon(Ionicons.person_circle),
           iconSize: 28,
           onPressed: () {
 

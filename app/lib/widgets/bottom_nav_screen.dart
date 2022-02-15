@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:ionicons/ionicons.dart';
 import 'package:webcontrol/Screens/Dashboard/home_screen.dart';
 
 class BottomNavScreen extends StatefulWidget {
@@ -40,8 +41,8 @@ class _BottomNavScreenState extends State<BottomNavScreen> {
         selectedItemColor: Colors.white,
         unselectedItemColor: Colors.grey,
         elevation: 0,
-        items: [Icons.home, Icons.account_box, Icons.event_note, Icons.info].asMap().map((key, value) => MapEntry(key, BottomNavigationBarItem(
-          label: "Test",
+        items: [Ionicons.home, Ionicons.terminal, Ionicons.options, Ionicons.settings].asMap().map((key, value) => MapEntry(key, BottomNavigationBarItem(
+          label: "",
           icon: Container(
             padding: const EdgeInsets.symmetric(
               vertical: 6,

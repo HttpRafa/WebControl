@@ -1,5 +1,7 @@
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:ionicons/ionicons.dart';
+
+import '../constants.dart';
 
 class ApplicationsDropdown extends StatelessWidget {
   final List<String> applications;
@@ -32,7 +34,11 @@ class ApplicationsDropdown extends StatelessWidget {
                       children: [
                         const CircleAvatar(
                           radius: 12,
-                          child: Icon(Icons.access_alarms_outlined),
+                          backgroundColor: Colors.transparent,
+                          child: Icon(
+                            Ionicons.hardware_chip,
+                            color: kPrimaryMiddleColor,
+                          ),
                         ),
                         const SizedBox(width: 8),
                         Text(e,
