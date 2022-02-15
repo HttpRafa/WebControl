@@ -189,7 +189,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 Column(
                   children: [
                     SvgPicture.asset(
-                      "assets/svg/hardware-chip-outline.svg",
+                      "assets/svg/cloud-outline.svg",
                       height: screenHeight * 0.08,
                       color: kPrimaryMiddleColor,
                     ),
@@ -207,7 +207,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 Column(
                   children: [
                     SvgPicture.asset(
-                      "assets/svg/cloud-outline.svg",
+                      "assets/svg/hardware-chip-outline.svg",
                       height: screenHeight * 0.08,
                       color: kPrimaryMiddleColor,
                     ),
