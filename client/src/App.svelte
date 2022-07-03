@@ -29,7 +29,7 @@
             } else if(value.applicationId == -1) {
                 hideSideBarIcon = [1, 2, 3, 4, 5];
             } else {
-                hideSideBarIcon = [1, 2, 3, 4, 5, 6, 7, 8];
+                hideSideBarIcon = [0, 1, 2, 3, 4, 5, 6, 7, 8];
             }
         });
     });
