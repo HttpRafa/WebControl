@@ -1,8 +1,8 @@
-# Project exclude paths
+# Client
 /client/node_modules/
-/target/
-/.idea/
-/WebControl.iml
-/dependency-reduced-pom.xml
 /client/.idea/
 /client/public/build/
+
+# Kotlin Server
+/server-kotlin/target/
+/server-kotlin/dependency-reduced-pom.xml
