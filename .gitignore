@@ -6,3 +6,13 @@
 # Kotlin Server
 /server-kotlin/target/
 /server-kotlin/dependency-reduced-pom.xml
+
+# C++ Server
+/server/target/
+
+# Visual Studio
+.vs/
+*.user
+*.filters
+*.vcxproj
+*.sln
