@@ -19,8 +19,8 @@ group ""
         targetdir ("target/bin/" .. outputDir .. "/%{prj.name}")
         objdir ("target/obj/" .. outputDir .. "/%{prj.name}")
     
---        pchheader "pch.h"
---        pchsource "%{prj.name}/src/pch.cpp"
+        pchheader "pch.h"
+        pchsource "%{prj.name}/src/pch.cpp"
 
         files { 
             "%{prj.name}/src/**.h", 
