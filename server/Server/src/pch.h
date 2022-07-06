@@ -9,3 +9,5 @@
 #include <string>
 #include <sstream>
 #include <vector>
+
+#include "Server/Log.h"
